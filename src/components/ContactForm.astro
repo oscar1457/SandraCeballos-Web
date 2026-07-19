@@ -104,6 +104,7 @@ const { site, endpoint } = Astro.props;
           <p>
             <span data-lang="es">{site.form.privacyPrefix}</span>
             <span data-lang="en">{site.form.privacyPrefixEn}</span>
+            {" "}
             <a href="/privacidad" aria-label="Política de privacidad provisional">
               <span data-lang="es">{site.form.privacyLink}</span>
               <span data-lang="en">{site.form.privacyLinkEn}</span>
@@ -223,7 +224,7 @@ const { site, endpoint } = Astro.props;
 
 	  .contact-form textarea {
 	    min-height: clamp(4.75rem, 8svh, 6.5rem);
-	    resize: vertical;
+	    resize: none;
 	  }
 
 	  .contact-form__error {
@@ -255,6 +256,10 @@ const { site, endpoint } = Astro.props;
 
   .contact-form a {
     color: inherit;
+  }
+
+  .contact-form__footer a {
+    margin-left: 0.25em;
   }
 
   .contact-form button {

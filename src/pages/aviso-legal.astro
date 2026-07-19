@@ -1,18 +1,105 @@
 ---
+import LanguageSwitch from "@/components/LanguageSwitch.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { site } from "@/data/site";
 ---
 
 <BaseLayout title={`Aviso legal | ${site.name}`} description="Aviso legal provisional.">
   <main class="legal-page" id="contenido">
-    <a href="/#inicio">Volver</a>
-    <h1>{site.name}</h1>
-    <h2>Aviso legal</h2>
-    <p>
-      Texto legal provisional pendiente de sustitución por la versión definitiva. Las imágenes y
-      datos de obras pertenecen a Sandra Ceballos y deben publicarse con autorización de la artista.
+    <header class="legal-page__header">
+      <a href="/#inicio">
+        <span data-lang="es">Volver</span>
+        <span data-lang="en">Back</span>
+      </a>
+      <LanguageSwitch />
+    </header>
+
+    <p class="legal-page__kicker">
+      <span data-lang="es">Documento provisional</span>
+      <span data-lang="en">Provisional document</span>
     </p>
+    <h1>
+      <span data-lang="es">Aviso legal</span>
+      <span data-lang="en">Legal notice</span>
+    </h1>
+
+    <section>
+      <h2>
+        <span data-lang="es">Titular del sitio</span>
+        <span data-lang="en">Site owner</span>
+      </h2>
+      <p>
+        <span data-lang="es">
+          Este sitio funciona como portafolio artístico de {site.name}. Los datos fiscales,
+          dirección postal y representación legal están pendientes de confirmación por la
+          propietaria antes de publicación final.
+        </span>
+        <span data-lang="en">
+          This site functions as the artistic portfolio of {site.name}. Tax details, postal address
+          and legal representation are pending confirmation by the owner before final publication.
+        </span>
+      </p>
+    </section>
+
+    <section>
+      <h2>
+        <span data-lang="es">Propiedad intelectual</span>
+        <span data-lang="en">Intellectual property</span>
+      </h2>
+      <p>
+        <span data-lang="es">
+          Las imágenes, títulos, descripciones de obras y materiales visuales pertenecen a Sandra
+          Ceballos o a sus titulares correspondientes. No pueden reproducirse, distribuirse ni
+          modificarse sin autorización.
+        </span>
+        <span data-lang="en">
+          Images, titles, artwork descriptions and visual materials belong to Sandra Ceballos or
+          their respective rights holders. They may not be reproduced, distributed or modified
+          without authorization.
+        </span>
+      </p>
+    </section>
+
+    <section>
+      <h2>
+        <span data-lang="es">Contenido y fuentes</span>
+        <span data-lang="en">Content and sources</span>
+      </h2>
+      <p>
+        <span data-lang="es">
+          La sección de trayectoria combina información facilitada por el proyecto y referencias
+          públicas. Cualquier dato marcado como provisional debe revisarse con el CV oficial de la
+          artista.
+        </span>
+        <span data-lang="en">
+          The career section combines project-provided information and public references. Any data
+          marked as provisional must be reviewed against the artist's official CV.
+        </span>
+      </p>
+    </section>
+
+    <section>
+      <h2>
+        <span data-lang="es">Contacto</span>
+        <span data-lang="en">Contact</span>
+      </h2>
+      <p>
+        <span data-lang="es">
+          Para consultas sobre el sitio, derechos de imagen o correcciones de contenido, escribe a
+          {" "}
+          <a href={`mailto:${site.email}`}>{site.email}</a>.
+        </span>
+        <span data-lang="en">
+          For inquiries about the site, image rights or content corrections, write to
+          {" "}
+          <a href={`mailto:${site.email}`}>{site.email}</a>.
+        </span>
+      </p>
+    </section>
   </main>
+  <script>
+    import "@/scripts/language.ts";
+  </script>
 </BaseLayout>
 
 <style>
@@ -22,24 +109,46 @@ import { site } from "@/data/site";
     width: min(92vw, 52rem);
     min-height: 100svh;
     margin: 0 auto;
-    padding: clamp(3rem, 8vw, 7rem) 0;
+    padding: clamp(2rem, 6vw, 5rem) 0;
+  }
+
+  .legal-page__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .legal-page__header a,
+  .legal-page__kicker {
+    font-size: var(--text-label);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .legal-page__kicker,
+  .legal-page h1,
+  .legal-page h2,
+  .legal-page p {
+    margin: 0;
   }
 
   .legal-page h1 {
-    margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(3rem, 10vw, 8rem);
-    line-height: 0.86;
+    font-size: clamp(3rem, 9vw, 7rem);
+    line-height: 0.9;
     text-transform: uppercase;
   }
 
   .legal-page h2 {
-    margin: 0;
-    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    text-transform: uppercase;
   }
 
-  .legal-page p {
-    max-width: 42rem;
-    margin: 0;
+  .legal-page section {
+    display: grid;
+    gap: var(--space-1);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-line);
   }
 </style>

@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import ArtworkRail from "@/components/ArtworkRail.astro";
 import ArtworkViewer from "@/components/ArtworkViewer.astro";
 import CareerAccordion from "@/components/CareerAccordion.astro";
+import LanguageSwitch from "@/components/LanguageSwitch.astro";
 import type { Artwork } from "@/data/artworks";
 import type { CareerPanel } from "@/data/exhibitions";
 import type { Site } from "@/data/site";
@@ -35,9 +36,8 @@ if (!firstArtwork) {
   <div class="artist-stage__veil" aria-hidden="true"></div>
 
   <div class="experience-surface" data-surface>
-    <div class="language-switch" aria-label="Idioma">
-      <button type="button" data-language-switch="es" aria-current="true">ES</button>
-      <button type="button" data-language-switch="en">EN</button>
+    <div class="experience-language">
+      <LanguageSwitch />
     </div>
 
     <section class="experience-panel cover-panel" aria-label="Portada editorial" data-cover-panel>
@@ -151,32 +151,11 @@ if (!firstArtwork) {
     background: var(--color-paper);
   }
 
-  .language-switch {
+  .experience-language {
     position: absolute;
     top: clamp(0.85rem, 2vw, 1.5rem);
     right: clamp(0.85rem, 2vw, 1.5rem);
     z-index: 4;
-    display: flex;
-    gap: 0.35rem;
-    background: var(--color-paper);
-  }
-
-  .language-switch button {
-    min-width: 2.75rem;
-    min-height: 2.75rem;
-    border: 1px solid var(--color-ink);
-    border-radius: 0;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    font-size: var(--text-label);
-    font-weight: 800;
-    cursor: pointer;
-  }
-
-  .language-switch button[aria-current="true"] {
-    background: var(--color-ink);
-    color: var(--color-paper);
   }
 
   .experience-panel {
@@ -260,10 +239,16 @@ if (!firstArtwork) {
     font-weight: 800;
   }
 
-  .cover-panel__work-cta:hover {
+  .cover-panel__work-cta:hover,
+  .cover-panel__work-cta:focus-visible {
     background: var(--color-ink);
     color: var(--color-paper);
     text-decoration: none !important;
+  }
+
+  .cover-panel__bottom .cover-panel__work-cta:hover,
+  .cover-panel__bottom .cover-panel__work-cta:focus-visible {
+    color: var(--color-paper);
   }
 
   .cover-panel__nav a:hover,

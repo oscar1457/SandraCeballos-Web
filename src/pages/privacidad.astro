@@ -1,18 +1,120 @@
 ---
+import LanguageSwitch from "@/components/LanguageSwitch.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { site } from "@/data/site";
 ---
 
 <BaseLayout title={`Privacidad | ${site.name}`} description="Política de privacidad provisional.">
   <main class="legal-page" id="contenido">
-    <a href="/#contacto">Volver</a>
-    <h1>{site.name}</h1>
-    <h2>Política de privacidad</h2>
-    <p>
-      Texto legal provisional pendiente de sustitución por la versión definitiva de la propietaria.
-      El formulario usa Formspree y enviará los datos introducidos al endpoint configurado.
+    <header class="legal-page__header">
+      <a href="/#contacto">
+        <span data-lang="es">Volver</span>
+        <span data-lang="en">Back</span>
+      </a>
+      <LanguageSwitch />
+    </header>
+
+    <p class="legal-page__kicker">
+      <span data-lang="es">Documento provisional</span>
+      <span data-lang="en">Provisional document</span>
     </p>
+    <h1>
+      <span data-lang="es">Política de privacidad</span>
+      <span data-lang="en">Privacy policy</span>
+    </h1>
+
+    <section>
+      <h2>
+        <span data-lang="es">Responsable</span>
+        <span data-lang="en">Controller</span>
+      </h2>
+      <p>
+        <span data-lang="es">
+          Esta web representa el portafolio de {site.name}. El correo de contacto provisional es
+          {" "}
+          <a href={`mailto:${site.email}`}>{site.email}</a>.
+        </span>
+        <span data-lang="en">
+          This website presents the portfolio of {site.name}. The provisional contact email is
+          {" "}
+          <a href={`mailto:${site.email}`}>{site.email}</a>.
+        </span>
+      </p>
+    </section>
+
+    <section>
+      <h2>
+        <span data-lang="es">Datos recogidos</span>
+        <span data-lang="en">Data collected</span>
+      </h2>
+      <p>
+        <span data-lang="es">
+          Si usas el formulario de contacto, se procesan los datos que escribes: nombre, correo
+          electrónico, asunto opcional y mensaje. No se crea cuenta de usuario ni se usa CMS.
+        </span>
+        <span data-lang="en">
+          If you use the contact form, the submitted data is processed: name, email address,
+          optional subject and message. No user account or CMS is used.
+        </span>
+      </p>
+    </section>
+
+    <section>
+      <h2>Formspree</h2>
+      <p>
+        <span data-lang="es">
+          El formulario se envía mediante Formspree. Formspree actúa como proveedor técnico para
+          entregar el mensaje al correo configurado por la propietaria del sitio.
+        </span>
+        <span data-lang="en">
+          The form is sent through Formspree. Formspree acts as a technical provider to deliver the
+          message to the email configured by the site owner.
+        </span>
+      </p>
+    </section>
+
+    <section>
+      <h2>
+        <span data-lang="es">Finalidad y conservación</span>
+        <span data-lang="en">Purpose and retention</span>
+      </h2>
+      <p>
+        <span data-lang="es">
+          Los datos se usan únicamente para responder consultas sobre obra, exposiciones o
+          colaboraciones. Los mensajes se conservarán solo durante el tiempo necesario para atender
+          la comunicación.
+        </span>
+        <span data-lang="en">
+          The data is used only to respond to inquiries about works, exhibitions or collaborations.
+          Messages are kept only for as long as needed to handle the communication.
+        </span>
+      </p>
+    </section>
+
+    <section>
+      <h2>
+        <span data-lang="es">Derechos</span>
+        <span data-lang="en">Rights</span>
+      </h2>
+      <p>
+        <span data-lang="es">
+          Puedes solicitar acceso, rectificación o eliminación de tus datos escribiendo a
+          {" "}
+          <a href={`mailto:${site.email}`}>{site.email}</a>. Esta página debe revisarse antes de la
+          publicación final.
+        </span>
+        <span data-lang="en">
+          You may request access, correction or deletion of your data by writing to
+          {" "}
+          <a href={`mailto:${site.email}`}>{site.email}</a>. This page must be reviewed before final
+          publication.
+        </span>
+      </p>
+    </section>
   </main>
+  <script>
+    import "@/scripts/language.ts";
+  </script>
 </BaseLayout>
 
 <style>
@@ -22,24 +124,46 @@ import { site } from "@/data/site";
     width: min(92vw, 52rem);
     min-height: 100svh;
     margin: 0 auto;
-    padding: clamp(3rem, 8vw, 7rem) 0;
+    padding: clamp(2rem, 6vw, 5rem) 0;
+  }
+
+  .legal-page__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .legal-page__header a,
+  .legal-page__kicker {
+    font-size: var(--text-label);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .legal-page__kicker,
+  .legal-page h1,
+  .legal-page h2,
+  .legal-page p {
+    margin: 0;
   }
 
   .legal-page h1 {
-    margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(3rem, 10vw, 8rem);
-    line-height: 0.86;
+    font-size: clamp(3rem, 9vw, 7rem);
+    line-height: 0.9;
     text-transform: uppercase;
   }
 
   .legal-page h2 {
-    margin: 0;
-    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    text-transform: uppercase;
   }
 
-  .legal-page p {
-    max-width: 42rem;
-    margin: 0;
+  .legal-page section {
+    display: grid;
+    gap: var(--space-1);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-line);
   }
 </style>

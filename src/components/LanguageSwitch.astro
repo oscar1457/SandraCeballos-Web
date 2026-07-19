@@ -1,0 +1,38 @@
+---
+type Props = {
+  label?: string;
+};
+
+const { label = "Idioma" } = Astro.props;
+---
+
+<div class="language-switch" aria-label={label}>
+  <button type="button" data-language-switch="es" aria-current="true">ES</button>
+  <button type="button" data-language-switch="en">EN</button>
+</div>
+
+<style>
+  .language-switch {
+    display: flex;
+    gap: 0.35rem;
+    background: var(--color-paper);
+  }
+
+  .language-switch button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: 1px solid var(--color-ink);
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: var(--text-label);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .language-switch button[aria-current="true"] {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+</style>

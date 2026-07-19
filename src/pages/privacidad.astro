@@ -1,0 +1,45 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { site } from "@/data/site";
+---
+
+<BaseLayout title={`Privacidad | ${site.name}`} description="Política de privacidad provisional.">
+  <main class="legal-page" id="contenido">
+    <a href="/#contacto">Volver</a>
+    <h1>{site.name}</h1>
+    <h2>Política de privacidad</h2>
+    <p>
+      Texto legal provisional pendiente de sustitución por la versión definitiva de la propietaria.
+      El formulario usa Formspree y enviará los datos introducidos al endpoint configurado.
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    display: grid;
+    gap: var(--space-3);
+    width: min(92vw, 52rem);
+    min-height: 100svh;
+    margin: 0 auto;
+    padding: clamp(3rem, 8vw, 7rem) 0;
+  }
+
+  .legal-page h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 10vw, 8rem);
+    line-height: 0.86;
+    text-transform: uppercase;
+  }
+
+  .legal-page h2 {
+    margin: 0;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+  }
+
+  .legal-page p {
+    max-width: 42rem;
+    margin: 0;
+  }
+</style>

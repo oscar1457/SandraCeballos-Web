@@ -1,0 +1,323 @@
+---
+import type { Site } from "@/data/site";
+
+type Props = {
+  site: Site;
+  endpoint: string;
+};
+
+const { site, endpoint } = Astro.props;
+---
+
+<section class="contact-section" id="contacto" aria-labelledby="contact-title">
+  <div class="contact-section__inner">
+    <div class="contact-section__intro">
+      <p>
+        <span data-lang="es">{site.role}</span>
+        <span data-lang="en">{site.roleEn}</span>
+      </p>
+      <h2 id="contact-title">
+        <span data-lang="es">{site.nav.contact}</span>
+        <span data-lang="en">{site.nav.contactEn}</span>
+      </h2>
+    </div>
+    <div class="contact-section__body">
+      <p>
+        <span data-lang="es">{site.contactIntro}</span>
+        <span data-lang="en">{site.contactIntroEn}</span>
+      </p>
+      <form
+        class="contact-form"
+        action={endpoint || "#contacto"}
+        method="POST"
+        data-contact-form
+        data-endpoint={endpoint}
+      >
+        <div class="contact-form__field">
+          <label for="contact-name">
+            <span data-lang="es">{site.form.name}</span>
+            <span data-lang="en">{site.form.nameEn}</span>
+          </label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            required
+            aria-describedby="contact-name-error"
+          />
+          <p class="contact-form__error" id="contact-name-error" data-error-for="name"></p>
+        </div>
+
+        <div class="contact-form__field">
+          <label for="contact-email">
+            <span data-lang="es">{site.form.email}</span>
+            <span data-lang="en">{site.form.emailEn}</span>
+          </label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+            aria-describedby="contact-email-error"
+          />
+          <p class="contact-form__error" id="contact-email-error" data-error-for="email"></p>
+        </div>
+
+        <div class="contact-form__field">
+          <label for="contact-subject">
+            <span data-lang="es">{site.form.subjectOptional}</span>
+            <span data-lang="en">{site.form.subjectOptionalEn}</span>
+          </label>
+          <input
+            id="contact-subject"
+            name="subject"
+            type="text"
+            autocomplete="off"
+            aria-describedby="contact-subject-error"
+          />
+          <p class="contact-form__error" id="contact-subject-error" data-error-for="subject"></p>
+        </div>
+
+        <div class="contact-form__field contact-form__field--full">
+          <label for="contact-message">
+            <span data-lang="es">{site.form.message}</span>
+            <span data-lang="en">{site.form.messageEn}</span>
+          </label>
+          <textarea
+            id="contact-message"
+            name="message"
+            rows="7"
+            required
+            aria-describedby="contact-message-error"
+          ></textarea>
+          <p class="contact-form__error" id="contact-message-error" data-error-for="message"></p>
+        </div>
+
+        <div class="contact-form__honeypot" aria-hidden="true">
+          <label for="contact-gotcha">No completar</label>
+          <input id="contact-gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="contact-form__footer">
+          <p>
+            <span data-lang="es">{site.form.privacyPrefix}</span>
+            <span data-lang="en">{site.form.privacyPrefixEn}</span>
+            <a href="/privacidad" aria-label="Política de privacidad provisional">
+              <span data-lang="es">{site.form.privacyLink}</span>
+              <span data-lang="en">{site.form.privacyLinkEn}</span>
+            </a>.
+          </p>
+          <button
+            type="submit"
+            data-submit-label={site.form.submit}
+            data-submit-label-en={site.form.submitEn}
+            data-sending-label={site.form.sending}
+            data-sending-label-en={site.form.sendingEn}
+          >
+            <span data-lang="es">{site.form.submit}</span>
+            <span data-lang="en">{site.form.submitEn}</span>
+          </button>
+        </div>
+
+        <p
+          class="contact-form__status"
+          role="status"
+          aria-live="polite"
+          data-form-status
+          data-success-message={site.form.success}
+          data-success-message-en={site.form.successEn}
+          data-endpoint-missing={site.form.endpointMissing}
+          data-error-message={site.form.genericError}
+          data-required-message={site.form.required}
+          data-required-message-en={site.form.requiredEn}
+          data-email-message={site.form.invalidEmail}
+          data-email-message-en={site.form.invalidEmailEn}
+        ></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  import "@/scripts/contact-form.ts";
+</script>
+
+<style>
+  .contact-section {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border-top: 1px solid var(--color-ink);
+  }
+
+	  .contact-section__inner {
+	    display: grid;
+	    grid-template-columns: minmax(15rem, 0.5fr) minmax(28rem, 1fr);
+	    gap: clamp(2rem, 5vw, 5rem);
+	    width: min(88vw, 78rem);
+	    margin: 0 auto;
+	    padding: clamp(2.25rem, 4.5vw, 4rem) 0;
+	  }
+
+  .contact-section__intro {
+    align-self: start;
+  }
+
+  .contact-section__intro p {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-serif);
+    font-size: clamp(1.2rem, 2vw, 1.75rem);
+  }
+
+	  .contact-section h2 {
+	    max-width: 7.5ch;
+	    margin: 0;
+	    font-family: var(--font-display);
+	    font-size: clamp(3rem, 4.8vw, 5.1rem);
+	    line-height: 0.9;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+	  .contact-section__body > p {
+	    max-width: 34rem;
+	    margin: 0 0 clamp(1rem, 2vw, 1.8rem);
+	  }
+
+	  .contact-form {
+	    display: grid;
+	    grid-template-columns: repeat(2, minmax(0, 1fr));
+	    column-gap: clamp(1.6rem, 3vw, 3rem);
+	    row-gap: clamp(0.8rem, 1.5vw, 1.25rem);
+	  }
+
+  .contact-form__field {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .contact-form__field--full,
+  .contact-form__footer,
+  .contact-form__status {
+    grid-column: 1 / -1;
+  }
+
+  .contact-form label {
+    font-size: var(--text-label);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+	  .contact-form input,
+	  .contact-form textarea {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--color-ink);
+    border-radius: 0;
+	    padding: 0.36rem 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+  }
+
+	  .contact-form textarea {
+	    min-height: clamp(4.75rem, 8svh, 6.5rem);
+	    resize: vertical;
+	  }
+
+	  .contact-form__error {
+	    min-height: 0.95rem;
+    margin: 0;
+    color: var(--color-error);
+    font-size: var(--text-small);
+  }
+
+  .contact-form__honeypot {
+    position: absolute;
+    left: -9999px;
+  }
+
+	  .contact-form__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    border-top: 1px solid var(--color-line);
+	    padding-top: var(--space-2);
+	  }
+
+  .contact-form__footer p,
+  .contact-form__status {
+    margin: 0;
+    font-size: var(--text-small);
+  }
+
+  .contact-form a {
+    color: inherit;
+  }
+
+  .contact-form button {
+    min-width: 10.5rem;
+    min-height: 2.75rem;
+    border: 1px solid var(--color-ink);
+    border-radius: 0;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .contact-form button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 980px) {
+    .contact-section__inner {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+      width: min(100% - var(--space-4), 48rem);
+    }
+
+    .contact-section h2 {
+      max-width: none;
+      font-size: clamp(3rem, 11vw, 5rem);
+    }
+  }
+
+  @media (max-width: 760px) {
+    .contact-section__inner,
+    .contact-form {
+      grid-template-columns: 1fr;
+    }
+
+	    .contact-section__inner {
+	      gap: var(--space-3);
+	      width: min(100% - var(--space-4), 42rem);
+	      padding: var(--space-3) 0;
+	    }
+
+	    .contact-section h2 {
+	      font-size: clamp(2.75rem, 13vw, 4rem);
+	    }
+
+	    .contact-form {
+	      row-gap: 0.65rem;
+	    }
+
+	    .contact-form__error {
+	      min-height: 0.65rem;
+	      font-size: 0.86rem;
+	    }
+
+    .contact-form__footer {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .contact-form button {
+      width: 100%;
+    }
+  }
+</style>

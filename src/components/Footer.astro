@@ -1,0 +1,59 @@
+---
+import type { Site } from "@/data/site";
+
+type Props = {
+  site: Site;
+};
+
+const { site } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <p>{site.name} © {year}</p>
+  <nav aria-label="Enlaces secundarios">
+    <a href={site.instagram.url} rel="noreferrer" target="_blank">{site.instagram.label}</a>
+    <a href="/privacidad">{site.footer.privacy}</a>
+    <a href="/aviso-legal">{site.footer.legal}</a>
+  </nav>
+</footer>
+
+<style>
+  .site-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) clamp(1rem, 4vw, 3rem);
+    border-top: 1px solid var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-size: var(--text-small);
+  }
+
+  .site-footer p {
+    margin: 0;
+  }
+
+  .site-footer nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+  }
+
+  .site-footer a {
+    color: inherit;
+  }
+
+  @media (max-width: 620px) {
+    .site-footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .site-footer nav {
+      justify-content: flex-start;
+    }
+  }
+</style>

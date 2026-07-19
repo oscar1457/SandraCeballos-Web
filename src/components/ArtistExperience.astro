@@ -1,0 +1,380 @@
+---
+import { Image } from "astro:assets";
+import ArtworkRail from "@/components/ArtworkRail.astro";
+import ArtworkViewer from "@/components/ArtworkViewer.astro";
+import CareerAccordion from "@/components/CareerAccordion.astro";
+import type { Artwork } from "@/data/artworks";
+import type { CareerPanel } from "@/data/exhibitions";
+import type { Site } from "@/data/site";
+
+type Props = {
+  site: Site;
+  artworks: Artwork[];
+  careerPanels: CareerPanel[];
+};
+
+const { site, artworks, careerPanels } = Astro.props;
+const firstArtwork = artworks[0];
+if (!firstArtwork) {
+  throw new Error("ArtistExperience requiere al menos una obra.");
+}
+---
+
+<section class="artist-stage" id="inicio" data-experience data-mode="home">
+  <Image
+    src={site.backgroundImage}
+    alt=""
+    widths={[720, 1080, 1440, 1920, 2400]}
+    sizes="100vw"
+    loading="eager"
+    decoding="async"
+    fetchpriority="high"
+    aria-hidden="true"
+    class="artist-stage__background"
+  />
+  <div class="artist-stage__veil" aria-hidden="true"></div>
+
+  <div class="experience-surface" data-surface>
+    <div class="language-switch" aria-label="Idioma">
+      <button type="button" data-language-switch="es" aria-current="true">ES</button>
+      <button type="button" data-language-switch="en">EN</button>
+    </div>
+
+    <section class="experience-panel cover-panel" aria-label="Portada editorial" data-cover-panel>
+      <ArtworkRail artworks={artworks} label="Obras destacadas" variant="cover" />
+
+      <div class="cover-panel__middle">
+        <p class="cover-panel__role">
+          <span data-lang="es">{site.role}</span>
+          <span data-lang="en">{site.roleEn}</span>
+        </p>
+        <nav class="cover-panel__nav" aria-label="Navegación principal">
+          <a
+            href={`#obra/${firstArtwork.slug}`}
+            data-open-gallery
+            aria-controls="galeria-obras"
+            aria-expanded="false"
+          >
+            <span data-lang="es">{site.nav.artwork}</span>
+            <span data-lang="en">{site.nav.artworkEn}</span>
+          </a>
+          <a
+            href="#trayectoria"
+            data-open-career
+            aria-controls="trayectoria-panel"
+            aria-expanded="false"
+          >
+            <span data-lang="es">{site.nav.career}</span>
+            <span data-lang="en">{site.nav.careerEn}</span>
+          </a>
+          <a href="#contacto">
+            <span data-lang="es">{site.nav.contact}</span>
+            <span data-lang="en">{site.nav.contactEn}</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="cover-panel__bottom">
+        <p aria-hidden="true">(01 / {String(artworks.length).padStart(2, "0")})</p>
+        <a class="cover-panel__work-cta" href={`#obra/${firstArtwork.slug}`} data-open-gallery>
+          <span data-lang="es">{site.nav.viewArtwork}</span>
+          <span data-lang="en">{site.nav.viewArtworkEn}</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <h1>{site.name}</h1>
+    </section>
+
+    <section
+      class="experience-panel detail-panel"
+      id="galeria-obras"
+      aria-label="Galeria de obras"
+      aria-hidden="true"
+      data-gallery-panel-host
+    >
+      <ArtworkViewer artworks={artworks} site={site} />
+    </section>
+
+    <section
+      class="experience-panel detail-panel"
+      id="trayectoria-panel"
+      aria-label="Trayectoria"
+      aria-hidden="true"
+      data-career-panel-host
+    >
+      <CareerAccordion panels={careerPanels} site={site} />
+    </section>
+  </div>
+</section>
+
+<script>
+  import "@/scripts/experience.ts";
+  import "@/scripts/language.ts";
+</script>
+
+<style>
+  .artist-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 100svh;
+    padding: clamp(1rem, 3vw, 3rem);
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .artist-stage__background,
+  .artist-stage__veil {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .artist-stage__background {
+    z-index: -2;
+    object-fit: cover;
+  }
+
+  .artist-stage__veil {
+    z-index: -1;
+    background: color-mix(in srgb, var(--color-ink) 18%, transparent);
+  }
+
+  .experience-surface {
+    position: relative;
+    width: min(92vw, 90rem);
+    min-height: clamp(38rem, 80svh, 54rem);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 24%, transparent);
+    background: var(--color-paper);
+  }
+
+  .language-switch {
+    position: absolute;
+    top: clamp(0.85rem, 2vw, 1.5rem);
+    right: clamp(0.85rem, 2vw, 1.5rem);
+    z-index: 4;
+    display: flex;
+    gap: 0.35rem;
+    background: var(--color-paper);
+  }
+
+  .language-switch button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: 1px solid var(--color-ink);
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: var(--text-label);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .language-switch button[aria-current="true"] {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  .experience-panel {
+    position: absolute;
+    inset: 0;
+    padding: clamp(0.85rem, 2vw, 1.5rem);
+    background: var(--color-paper);
+    min-width: 0;
+    transition:
+      transform var(--duration-main) var(--ease-editorial),
+      opacity var(--duration-main) var(--ease-editorial);
+    will-change: transform, opacity;
+  }
+
+  .cover-panel {
+    display: grid;
+    grid-template-rows: auto minmax(9rem, 1fr) auto auto;
+    gap: clamp(1rem, 2.5vw, 2rem);
+    transform: translateX(0);
+  }
+
+  [data-mode="gallery"] .cover-panel,
+  [data-mode="career"] .cover-panel {
+    transform: translateX(-102%);
+    opacity: 0.92;
+  }
+
+  .detail-panel {
+    transform: translateX(102%);
+    opacity: 0.98;
+  }
+
+  [data-mode="gallery"] [data-gallery-panel-host],
+  [data-mode="career"] [data-career-panel-host] {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  [data-mode="gallery"] [data-career-panel-host],
+  [data-mode="career"] [data-gallery-panel-host] {
+    transform: translateX(102%);
+    opacity: 0;
+  }
+
+  .cover-panel__middle {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.85fr) minmax(10rem, 1fr);
+    gap: var(--space-4);
+    align-items: center;
+  }
+
+  .cover-panel__role {
+    max-width: 18rem;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.35rem, 2.2vw, 2rem);
+    line-height: 1.05;
+  }
+
+  .cover-panel__nav {
+    display: grid;
+    justify-items: start;
+    gap: 0.35rem;
+    width: max-content;
+    font-size: var(--text-base);
+  }
+
+  .cover-panel__nav a,
+  .cover-panel__bottom a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .cover-panel__work-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.75rem;
+    padding: 0 0.65rem;
+    border: 1px solid var(--color-ink);
+    font-weight: 800;
+  }
+
+  .cover-panel__work-cta:hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    text-decoration: none !important;
+  }
+
+  .cover-panel__nav a:hover,
+  .cover-panel__bottom a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .cover-panel__bottom {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-size: var(--text-label);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .cover-panel__bottom p {
+    margin: 0;
+  }
+
+  .cover-panel h1 {
+    max-width: 100%;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(4.2rem, 11.6vw, 12.25rem);
+    line-height: 0.82;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    overflow-wrap: normal;
+    word-break: normal;
+    text-wrap: balance;
+  }
+
+  @media (max-width: 980px) {
+    .experience-surface {
+      width: min(94vw, 58rem);
+      min-height: min(50rem, calc(100svh - 2rem));
+    }
+
+    .detail-panel {
+      overflow-y: auto;
+    }
+
+    .cover-panel h1 {
+      font-size: clamp(4rem, 14vw, 8rem);
+      line-height: 0.84;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .artist-stage {
+      align-items: start;
+      min-height: 100svh;
+      padding: 0.75rem;
+    }
+
+    .experience-surface {
+      width: 100%;
+      min-height: calc(100svh - 1.5rem);
+    }
+
+    .experience-panel {
+      overflow-y: auto;
+      padding: var(--space-2);
+      padding-top: 4.25rem;
+    }
+
+    .cover-panel {
+      grid-template-rows: auto minmax(10rem, 1fr) auto auto;
+    }
+
+    .cover-panel__middle {
+      grid-template-columns: 1fr;
+      align-content: center;
+      gap: var(--space-3);
+    }
+
+    .cover-panel__role {
+      max-width: 14rem;
+    }
+
+    .cover-panel h1 {
+      font-size: clamp(3.3rem, 17vw, 5.8rem);
+      line-height: 0.88;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .experience-panel {
+      transition-duration: 80ms;
+    }
+
+    [data-mode="gallery"] .cover-panel,
+    [data-mode="career"] .cover-panel,
+    .detail-panel,
+    [data-mode="gallery"] [data-gallery-panel-host],
+    [data-mode="career"] [data-career-panel-host] {
+      transform: none;
+    }
+
+    .detail-panel {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    [data-mode="gallery"] [data-gallery-panel-host],
+    [data-mode="career"] [data-career-panel-host] {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+</style>

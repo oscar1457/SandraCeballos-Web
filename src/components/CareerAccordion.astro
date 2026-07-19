@@ -1,0 +1,354 @@
+---
+import type { CareerPanel } from "@/data/exhibitions";
+import type { Site } from "@/data/site";
+
+type Props = {
+  panels: CareerPanel[];
+  site: Site;
+};
+
+const { panels, site } = Astro.props;
+---
+
+<section class="career-view" aria-labelledby="career-title" data-career-view>
+  <div class="career-view__topline">
+    <button class="text-button" type="button" data-close-panel>
+      <span data-lang="es">{site.nav.closeCareer}</span>
+      <span data-lang="en">{site.nav.closeCareerEn}</span>
+    </button>
+    <p>
+      <span data-lang="es">Trayectoria seleccionada</span>
+      <span data-lang="en">Selected career</span>
+    </p>
+  </div>
+
+  <div class="career-view__intro">
+    <h2 id="career-title" tabindex="-1">
+      <span data-lang="es">Trayectoria</span>
+      <span data-lang="en">Career</span>
+    </h2>
+    <p>
+      <span data-lang="es">{site.biographyNote}</span>
+      <span data-lang="en">{site.biographyNoteEn}</span>
+    </p>
+  </div>
+
+  <div class="career-accordion" data-career-accordion>
+    {
+      panels.map((panel, index) => (
+        <article
+          class:list={["career-item", index === 0 && "is-active"]}
+          style={`--panel-color:${panel.color}`}
+          data-career-item
+        >
+          <button
+            class="career-item__trigger"
+            id={`career-trigger-${panel.id}`}
+            type="button"
+            aria-expanded={index === 0 ? "true" : "false"}
+            aria-controls={`career-panel-${panel.id}`}
+            data-career-trigger
+          >
+            <span>{panel.eyebrow}</span>
+            <strong>
+              <span data-lang="es">{panel.label}</span>
+              <span data-lang="en">{panel.labelEn}</span>
+            </strong>
+          </button>
+          <div
+            class="career-item__panel"
+            id={`career-panel-${panel.id}`}
+            role="region"
+            aria-labelledby={`career-trigger-${panel.id}`}
+            data-career-panel
+          >
+            <div class="career-item__content">
+              <p class="career-item__summary">
+                <span data-lang="es">{panel.summary}</span>
+                <span data-lang="en">{panel.summaryEn}</span>
+              </p>
+              <ul>
+                {panel.items.map((item) => (
+                  <li>
+                    <span class="career-item__year">{item.year}</span>
+                    <span class="career-item__detail">
+                      <strong>{item.title}</strong>
+	                    <span>
+	                        {item.venue}, {item.city}, {item.country}
+	                      </span>
+	                      {
+	                        item.url && (
+	                          <a href={item.url} target="_blank" rel="noreferrer">
+	                            <span data-lang="es">Ver fuente</span>
+	                            <span data-lang="en">View source</span>
+	                          </a>
+	                        )
+	                      }
+	                    </span>
+	                  </li>
+	                ))}
+	              </ul>
+	            </div>
+	          </div>
+	        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .career-view {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: clamp(1rem, 1.8vw, 1.75rem);
+    min-height: 100%;
+  }
+
+  .career-view__topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .career-view__topline p {
+    margin: 0;
+    font-size: var(--text-label);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .career-view__intro {
+    display: grid;
+    grid-template-columns: minmax(18rem, 0.58fr) minmax(24rem, 1fr);
+    gap: clamp(2rem, 5vw, 6rem);
+    align-items: start;
+  }
+
+  .career-view__intro h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(3.75rem, 6.2vw, 6.75rem);
+    line-height: 0.9;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .career-view__intro p {
+    max-width: 36rem;
+    margin: 0;
+    padding-top: 0.7rem;
+    font-size: var(--text-small);
+  }
+
+  .career-accordion {
+    display: flex;
+    height: min(28rem, 43svh);
+    min-height: 20rem;
+    border: 1px solid var(--color-ink);
+    overflow: hidden;
+  }
+
+	  .career-item {
+	    display: grid;
+	    grid-template-columns: var(--stripe-width) 0fr;
+	    flex: 0 1 var(--stripe-width);
+	    min-width: var(--stripe-width);
+	    background: var(--panel-color);
+	    transition: background-color 160ms ease;
+	  }
+
+  .career-item.is-active {
+    grid-template-columns: var(--stripe-width) minmax(22rem, 1fr);
+    flex-basis: min(58rem, 58vw);
+    background: var(--color-paper);
+  }
+
+  .career-item__trigger {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: var(--space-2);
+    justify-items: center;
+    width: var(--stripe-width);
+    min-height: 100%;
+    padding: var(--space-2) 0.55rem;
+    border: 0;
+    border-right: 1px solid var(--color-ink);
+    background: var(--panel-color);
+    color: var(--color-ink);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .career-item__trigger span {
+    font-size: var(--text-label);
+    font-weight: 800;
+  }
+
+  .career-item__trigger strong {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: var(--text-label);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+	  .career-item__panel {
+	    min-width: 0;
+	    overflow: hidden;
+	  }
+
+	  .career-item__content {
+	    display: grid;
+	    grid-template-columns: minmax(0, 1fr);
+	    grid-template-areas:
+	      "summary"
+	      "list";
+	    gap: var(--space-3);
+	    width: min(48rem, calc(92vw - (var(--stripe-width) * 5)));
+	    max-width: 100%;
+	    min-width: 0;
+	    height: 100%;
+	    padding: clamp(1.75rem, 3vw, 3rem);
+	    overflow-y: auto;
+	    background: var(--color-paper);
+	    visibility: hidden;
+	    transition: none;
+	  }
+
+	  .career-item.is-active .career-item__content {
+	    visibility: visible;
+	  }
+
+	  .career-item__summary {
+	    grid-area: summary;
+	    max-width: 42rem;
+	    margin: 0;
+	    font-size: clamp(1.15rem, 1.35vw, 1.45rem);
+	    line-height: 1.22;
+	  }
+
+	  .career-item ul {
+	    grid-area: list;
+	    display: grid;
+	    gap: var(--space-2);
+	    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .career-item li {
+    display: grid;
+    grid-template-columns: minmax(5rem, 0.24fr) 1fr;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .career-item__year {
+    font-size: var(--text-label);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+	  .career-item__detail {
+	    display: grid;
+	    gap: 0.25rem;
+	  }
+
+	  .career-item__detail a {
+	    width: fit-content;
+	    font-size: var(--text-label);
+	    font-weight: 800;
+	    text-transform: uppercase;
+	  }
+
+  .career-item__detail strong {
+    font-size: var(--text-base);
+  }
+
+	  .career-item__detail span {
+	    font-size: var(--text-small);
+	  }
+
+  @media (max-width: 860px) {
+    .career-view__intro {
+      grid-template-columns: 1fr;
+      gap: var(--space-2);
+    }
+
+    .career-view__intro h2 {
+      font-size: clamp(3.1rem, 16vw, 5.5rem);
+    }
+
+    .career-view__intro p {
+      padding-top: 0;
+    }
+
+    .career-accordion {
+      display: grid;
+      height: auto;
+      min-height: 0;
+      border: 0;
+      gap: 1px;
+      background: var(--color-ink);
+      overflow: visible;
+    }
+
+    .career-item,
+    .career-item.is-active {
+      display: block;
+      min-width: 0;
+      background: var(--color-paper);
+    }
+
+    .career-item__trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 3.25rem;
+      padding: var(--space-2);
+      border: 0;
+      background: var(--panel-color);
+    }
+
+    .career-item__trigger strong {
+      writing-mode: horizontal-tb;
+      transform: none;
+      text-align: right;
+    }
+
+	    .career-item__panel {
+	      display: none;
+	      transition: none;
+	    }
+
+	    .career-item.is-active .career-item__panel {
+	      display: block;
+	    }
+
+	    .career-item__content {
+	      grid-template-columns: 1fr;
+	      grid-template-areas:
+	        "summary"
+	        "list";
+	      width: 100%;
+	      min-width: 0;
+	      height: auto;
+	      padding: var(--space-3);
+	      overflow: visible;
+	      opacity: 1;
+	      visibility: visible;
+	    }
+
+    .career-item__summary {
+      font-size: var(--text-base);
+    }
+
+    .career-item li {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
+  }
+</style>

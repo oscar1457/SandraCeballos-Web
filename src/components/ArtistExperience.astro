@@ -50,15 +50,18 @@ if (!firstArtwork) {
         </p>
         <nav class="cover-panel__nav" aria-label="Navegación principal">
           <a
+            class="cover-panel__button"
             href={`#obra/${firstArtwork.slug}`}
             data-open-gallery
             aria-controls="galeria-obras"
             aria-expanded="false"
           >
-            <span data-lang="es">{site.nav.artwork}</span>
-            <span data-lang="en">{site.nav.artworkEn}</span>
+            <span data-lang="es">{site.nav.viewArtwork}</span>
+            <span data-lang="en">{site.nav.viewArtworkEn}</span>
+            <span aria-hidden="true">→</span>
           </a>
           <a
+            class="cover-panel__button"
             href="#trayectoria"
             data-open-career
             aria-controls="trayectoria-panel"
@@ -66,21 +69,18 @@ if (!firstArtwork) {
           >
             <span data-lang="es">{site.nav.career}</span>
             <span data-lang="en">{site.nav.careerEn}</span>
+            <span aria-hidden="true">→</span>
           </a>
-          <a href="#contacto">
+          <a class="cover-panel__button" href="#contacto">
             <span data-lang="es">{site.nav.contact}</span>
             <span data-lang="en">{site.nav.contactEn}</span>
+            <span aria-hidden="true">↓</span>
           </a>
         </nav>
       </div>
 
       <div class="cover-panel__bottom">
         <p aria-hidden="true">(01 / {String(artworks.length).padStart(2, "0")})</p>
-        <a class="cover-panel__work-cta" href={`#obra/${firstArtwork.slug}`} data-open-gallery>
-          <span data-lang="es">{site.nav.viewArtwork}</span>
-          <span data-lang="en">{site.nav.viewArtworkEn}</span>
-          <span aria-hidden="true">→</span>
-        </a>
       </div>
 
       <h1>{site.name}</h1>
@@ -216,11 +216,11 @@ if (!firstArtwork) {
   }
 
   .cover-panel__nav {
-    display: grid;
-    justify-items: start;
-    gap: 0.35rem;
-    width: max-content;
-    font-size: var(--text-base);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1);
+    max-width: 34rem;
   }
 
   .cover-panel__nav a,
@@ -229,29 +229,28 @@ if (!firstArtwork) {
     text-decoration: none;
   }
 
-  .cover-panel__work-cta {
+  .cover-panel__button {
     display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-width: clamp(8rem, 13vw, 11rem);
     min-height: 2.75rem;
-    padding: 0 0.65rem;
+    padding: 0 0.75rem;
     border: 1px solid var(--color-ink);
+    color: var(--color-ink);
+    font-size: var(--text-label);
     font-weight: 800;
+    text-transform: uppercase;
   }
 
-  .cover-panel__work-cta:hover,
-  .cover-panel__work-cta:focus-visible {
+  .cover-panel__button:hover,
+  .cover-panel__button:focus-visible {
     background: var(--color-ink);
     color: var(--color-paper);
     text-decoration: none !important;
   }
 
-  .cover-panel__bottom .cover-panel__work-cta:hover,
-  .cover-panel__bottom .cover-panel__work-cta:focus-visible {
-    color: var(--color-paper);
-  }
-
-  .cover-panel__nav a:hover,
   .cover-panel__bottom a:hover {
     text-decoration: underline;
     text-underline-offset: 0.18em;
@@ -326,6 +325,15 @@ if (!firstArtwork) {
       grid-template-columns: 1fr;
       align-content: center;
       gap: var(--space-3);
+    }
+
+    .cover-panel__nav {
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .cover-panel__button {
+      flex: 1 1 100%;
     }
 
     .cover-panel__role {

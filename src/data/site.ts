@@ -46,9 +46,9 @@ export const site = {
   biography:
     "Sandra Ceballos es artista multidisciplinar y curadora cubana. Cursó estudios en San Alejandro, cofundó Espacio Aglutinador en La Habana en 1994 junto a Ezequiel Suárez y ha desarrollado una práctica sostenida entre creación, archivo, curaduría independiente y resistencia cultural.",
   biographyNote:
-    "Texto provisional basado en fuentes públicas; pendiente de revisión final por la artista.",
+    "Selección de biografía, exposiciones, premios y prensa.",
   biographyNoteEn:
-    "Provisional text based on public sources; pending final review by the artist.",
+    "Selection of biography, exhibitions, awards and press.",
   contactIntro:
     "Para consultas sobre obra, exposiciones o colaboraciones, escribe mediante el formulario.",
   contactIntroEn:
@@ -79,8 +79,8 @@ export const site = {
     invalidEmailEn: "Enter a valid email.",
     privacyPrefix: "Al enviar aceptas la",
     privacyPrefixEn: "By sending you accept the",
-    privacyLink: "política de privacidad provisional",
-    privacyLinkEn: "provisional privacy policy"
+    privacyLink: "política de privacidad",
+    privacyLinkEn: "privacy policy"
   },
   sources: [
     {

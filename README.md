@@ -49,10 +49,10 @@ El formulario funciona por POST estándar si el endpoint existe y mejora con `fe
    - Output directory: `dist`
 4. Añade `PUBLIC_FORMSPREE_ENDPOINT` en Environment Variables.
 
-## Pendiente de la propietaria
+## Antes de publicar
 
-- Confirmar biografía definitiva.
+- Confirmar biografía final.
 - Completar CV con años, títulos y sedes de exposiciones individuales/colectivas.
 - Confirmar premios, becas y residencias.
-- Sustituir textos legales provisionales.
+- Revisar textos legales con la información fiscal/corporativa correspondiente.
 - Confirmar correo de contacto y dominio canonical final en `src/data/site.ts` y `astro.config.mjs`.

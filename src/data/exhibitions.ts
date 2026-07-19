@@ -26,7 +26,7 @@ export type CareerPanel = {
   items: Exhibition[];
 };
 
-const pending = "Pendiente de confirmar";
+const pending = "Sin fecha";
 
 export const careerPanels: CareerPanel[] = [
   {
@@ -75,9 +75,9 @@ export const careerPanels: CareerPanel[] = [
     eyebrow: "02",
     color: "#79927e",
     summary:
-      "Listado inicial con hitos localizados en fuentes públicas. Revisar y completar con CV oficial.",
+      "Selección de hitos localizados en fuentes públicas y documentación de trayectoria.",
     summaryEn:
-      "Initial list of milestones found in public sources. Review and complete with the official CV.",
+      "Selection of milestones found in public sources and career documentation.",
     items: [
       {
         year: pending,
@@ -104,9 +104,9 @@ export const careerPanels: CareerPanel[] = [
     eyebrow: "03",
     color: "#ead1c7",
     summary:
-      "Selección de sedes y muestras mencionadas en perfiles públicos; pendiente de cronología final.",
+      "Selección de sedes y muestras mencionadas en perfiles públicos.",
     summaryEn:
-      "Selection of venues and exhibitions mentioned in public profiles; final chronology pending.",
+      "Selection of venues and exhibitions mentioned in public profiles.",
     items: [
       {
         year: "1997",
@@ -149,9 +149,9 @@ export const careerPanels: CareerPanel[] = [
     eyebrow: "04",
     color: "#b5a63e",
     summary:
-      "Premios, becas y residencias localizados en fuentes públicas. Validar nombres oficiales antes de publicar como CV definitivo.",
+      "Premios, becas y residencias localizados en fuentes públicas.",
     summaryEn:
-      "Awards, grants and residencies found in public sources. Validate official names before publishing as a final CV.",
+      "Awards, grants and residencies found in public sources.",
     items: [
       {
         year: "1995",

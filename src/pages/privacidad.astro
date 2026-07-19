@@ -4,7 +4,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { site } from "@/data/site";
 ---
 
-<BaseLayout title={`Privacidad | ${site.name}`} description="Política de privacidad provisional.">
+<BaseLayout title={`Privacidad | ${site.name}`} description="Política de privacidad.">
   <main class="legal-page" id="contenido">
     <header class="legal-page__header">
       <a href="/#contacto">
@@ -15,8 +15,8 @@ import { site } from "@/data/site";
     </header>
 
     <p class="legal-page__kicker">
-      <span data-lang="es">Documento provisional</span>
-      <span data-lang="en">Provisional document</span>
+      <span data-lang="es">Información legal</span>
+      <span data-lang="en">Legal information</span>
     </p>
     <h1>
       <span data-lang="es">Política de privacidad</span>
@@ -30,12 +30,12 @@ import { site } from "@/data/site";
       </h2>
       <p>
         <span data-lang="es">
-          Esta web representa el portafolio de {site.name}. El correo de contacto provisional es
+          Esta web representa el portafolio de {site.name}. El correo de contacto es
           {" "}
           <a href={`mailto:${site.email}`}>{site.email}</a>.
         </span>
         <span data-lang="en">
-          This website presents the portfolio of {site.name}. The provisional contact email is
+          This website presents the portfolio of {site.name}. The contact email is
           {" "}
           <a href={`mailto:${site.email}`}>{site.email}</a>.
         </span>
@@ -100,14 +100,12 @@ import { site } from "@/data/site";
         <span data-lang="es">
           Puedes solicitar acceso, rectificación o eliminación de tus datos escribiendo a
           {" "}
-          <a href={`mailto:${site.email}`}>{site.email}</a>. Esta página debe revisarse antes de la
-          publicación final.
+          <a href={`mailto:${site.email}`}>{site.email}</a>.
         </span>
         <span data-lang="en">
           You may request access, correction or deletion of your data by writing to
           {" "}
-          <a href={`mailto:${site.email}`}>{site.email}</a>. This page must be reviewed before final
-          publication.
+          <a href={`mailto:${site.email}`}>{site.email}</a>.
         </span>
       </p>
     </section>

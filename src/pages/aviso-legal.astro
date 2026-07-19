@@ -4,7 +4,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { site } from "@/data/site";
 ---
 
-<BaseLayout title={`Aviso legal | ${site.name}`} description="Aviso legal provisional.">
+<BaseLayout title={`Aviso legal | ${site.name}`} description="Aviso legal.">
   <main class="legal-page" id="contenido">
     <header class="legal-page__header">
       <a href="/#inicio">
@@ -15,8 +15,8 @@ import { site } from "@/data/site";
     </header>
 
     <p class="legal-page__kicker">
-      <span data-lang="es">Documento provisional</span>
-      <span data-lang="en">Provisional document</span>
+      <span data-lang="es">Información legal</span>
+      <span data-lang="en">Legal information</span>
     </p>
     <h1>
       <span data-lang="es">Aviso legal</span>
@@ -30,13 +30,12 @@ import { site } from "@/data/site";
       </h2>
       <p>
         <span data-lang="es">
-          Este sitio funciona como portafolio artístico de {site.name}. Los datos fiscales,
-          dirección postal y representación legal están pendientes de confirmación por la
-          propietaria antes de publicación final.
+          Este sitio funciona como portafolio artístico de {site.name}. Para consultas legales,
+          derechos de imagen o correcciones de contenido, utiliza el correo de contacto indicado.
         </span>
         <span data-lang="en">
-          This site functions as the artistic portfolio of {site.name}. Tax details, postal address
-          and legal representation are pending confirmation by the owner before final publication.
+          This site functions as the artistic portfolio of {site.name}. For legal inquiries, image
+          rights or content corrections, use the contact email listed on this page.
         </span>
       </p>
     </section>
@@ -68,12 +67,11 @@ import { site } from "@/data/site";
       <p>
         <span data-lang="es">
           La sección de trayectoria combina información facilitada por el proyecto y referencias
-          públicas. Cualquier dato marcado como provisional debe revisarse con el CV oficial de la
-          artista.
+          públicas vinculadas en la propia página.
         </span>
         <span data-lang="en">
-          The career section combines project-provided information and public references. Any data
-          marked as provisional must be reviewed against the artist's official CV.
+          The career section combines project-provided information and public references linked on
+          the page.
         </span>
       </p>
     </section>

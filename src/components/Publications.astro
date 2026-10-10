@@ -90,10 +90,6 @@ const shots = [publicationImages.covers, publicationImages.spread];
           onRefreshInit: setHeight
         }
       });
-      // Las imágenes pueden cambiar el ancho al cargar: recalculamos.
-      track.querySelectorAll("img").forEach((img) =>
-        img.addEventListener("load", () => ScrollTrigger.refresh(), { once: true })
-      );
       return () => {
         tween.scrollTrigger?.kill();
         tween.kill();

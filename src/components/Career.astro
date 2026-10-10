@@ -221,29 +221,31 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
         gsap.killTweensOf(content);
         if (!item.open) {
           item.open = true;
+          // Abrimos animando altura y margen inferior juntos (si no, se nota un salto).
+          const paddingBottom = getComputedStyle(content).paddingBottom;
           gsap.fromTo(
             content,
-            { height: 0, overflow: "hidden" },
+            { height: 0, paddingBottom: 0, overflow: "hidden" },
             {
               height: "auto",
+              paddingBottom,
               duration: 0.7,
               ease: "power3.inOut",
               onComplete: () => {
-                gsap.set(content, { clearProps: "height,overflow" });
-                ScrollTrigger.refresh();
+                gsap.set(content, { clearProps: "height,paddingBottom,overflow" });
               }
             }
           );
         } else {
           gsap.to(content, {
             height: 0,
+            paddingBottom: 0,
             overflow: "hidden",
             duration: 0.5,
             ease: "power3.inOut",
             onComplete: () => {
               item.open = false;
-              gsap.set(content, { clearProps: "height,overflow" });
-              ScrollTrigger.refresh();
+              gsap.set(content, { clearProps: "height,paddingBottom,overflow" });
             }
           });
         }
@@ -257,6 +259,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     position: relative;
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-content: start;
     gap: var(--space-4) var(--gutter);
     min-height: 100svh;
     padding: 9rem var(--gutter) var(--space-5);

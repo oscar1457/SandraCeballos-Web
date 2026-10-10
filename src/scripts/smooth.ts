@@ -8,12 +8,52 @@ gsap.registerPlugin(ScrollTrigger);
 
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+let lenis: Lenis | null = null;
 if (!reduced) {
-  const lenis = new Lenis({ lerp: 0.1, anchors: { offset: 0 } });
+  lenis = new Lenis({ lerp: 0.1, anchors: { offset: 0 } });
   lenis.on("scroll", ScrollTrigger.update);
-  gsap.ticker.add((time) => lenis.raf(time * 1000));
+  gsap.ticker.add((time) => lenis?.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
 }
+
+// Recalcula las posiciones de las animaciones de scroll cuando cambia la altura
+// de la página (por ejemplo al abrir un apartado). Solo lo hace con el scroll
+// quieto: si se hace en pleno movimiento, la página da un salto.
+let pending: number | undefined;
+const refreshWhenIdle = () => {
+  window.clearTimeout(pending);
+  pending = window.setTimeout(() => {
+    if (lenis?.isScrolling) {
+      refreshWhenIdle();
+      return;
+    }
+    ScrollTrigger.refresh();
+  }, 200);
+};
+
+let lastHeight = document.documentElement.scrollHeight;
+new ResizeObserver(() => {
+  const height = document.documentElement.scrollHeight;
+  if (Math.abs(height - lastHeight) > 2) {
+    lastHeight = height;
+    refreshWhenIdle();
+  }
+}).observe(document.body);
+
+// Si se entra con un enlace a una sección (#trayectoria…), vamos a ella cuando
+// la página ya tiene su altura definitiva.
+window.addEventListener("load", () => {
+  const id = window.location.hash.slice(1);
+  const target = id && !id.includes("/") ? document.getElementById(id) : null;
+  if (target) {
+    ScrollTrigger.refresh();
+    if (lenis) {
+      lenis.scrollTo(target, { immediate: true, force: true });
+    } else {
+      target.scrollIntoView();
+    }
+  }
+});
 
 const header = document.querySelector<HTMLElement>("[data-site-header]");
 const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-header]"));
@@ -34,6 +74,6 @@ if (header && sections.length > 0) {
   };
   updateTone();
   window.addEventListener("scroll", updateTone, { passive: true });
-  ScrollTrigger.addEventListener("refresh", updateTone);
   window.addEventListener("resize", updateTone);
+  ScrollTrigger.addEventListener("refresh", updateTone);
 }

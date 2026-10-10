@@ -1,0 +1,115 @@
+---
+import { Image } from "astro:assets";
+import type { Artwork } from "@/data/artworks";
+import type { Site } from "@/data/site";
+
+type Props = {
+  site: Site;
+  artwork: Artwork;
+};
+
+const { site, artwork } = Astro.props;
+---
+
+<section class="hero page" id="inicio" aria-labelledby="hero-title">
+  <div class="hero__text">
+    <h1 id="hero-title">{site.name}</h1>
+    <p class="hero__role">
+      <span data-lang="es">{site.role}</span>
+      <span data-lang="en">{site.roleEn}</span>
+    </p>
+    <p class="hero__bio">
+      <span data-lang="es">{site.biography}</span>
+      <span data-lang="en">{site.biographyEn}</span>
+    </p>
+    <p class="hero__links">
+      <a href="#obra">
+        <span data-lang="es">Ver la obra</span>
+        <span data-lang="en">See the work</span>
+      </a>
+      <a href={site.portfolioPdf} target="_blank" rel="noreferrer">
+        <span data-lang="es">Portafolio en PDF (10 MB)</span>
+        <span data-lang="en">Portfolio PDF (10 MB)</span>
+      </a>
+    </p>
+  </div>
+
+  <figure class="hero__work">
+    <Image
+      src={artwork.image}
+      alt={artwork.alt}
+      widths={[640, 960, 1280, 1600]}
+      sizes="(max-width: 900px) 100vw, 55vw"
+      loading="eager"
+      fetchpriority="high"
+    />
+    <figcaption>
+      <span class="hero__work-title">{artwork.title}</span>, {artwork.year}
+    </figcaption>
+  </figure>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-4);
+    align-items: end;
+    padding-block: var(--space-4) 0;
+  }
+
+  .hero h1 {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+  }
+
+  .hero__role {
+    margin: 0.75rem 0 0;
+    font-size: var(--text-lead);
+    color: var(--color-muted);
+  }
+
+  .hero__bio {
+    max-width: 34rem;
+    margin: var(--space-3) 0 0;
+  }
+
+  .hero__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem var(--space-3);
+    margin: var(--space-3) 0 0;
+  }
+
+  .hero__work {
+    margin: 0;
+  }
+
+  .hero__work img {
+    width: 100%;
+    height: auto;
+    max-height: 78svh;
+    object-fit: contain;
+    object-position: left bottom;
+  }
+
+  .hero__work figcaption {
+    margin-top: 0.6rem;
+    color: var(--color-muted);
+    font-size: var(--text-small);
+  }
+
+  .hero__work-title {
+    font-style: italic;
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+  }
+</style>

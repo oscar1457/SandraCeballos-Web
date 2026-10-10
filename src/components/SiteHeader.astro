@@ -1,0 +1,83 @@
+---
+import LanguageSwitch from "@/components/LanguageSwitch.astro";
+import type { Site } from "@/data/site";
+
+type Props = {
+  site: Site;
+};
+
+const { site } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="site-header__inner page">
+    <a class="site-header__name" href="#inicio">{site.name}</a>
+    <nav class="site-header__nav" aria-label="Navegación principal" data-aria-label-en="Main navigation">
+      <a href="#obra">
+        <span data-lang="es">{site.nav.artwork}</span>
+        <span data-lang="en">{site.nav.artworkEn}</span>
+      </a>
+      <a href="#trayectoria">
+        <span data-lang="es">{site.nav.career}</span>
+        <span data-lang="en">{site.nav.careerEn}</span>
+      </a>
+      <a href="#contacto">
+        <span data-lang="es">{site.nav.contact}</span>
+        <span data-lang="en">{site.nav.contactEn}</span>
+      </a>
+    </nav>
+    <LanguageSwitch />
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background: color-mix(in srgb, var(--color-paper) 92%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 3.75rem;
+  }
+
+  .site-header__name {
+    margin-right: auto;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .site-header__nav {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .site-header__nav a {
+    color: var(--color-muted);
+    text-decoration: none;
+  }
+
+  .site-header__nav a:hover {
+    color: var(--color-ink);
+  }
+
+  @media (max-width: 640px) {
+    .site-header__inner {
+      flex-wrap: wrap;
+      gap: 0.25rem var(--space-2);
+      padding-block: 0.6rem;
+    }
+
+    .site-header__nav {
+      order: 3;
+      width: 100%;
+      gap: var(--space-2);
+      font-size: var(--text-small);
+    }
+  }
+</style>

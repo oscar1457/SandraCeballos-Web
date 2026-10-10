@@ -1,0 +1,215 @@
+---
+import { careerPanels, careerStages, essentialHighlights } from "@/data/exhibitions";
+import type { Site } from "@/data/site";
+
+type Props = {
+  site: Site;
+};
+
+const { site } = Astro.props;
+
+// La biografía ya aparece en la portada; aquí va el resto del CV.
+const cvPanels = careerPanels.filter((panel) => panel.id !== "biografia");
+const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
+---
+
+<section class="section page career" id="trayectoria" aria-labelledby="career-title">
+  <header class="section__head career__head">
+    <h2 class="section__title" id="career-title">
+      <span data-lang="es">{site.nav.career}</span>
+      <span data-lang="en">{site.nav.careerEn}</span>
+    </h2>
+    <p class="section__intro">
+      <span data-lang="es">
+        En 1994 cofundó Espacio Aglutinador en La Habana, el primer espacio de arte independiente
+        sostenido en Cuba. Su práctica une obra propia, curaduría y archivo.
+      </span>
+      <span data-lang="en">
+        In 1994 she co-founded Espacio Aglutinador in Havana, the first sustained independent art
+        space in Cuba. Her practice joins her own work, curating and archive.
+      </span>
+    </p>
+  </header>
+
+  <div class="career__body">
+    <section class="career__block" aria-labelledby="career-timeline">
+      <h3 id="career-timeline">
+        <span data-lang="es">Cronología</span>
+        <span data-lang="en">Timeline</span>
+      </h3>
+      <ol class="rows">
+        {
+          careerStages.map((stage) => (
+            <li class="row">
+              <span class="row__year">{stage.year}</span>
+              <span class="row__main">
+                <strong>
+                  <span data-lang="es">{stage.title}</span>
+                  <span data-lang="en">{stage.titleEn}</span>
+                </strong>
+                <span class="row__note">
+                  <span data-lang="es">{stage.summary}</span>
+                  <span data-lang="en">{stage.summaryEn}</span>
+                </span>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="career__block" aria-labelledby="career-highlights">
+      <h3 id="career-highlights">
+        <span data-lang="es">Hitos</span>
+        <span data-lang="en">Highlights</span>
+      </h3>
+      <ul class="rows">
+        {
+          essentialHighlights.map((item) => (
+            <li class="row">
+              <span class="row__year">{item.year || "—"}</span>
+              <span class="row__main">
+                <strong>
+                  {item.url ? (
+                    <a href={item.url} target="_blank" rel="noreferrer">
+                      <span data-lang="es">{item.title}</span>
+                      <span data-lang="en">{item.titleEn}</span>
+                    </a>
+                  ) : (
+                    <>
+                      <span data-lang="es">{item.title}</span>
+                      <span data-lang="en">{item.titleEn}</span>
+                    </>
+                  )}
+                </strong>
+                <span class="row__place">{place(item.city, item.country)}</span>
+                <span class="row__note">
+                  <span data-lang="es">{item.summary}</span>
+                  <span data-lang="en">{item.summaryEn}</span>
+                </span>
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="career__block career__block--cv" aria-labelledby="career-cv">
+      <h3 id="career-cv">
+        <span data-lang="es">Currículum</span>
+        <span data-lang="en">Curriculum vitae</span>
+      </h3>
+      <div class="cv">
+        {
+          cvPanels.map((panel) => (
+            <section class="cv__group">
+              <h4>
+                <span data-lang="es">{panel.label}</span>
+                <span data-lang="en">{panel.labelEn}</span>
+              </h4>
+              <ul class="rows rows--compact">
+                {panel.items.map((item) => (
+                  <li class="row">
+                    <span class="row__year">{item.year || "—"}</span>
+                    <span class="row__main">
+                      {item.url ? (
+                        <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a>
+                      ) : (
+                        <span>{item.title}</span>
+                      )}
+                      <span class="row__place">{place(item.venue, item.city, item.country)}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</section>
+
+<style>
+  .career__body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4) clamp(2rem, 6vw, 6rem);
+  }
+
+  .career__block--cv {
+    grid-column: 1 / -1;
+  }
+
+  .career h3 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-base);
+    font-weight: 600;
+  }
+
+  .career h4 {
+    margin: 0 0 0.75rem;
+    font-size: var(--text-small);
+    font-weight: 600;
+  }
+
+  .rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding-block: 0.9rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .row__year {
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row__main {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .row__main strong {
+    font-weight: 500;
+  }
+
+  .row__place,
+  .row__note {
+    color: var(--color-muted);
+    font-size: var(--text-small);
+  }
+
+  .rows--compact .row {
+    padding-block: 0.6rem;
+    font-size: var(--text-small);
+  }
+
+  .rows--compact .row__year {
+    font-size: var(--text-small);
+  }
+
+  .cv {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: var(--space-3) clamp(2rem, 4vw, 4rem);
+  }
+
+  @media (max-width: 800px) {
+    .career__body {
+      grid-template-columns: 1fr;
+    }
+
+    .row {
+      grid-template-columns: 5.5rem minmax(0, 1fr);
+    }
+  }
+</style>

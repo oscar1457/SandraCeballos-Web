@@ -9,7 +9,7 @@ const { site } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer">
+<footer class="site-footer page">
   <p>{site.name} © {year}</p>
   <nav aria-label="Enlaces secundarios" data-aria-label-en="Secondary links">
     <a href={`mailto:${site.email}`}>{site.email}</a>
@@ -28,13 +28,14 @@ const year = new Date().getFullYear();
 <style>
   .site-footer {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
-    padding: var(--space-3) clamp(1rem, 4vw, 3rem);
-    border-top: 1px solid var(--color-ink);
-    background: var(--color-ink);
-    color: var(--color-paper);
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-5);
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--color-line);
+    color: var(--color-muted);
     font-size: var(--text-small);
   }
 
@@ -45,22 +46,6 @@ const year = new Date().getFullYear();
   .site-footer nav {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: var(--space-2);
-  }
-
-  .site-footer a {
-    color: inherit;
-  }
-
-  @media (max-width: 620px) {
-    .site-footer {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .site-footer nav {
-      justify-content: flex-start;
-    }
+    gap: 0.5rem var(--space-3);
   }
 </style>

@@ -1,18 +1,31 @@
 ---
-import ArtistExperience from "@/components/ArtistExperience.astro";
+import Career from "@/components/Career.astro";
 import ContactForm from "@/components/ContactForm.astro";
 import Footer from "@/components/Footer.astro";
+import Hero from "@/components/Hero.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import WorkWall from "@/components/WorkWall.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { artworks } from "@/data/artworks";
 import { site } from "@/data/site";
 
 const formEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? "";
+
+// Obra de portada: la misma que antes servía de fondo.
+const heroArtwork =
+  artworks.find((artwork) => artwork.image === site.backgroundImage) ?? artworks[0]!;
 ---
 
 <BaseLayout>
+  <SiteHeader site={site} />
   <main id="contenido">
-    <ArtistExperience site={site} artworks={artworks} />
+    <Hero site={site} artwork={heroArtwork} />
+    <WorkWall artworks={artworks} />
+    <Career site={site} />
     <ContactForm site={site} endpoint={formEndpoint} />
   </main>
   <Footer site={site} />
+  <script>
+    import "@/scripts/language.ts";
+  </script>
 </BaseLayout>

@@ -9,23 +9,29 @@ type Props = {
 const { site, endpoint } = Astro.props;
 ---
 
-<section class="contact-section" id="contacto" aria-labelledby="contact-title">
-  <div class="contact-section__inner">
-    <div class="contact-section__intro">
-      <p>
-        <span data-lang="es">{site.role}</span>
-        <span data-lang="en">{site.roleEn}</span>
-      </p>
-      <h2 id="contact-title">
+<section class="section page contact" id="contacto" aria-labelledby="contact-title">
+  <div class="contact__grid">
+    <div class="contact__intro">
+      <h2 class="section__title" id="contact-title">
         <span data-lang="es">{site.nav.contact}</span>
         <span data-lang="en">{site.nav.contactEn}</span>
       </h2>
-    </div>
-    <div class="contact-section__body">
-      <p>
+      <p class="section__intro">
         <span data-lang="es">{site.contactIntro}</span>
         <span data-lang="en">{site.contactIntroEn}</span>
       </p>
+      <ul class="contact__links">
+        <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+        <li><a href={site.instagram.url} target="_blank" rel="noreferrer">Instagram {site.instagram.label}</a></li>
+        <li>
+          <a href={site.portfolioPdf} target="_blank" rel="noreferrer">
+            <span data-lang="es">Portafolio en PDF (10 MB)</span>
+            <span data-lang="en">Portfolio PDF (10 MB)</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="contact__body">
       <form
         class="contact-form"
         action={endpoint || "#contacto"}
@@ -148,56 +154,35 @@ const { site, endpoint } = Astro.props;
 </script>
 
 <style>
-  .contact-section {
-    background: var(--color-paper);
-    color: var(--color-ink);
-    border-top: 1px solid var(--color-ink);
+  .contact__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-4);
   }
 
-	  .contact-section__inner {
-	    display: grid;
-	    grid-template-columns: minmax(15rem, 0.5fr) minmax(28rem, 1fr);
-	    gap: clamp(2rem, 5vw, 5rem);
-	    width: min(88vw, 78rem);
-	    margin: 0 auto;
-	    padding: clamp(2.25rem, 4.5vw, 4rem) 0;
-	  }
-
-  .contact-section__intro {
-    align-self: start;
+  .contact__intro {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
   }
 
-  .contact-section__intro p {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-serif);
-    font-size: clamp(1.2rem, 2vw, 1.75rem);
+  .contact__links {
+    display: grid;
+    gap: 0.4rem;
+    margin: var(--space-1) 0 0;
+    padding: 0;
+    list-style: none;
   }
 
-	  .contact-section h2 {
-	    max-width: 7.5ch;
-	    margin: 0;
-	    font-family: var(--font-display);
-	    font-size: clamp(3rem, 4.8vw, 5.1rem);
-	    line-height: 0.9;
-    letter-spacing: 0;
-    text-transform: uppercase;
+  .contact-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2) var(--space-3);
   }
-
-	  .contact-section__body > p {
-	    max-width: 34rem;
-	    margin: 0 0 clamp(1rem, 2vw, 1.8rem);
-	  }
-
-	  .contact-form {
-	    display: grid;
-	    grid-template-columns: repeat(2, minmax(0, 1fr));
-	    column-gap: clamp(1.6rem, 3vw, 3rem);
-	    row-gap: clamp(0.8rem, 1.5vw, 1.25rem);
-	  }
 
   .contact-form__field {
     display: grid;
-    gap: 0.45rem;
+    gap: 0.35rem;
   }
 
   .contact-form__field--full,
@@ -207,33 +192,45 @@ const { site, endpoint } = Astro.props;
   }
 
   .contact-form label {
-    font-size: var(--text-label);
-    font-weight: 800;
-    text-transform: uppercase;
+    color: var(--color-muted);
+    font-size: var(--text-small);
   }
 
-	  .contact-form input,
-	  .contact-form textarea {
+  .contact-form input,
+  .contact-form textarea {
     width: 100%;
+    padding: 0.55rem 0;
     border: 0;
     border-bottom: 1px solid var(--color-ink);
     border-radius: 0;
-	    padding: 0.36rem 0;
     background: transparent;
     color: inherit;
-    font: inherit;
   }
 
-	  .contact-form textarea {
-	    min-height: clamp(4.75rem, 8svh, 6.5rem);
-	    resize: none;
-	  }
+  .contact-form input:focus-visible,
+  .contact-form textarea:focus-visible {
+    outline: none;
+    border-bottom-width: 2px;
+  }
 
-	  .contact-form__error {
-	    min-height: 0.95rem;
+  .contact-form textarea {
+    min-height: 8rem;
+    resize: vertical;
+  }
+
+  .contact-form [aria-invalid="true"] {
+    border-bottom-color: var(--color-error);
+  }
+
+  .contact-form__error {
+    min-height: 1.1rem;
     margin: 0;
     color: var(--color-error);
     font-size: var(--text-small);
+  }
+
+  .contact-form__error:empty {
+    min-height: 0;
   }
 
   .contact-form__honeypot {
@@ -241,23 +238,18 @@ const { site, endpoint } = Astro.props;
     left: -9999px;
   }
 
-	  .contact-form__footer {
+  .contact-form__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
-    border-top: 1px solid var(--color-line);
-	    padding-top: var(--space-2);
-	  }
+    gap: var(--space-2);
+  }
 
   .contact-form__footer p,
   .contact-form__status {
     margin: 0;
+    color: var(--color-muted);
     font-size: var(--text-small);
-  }
-
-  .contact-form a {
-    color: inherit;
   }
 
   .contact-form__footer a {
@@ -265,13 +257,11 @@ const { site, endpoint } = Astro.props;
   }
 
   .contact-form button {
-    min-width: 10.5rem;
     min-height: 2.75rem;
+    padding: 0 1.5rem;
     border: 1px solid var(--color-ink);
-    border-radius: 0;
     background: var(--color-ink);
     color: var(--color-paper);
-    font: inherit;
     cursor: pointer;
   }
 
@@ -280,51 +270,15 @@ const { site, endpoint } = Astro.props;
     opacity: 0.7;
   }
 
-  @media (max-width: 980px) {
-    .contact-section__inner {
-      grid-template-columns: 1fr;
-      gap: var(--space-3);
-      width: min(100% - var(--space-4), 48rem);
-    }
-
-    .contact-section h2 {
-      max-width: none;
-      font-size: clamp(3rem, 11vw, 5rem);
-    }
-  }
-
-  @media (max-width: 760px) {
-    .contact-section__inner,
+  @media (max-width: 800px) {
+    .contact__grid,
     .contact-form {
       grid-template-columns: 1fr;
     }
 
-	    .contact-section__inner {
-	      gap: var(--space-3);
-	      width: min(100% - var(--space-4), 42rem);
-	      padding: var(--space-3) 0;
-	    }
-
-	    .contact-section h2 {
-	      font-size: clamp(2.75rem, 13vw, 4rem);
-	    }
-
-	    .contact-form {
-	      row-gap: 0.65rem;
-	    }
-
-	    .contact-form__error {
-	      min-height: 0.65rem;
-	      font-size: 0.86rem;
-	    }
-
     .contact-form__footer {
       align-items: stretch;
       flex-direction: column;
-    }
-
-    .contact-form button {
-      width: 100%;
     }
   }
 </style>

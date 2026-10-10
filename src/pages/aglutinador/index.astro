@@ -56,7 +56,8 @@ import { participants } from "@/data/aglutinador";
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (box && list && spacer && !reduced) {
-    const speed = 55; // píxeles por segundo
+    // Velocidad proporcional a la altura de la pantalla (unos 125 px/s en un portátil).
+    const speed = () => Math.max(90, box.clientHeight * 0.15);
     let last = performance.now();
     let position = box.scrollTop; // posición exacta (scrollTop se redondea)
     let pending = 0; // desplazamiento manual que falta por aplicar, con suavizado
@@ -95,14 +96,18 @@ import { participants } from "@/data/aglutinador";
     let touchTime = 0;
     let velocity = 0;
     box.addEventListener("touchstart", (event) => {
-      touchY = event.touches[0].clientY;
+      const touch = event.touches[0];
+      if (!touch) return;
+      touchY = touch.clientY;
       touchTime = performance.now();
       velocity = 0;
       pending = 0;
     }, { passive: true });
     box.addEventListener("touchmove", (event) => {
+      const touch = event.touches[0];
+      if (!touch) return;
       event.preventDefault();
-      const y = event.touches[0].clientY;
+      const y = touch.clientY;
       const now = performance.now();
       const delta = touchY - y;
       position = wrap(position + delta);
@@ -131,7 +136,7 @@ import { participants } from "@/data/aglutinador";
         const step = pending * (1 - Math.exp(-dt * 10));
         pending -= step;
         if (Math.abs(pending) < 0.1) pending = 0;
-        position = wrap(position + speed * dt + step);
+        position = wrap(position + speed() * dt + step);
         box.scrollTop = position;
         written = box.scrollTop;
       }
@@ -179,25 +184,31 @@ import { participants } from "@/data/aglutinador";
     list-style: none;
   }
 
-  /* La lista empieza a mitad de pantalla, como en la referencia. */
+  /* Solo el hueco que ocupa el degradado de arriba: el primer nombre aparece
+     ya entero, sin pantalla vacía al entrar. */
   .names__spacer {
-    height: 50svh;
+    height: calc((100svh - var(--bar-h)) * 0.22);
   }
 
   .names__row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--gutter);
-    font-size: clamp(1.9rem, 4.4vw, 5.6rem);
+    font-size: clamp(1.9rem, 3.4vw, 5.6rem);
     font-weight: 600;
     line-height: 1;
     letter-spacing: -0.03em;
     transition: opacity 250ms var(--ease);
   }
 
+  /* Cada nombre y cada función ocupan una sola línea: así no quedan huecos
+     entre filas. El tamaño de letra está calculado para que quepa la más larga. */
   .names__name,
   .names__role {
+    overflow: hidden;
     padding-bottom: 0.08em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* Al pasar el ratón por la lista, la fila señalada destaca sobre las demás. */
@@ -211,7 +222,7 @@ import { participants } from "@/data/aglutinador";
     }
   }
 
-  @media (max-width: 620px) {
+  @media (max-width: 900px) {
     .intro {
       max-width: 15rem;
     }
@@ -219,8 +230,8 @@ import { participants } from "@/data/aglutinador";
     .names__row {
       grid-template-columns: 1fr;
       gap: 0;
-      padding-bottom: 0.4em;
-      font-size: 2rem;
+      padding-bottom: 0.2em;
+      font-size: clamp(1.6rem, 8.4vw, 3rem);
     }
 
     .names__role {

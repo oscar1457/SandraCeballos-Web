@@ -29,7 +29,7 @@ export type Participant = {
 // Orden: primero Sandra Ceballos (cofundadora); después, de mayor a menor
 // reconocimiento internacional.
 export const participants: Participant[] = [
-  { name: "Sandra Ceballos", role: "Cofundadora y curadora, desde 1994", roleEn: "Co-founder and curator, since 1994", source: "cronologia" },
+  { name: "Sandra Ceballos", role: "Cofundadora y curadora, 1994", roleEn: "Co-founder and curator, 1994", source: "cronologia" },
   { name: "Tania Bruguera", role: "Exposición, 1996–1999", roleEn: "Exhibition, 1996–1999", source: "cronologia" },
   { name: "Santiago Sierra", role: "Exposición, 1996–1999", roleEn: "Exhibition, 1996–1999", source: "cronologia" },
   { name: "Luis Camnitzer", role: "Cocurador, The Drawing Center", roleEn: "Co-curator, The Drawing Center", source: "cronologia" },

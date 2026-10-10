@@ -47,55 +47,93 @@ import { participants } from "@/data/aglutinador";
 </AglutinadorLayout>
 
 <script>
-  // Desplazamiento automático hacia arriba, en bucle. Se detiene un momento
-  // cuando la persona usa la rueda, el dedo o el teclado, y con movimiento reducido.
+  // Desplazamiento automático hacia arriba, en bucle y sin pausas. La rueda o el
+  // dedo de la persona adelantan o atrasan la lista, pero el movimiento nunca se
+  // detiene. Con movimiento reducido no se mueve sola y el scroll es el normal.
   const box = document.querySelector<HTMLElement>("[data-names]");
   const list = document.querySelector<HTMLElement>("[data-names-list]");
   const spacer = document.querySelector<HTMLElement>("[data-names-spacer]");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (box && list && spacer) {
+  if (box && list && spacer && !reduced) {
     const speed = 55; // píxeles por segundo
-    let pausedUntil = 0;
     let last = performance.now();
-    let position = box.scrollTop;
+    let position = box.scrollTop; // posición exacta (scrollTop se redondea)
+    let pending = 0; // desplazamiento manual que falta por aplicar, con suavizado
+    let looped = false;
+    let written = -1;
 
-    const pause = () => {
-      pausedUntil = performance.now() + 2500;
-    };
-    ["wheel", "touchstart", "keydown", "pointerdown"].forEach((type) =>
-      box.addEventListener(type, pause, { passive: true })
-    );
-
-    // Al llegar al final de la primera lista, saltamos hacia atrás exactamente
-    // su altura: la segunda copia ocupa ese mismo sitio y el salto no se nota.
+    // Las dos listas son idénticas: al pasar el final de la primera (o volver
+    // por encima de su inicio, una vez dada la primera vuelta) se salta
+    // exactamente su altura y el cambio no se ve.
     const wrap = (value: number) => {
       const height = list.offsetHeight;
-      return height > 0 && value >= spacer.offsetHeight + height ? value - height : value;
+      const top = spacer.offsetHeight;
+      if (height <= 0) return Math.max(0, value);
+      if (value >= top + height) {
+        looped = true;
+        return value - height;
+      }
+      if (looped && value < top) return value + height;
+      return Math.max(0, value);
     };
 
-    // El navegador redondea scrollTop; guardamos la posición exacta aparte y
-    // solo la leemos del scroll cuando lo mueve la persona.
-    let selfScrolling = false;
+    // Rueda: se suma al recorrido en vez de dejar que el navegador mueva la caja.
+    box.addEventListener(
+      "wheel",
+      (event) => {
+        if (event.ctrlKey) return; // zoom con el trackpad
+        event.preventDefault();
+        const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? box.clientHeight : 1;
+        pending += event.deltaY * unit;
+      },
+      { passive: false }
+    );
+
+    // Tacto: se sigue al dedo y al soltar queda algo de inercia.
+    let touchY = 0;
+    let touchTime = 0;
+    let velocity = 0;
+    box.addEventListener("touchstart", (event) => {
+      touchY = event.touches[0].clientY;
+      touchTime = performance.now();
+      velocity = 0;
+      pending = 0;
+    }, { passive: true });
+    box.addEventListener("touchmove", (event) => {
+      event.preventDefault();
+      const y = event.touches[0].clientY;
+      const now = performance.now();
+      const delta = touchY - y;
+      position = wrap(position + delta);
+      velocity = delta / Math.max(now - touchTime, 1);
+      touchY = y;
+      touchTime = now;
+    }, { passive: false });
+    box.addEventListener("touchend", () => {
+      pending += velocity * 320;
+      velocity = 0;
+    }, { passive: true });
+
+    // Si algo mueve la caja por otra vía (barra de desplazamiento, teclado),
+    // se toma esa posición como nueva base.
     box.addEventListener("scroll", () => {
-      if (selfScrolling) {
-        selfScrolling = false;
-        return;
+      if (Math.abs(box.scrollTop - written) > 1) {
+        position = wrap(box.scrollTop);
+        pending = 0;
       }
-      const wrapped = wrap(box.scrollTop);
-      if (wrapped !== box.scrollTop) {
-        box.scrollTop = wrapped;
-      }
-      position = box.scrollTop;
     });
 
     const tick = (now: number) => {
       const dt = Math.min(now - last, 100) / 1000;
       last = now;
-      if (!reduced && now > pausedUntil && !document.hidden) {
-        position = wrap(position + speed * dt);
-        selfScrolling = true;
+      if (!document.hidden) {
+        const step = pending * (1 - Math.exp(-dt * 10));
+        pending -= step;
+        if (Math.abs(pending) < 0.1) pending = 0;
+        position = wrap(position + speed * dt + step);
         box.scrollTop = position;
+        written = box.scrollTop;
       }
       requestAnimationFrame(tick);
     };
@@ -120,6 +158,7 @@ import { participants } from "@/data/aglutinador";
     position: fixed;
     inset: 0 0 var(--bar-h);
     overflow-y: auto;
+    overscroll-behavior: contain;
     scrollbar-width: none;
     -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 100%);
     mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 100%);

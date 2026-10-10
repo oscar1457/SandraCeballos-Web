@@ -41,9 +41,9 @@ export const artworks: Artwork[] = [
     thumbnail: elVientoAbusador,
     alt: "El viento abusador, acrílico sobre tela de Sandra Ceballos dedicado a Ana Mendieta.",
     description:
-      "De la serie Desamparo con alevosía. Obra basada en una investigación sobre víctimas de violencia de género en Cuba y un homenaje a la artista cubana Ana Mendieta.",
+      "Pertenece a la serie Desamparo con alevosía. La obra parte de una investigación sobre las víctimas de la violencia de género en Cuba y rinde homenaje a la artista cubana Ana Mendieta.",
     descriptionEn:
-      "From the series Desamparo con alevosía. A work based on research into victims of gender-based violence in Cuba and a tribute to the Cuban artist Ana Mendieta."
+      "Part of the series Desamparo con alevosía. The work stems from research into victims of gender-based violence in Cuba and pays tribute to the Cuban artist Ana Mendieta."
   },
   {
     id: "obra-09",
@@ -57,9 +57,9 @@ export const artworks: Artwork[] = [
     thumbnail: guiaEspiritual9,
     alt: "Guía espiritual número 9, óleo sobre tela de Sandra Ceballos.",
     description:
-      "Monja inspirada en un imaginario anecdótico de quién sabe cuándo y quién sabe qué. Texto escrito en la obra: “Sé quién eres, tu nombre también, pero tú no sabes quién soy, mi nombre tampoco.”",
+      "Una monja que surge de un imaginario anecdótico, «de quién sabe cuándo y quién sabe qué». Sobre la tela, la artista escribe: «Sé quién eres, tu nombre también, pero tú no sabes quién soy, mi nombre tampoco».",
     descriptionEn:
-      "A nun inspired by an anecdotal imaginary from who knows when and who knows what. Text written in the work: “I know who you are, your name too, but you do not know who I am, nor my name.”"
+      "A nun emerging from an anecdotal imaginary, “from who knows when and who knows what.” Written on the canvas: “I know who you are, your name too, but you do not know who I am, nor my name.”"
   },
   {
     id: "obra-10",
@@ -73,9 +73,9 @@ export const artworks: Artwork[] = [
     thumbnail: dragonbandera,
     alt: "Dragon bandera, obra de Sandra Ceballos de la serie Discursos Mangas.",
     description:
-      "De la serie Discursos Mangas. En esta obra se establece un paralelo entre el superhéroe manga y un supuesto líder político: dos representaciones de poder que aglutinan tantos seguidores como detractores. Textos de discursos del presidente Fidel Castro y la figura de Dragon Ball en forma de bandera cubana.",
+      "Pertenece a la serie Discursos Mangas. La obra establece un paralelo entre el superhéroe del manga y la figura de un supuesto líder político: dos representaciones del poder capaces de reunir tantos seguidores como detractores. En ella conviven fragmentos de discursos del presidente Fidel Castro y la figura de Dragon Ball convertida en bandera cubana.",
     descriptionEn:
-      "From the series Discursos Mangas. The work draws a parallel between the manga superhero and a supposed political leader: two representations of power that gather as many followers as detractors. Texts from speeches by President Fidel Castro and the figure of Dragon Ball in the shape of the Cuban flag."
+      "Part of the series Discursos Mangas. The work draws a parallel between the manga superhero and the figure of a supposed political leader: two representations of power able to gather as many followers as detractors. Fragments of speeches by President Fidel Castro coexist with the figure of Dragon Ball turned into the Cuban flag."
   },
   {
     id: "obra-11",
@@ -88,8 +88,10 @@ export const artworks: Artwork[] = [
     image: discursosMangasPequena,
     thumbnail: discursosMangasPequena,
     alt: "Discursos Mangas #1, acrílico sobre tela de Sandra Ceballos con gárgolas.",
-    description: "Gárgolas, sobre textos de discursos de Fidel Castro.",
-    descriptionEn: "Gargoyles, over texts from speeches by Fidel Castro."
+    description:
+      "Pertenece a la serie Discursos Mangas. Un grupo de gárgolas convive con fragmentos de discursos de Fidel Castro.",
+    descriptionEn:
+      "Part of the series Discursos Mangas. A group of gargoyles coexists with fragments of speeches by Fidel Castro."
   },
   {
     id: "obra-12",
@@ -102,8 +104,10 @@ export const artworks: Artwork[] = [
     image: discursosMangas2,
     thumbnail: discursosMangas2,
     alt: "Discursos Mangas #2, acrílico sobre tela de Sandra Ceballos con la figura de Ben 10.",
-    description: "Ben 10, sobre textos de discursos de Fidel Castro.",
-    descriptionEn: "Ben 10, over texts from speeches by Fidel Castro."
+    description:
+      "Pertenece a la serie Discursos Mangas. La figura de Ben 10 convive con fragmentos de discursos de Fidel Castro.",
+    descriptionEn:
+      "Part of the series Discursos Mangas. The figure of Ben 10 coexists with fragments of speeches by Fidel Castro."
   },
   {
     id: "obra-13",
@@ -116,8 +120,10 @@ export const artworks: Artwork[] = [
     image: adoradoWolfi,
     thumbnail: adoradoWolfi,
     alt: "Adorado Wolfi, acrílico sobre PVC de Sandra Ceballos.",
-    description: "De la serie Adorado Wolfi.",
-    descriptionEn: "From the series Adorado Wolfi."
+    description:
+      "Pertenece a la serie Adorado Wolfi.",
+    descriptionEn:
+      "Part of the series Adorado Wolfi."
   },
   {
     id: "obra-01",
@@ -133,9 +139,9 @@ export const artworks: Artwork[] = [
     thumbnail: miArtilleriaEsPotente,
     alt: "Mi artillería es potente, obra de Sandra Ceballos en caja de metal.",
     description:
-      "Objeto y collage donde materiales domésticos, quirúrgicos y ornamentales se condensan en una composición frontal.",
+      "Objeto-collage en el que materiales domésticos, quirúrgicos y ornamentales se condensan en una composición frontal.",
     descriptionEn:
-      "Object and collage where domestic, surgical and ornamental materials condense into a frontal composition."
+      "An object-collage in which domestic, surgical and ornamental materials condense into a frontal composition."
   },
   {
     id: "obra-02",
@@ -149,9 +155,9 @@ export const artworks: Artwork[] = [
     thumbnail: laCenaDelCharlatan,
     alt: "La cena del charlatán, óleo sobre tela de Sandra Ceballos.",
     description:
-      "Pintura de gran formato organizada como una escena densa, teatral y de lectura abierta.",
+      "Pintura de gran formato concebida como una escena densa y teatral, abierta a múltiples lecturas.",
     descriptionEn:
-      "Large-format painting arranged as a dense, theatrical scene open to interpretation."
+      "A large-format painting conceived as a dense, theatrical scene, open to multiple readings."
   },
   {
     id: "obra-03",
@@ -165,9 +171,9 @@ export const artworks: Artwork[] = [
     thumbnail: guia4,
     alt: "Guía número 4, acrílico sobre tela de Sandra Ceballos.",
     description:
-      "Obra reciente de la serie Guía, con trazo directo y una estructura pictórica de fuerte presencia gráfica.",
+      "Obra reciente de la serie Guía, de trazo directo y marcada presencia gráfica.",
     descriptionEn:
-      "Recent work from the Guide series, with direct brushwork and a pictorial structure of strong graphic presence."
+      "A recent work from the Guía series, with direct brushwork and a strong graphic presence."
   },
   {
     id: "obra-04",
@@ -181,9 +187,9 @@ export const artworks: Artwork[] = [
     thumbnail: guiaEspiritual6,
     alt: "Guía espiritual número 6, acrílico sobre tela con crucifijo de madera.",
     description:
-      "Pieza vertical que incorpora objeto religioso y pintura como parte de una investigación material y simbólica.",
+      "Pieza vertical que integra pintura y objeto religioso dentro de una investigación material y simbólica.",
     descriptionEn:
-      "Vertical piece incorporating a religious object and painting as part of a material and symbolic investigation."
+      "A vertical piece that brings together painting and a religious object within a material and symbolic inquiry."
   },
   {
     id: "obra-05",
@@ -197,9 +203,9 @@ export const artworks: Artwork[] = [
     thumbnail: guia2,
     alt: "Guía número 2, acrílico y lápiz sobre tela de Sandra Ceballos.",
     description:
-      "Incluye el texto en obra: Sandri no salves al Otro, sálvate tú, pequeña diabla.",
+      "La obra incluye el texto: «Sandri, no salves al Otro, sálvate tú, pequeña diabla».",
     descriptionEn:
-      "Includes the text in the work: Sandri, don't save the Other, save yourself, little devil."
+      "The work includes the text: “Sandri, don't save the Other, save yourself, little devil.”"
   },
   {
     id: "obra-06",
@@ -213,9 +219,9 @@ export const artworks: Artwork[] = [
     thumbnail: quienMatoAlComendador,
     alt: "¿Quién mató al Comendador?, acrílico sobre tela de Sandra Ceballos.",
     description:
-      "Pintura atravesada por diálogo escrito, ironía y tensión narrativa.",
+      "Pintura atravesada por el diálogo escrito, la ironía y la tensión narrativa.",
     descriptionEn:
-      "Painting crossed by written dialogue, irony and narrative tension."
+      "A painting crossed by written dialogue, irony and narrative tension."
   },
   {
     id: "obra-07",
@@ -229,8 +235,8 @@ export const artworks: Artwork[] = [
     thumbnail: comidaComiendoComida,
     alt: "Comida comiendo comida, óleo sobre tela de la serie Absolut Sandra.",
     description:
-      "Obra de la serie Absolut Sandra con título bilingüe indicado por la artista.",
+      "Pertenece a la serie Absolut Sandra. El título bilingüe es de la propia artista.",
     descriptionEn:
-      "Work from the Absolut Sandra series with the bilingual title indicated by the artist."
+      "Part of the series Absolut Sandra. The bilingual title is the artist's own."
   }
 ];

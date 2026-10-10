@@ -1,29 +1,30 @@
 ---
 // Sección "En el taller", entre la obra y la trayectoria. El vídeo de Sandra
-// trabajando no se muestra como vídeo sino como fondo: duotono rojo, grano y
-// paralaje, sin sonido ni controles.
+// trabajando no se muestra como vídeo sino como fondo con trama de imprenta:
+// cada fotograma se convierte en puntos (WebGL) que se dibujan nítidos a
+// cualquier tamaño, así la baja resolución del vídeo no se nota.
 import { getImage } from "astro:assets";
 import posterImage from "@/assets/sandra-taller-poster.jpg";
 
 const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
 ---
 
-<section class="studio" id="taller" data-header="light" aria-labelledby="studio-title" data-studio>
-  <!-- Fondo decorativo: el vídeo del taller tratado en duotono rojo, con grano. -->
+<section class="studio" id="taller" data-header="light" aria-labelledby="studio-title" data-studio data-poster={poster.src}>
   <div class="studio__media" aria-hidden="true">
+    <!-- Respaldo sin WebGL: el póster en duotono. -->
+    <img class="studio__fallback" src={poster.src} alt="" width="576" height="972" loading="lazy" decoding="async" />
+    <canvas class="studio__canvas" data-studio-canvas></canvas>
     <video
-      class="studio__video"
+      class="studio__source"
       data-studio-video
-      poster={poster.src}
-      width="576"
-      height="972"
+      width="360"
+      height="608"
       muted
       loop
       playsinline
       preload="none"
       tabindex="-1"
     ></video>
-    <div class="studio__grain"></div>
   </div>
 
   <div class="studio__content">
@@ -44,17 +45,166 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const section = document.querySelector<HTMLElement>("[data-studio]");
-  const video = section?.querySelector<HTMLVideoElement>("[data-studio-video]");
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Trama de imprenta: rejilla girada 45°, un punto por celda cuyo tamaño
+  // depende de lo oscuro que sea el vídeo en ese punto. Fondo rojo, tinta casi negra.
+  const VERTEX = `
+    attribute vec2 a_pos;
+    void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
+  `;
+  const FRAGMENT = `
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+    #else
+    precision mediump float;
+    #endif
+    uniform sampler2D u_tex;
+    uniform vec2 u_res;
+    uniform vec2 u_src;
+    uniform float u_cell;
+    uniform float u_pan;
+    uniform vec3 u_paper;
+    uniform vec3 u_ink;
 
-  // Con movimiento reducido se queda la imagen fija (el póster).
-  if (section && video && !reduced) {
-    // El vídeo (3 MB, sin sonido) solo se descarga cuando la sección se acerca.
-    // WebM para Chrome y Firefox; MP4 para Safari y el resto.
+    vec2 coverUV(vec2 p) {
+      float scale = max(u_res.x / u_src.x, u_res.y / u_src.y);
+      vec2 size = u_src * scale;
+      vec2 offset = vec2((u_res.x - size.x) * 0.5, (u_res.y - size.y) * (0.5 + 0.5 * u_pan));
+      return (p - offset) / size;
+    }
+
+    void main() {
+      vec2 p = vec2(gl_FragCoord.x, u_res.y - gl_FragCoord.y);
+      const float c = 0.70710678;
+      mat2 rot = mat2(c, -c, c, c);
+      vec2 q = rot * p;
+      vec2 center = (floor(q / u_cell) + 0.5) * u_cell;
+      vec2 sampleAt = center * rot; // vuelta al espacio de la pantalla
+      vec3 color = texture2D(u_tex, clamp(coverUV(sampleAt), 0.0, 1.0)).rgb;
+      float lum = dot(color, vec3(0.299, 0.587, 0.114));
+      lum = clamp((lum - 0.5) * 1.3 + 0.5, 0.0, 1.0);
+      // Incluso en los blancos queda un punto mínimo: la trama se ve en toda la superficie.
+      float radius = u_cell * 0.62 * sqrt(1.0 - lum * 0.88);
+      float dist = length(q - center);
+      float ink = 1.0 - smoothstep(radius - 0.8, radius + 0.8, dist);
+      gl_FragColor = vec4(mix(u_paper, u_ink, ink), 1.0);
+    }
+  `;
+
+  const section = document.querySelector<HTMLElement>("[data-studio]");
+  const canvas = section?.querySelector<HTMLCanvasElement>("[data-studio-canvas]");
+  const video = section?.querySelector<HTMLVideoElement>("[data-studio-video]");
+  const posterSrc = section?.dataset.poster;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const gl = canvas?.getContext("webgl", { antialias: false, premultipliedAlpha: false });
+
+  const compile = (context: WebGLRenderingContext, type: number, source: string) => {
+    const shader = context.createShader(type);
+    if (!shader) return null;
+    context.shaderSource(shader, source);
+    context.compileShader(shader);
+    return context.getShaderParameter(shader, context.COMPILE_STATUS) ? shader : null;
+  };
+
+  const setup = () => {
+    if (!section || !canvas || !video || !gl) return false;
+    const vs = compile(gl, gl.VERTEX_SHADER, VERTEX);
+    const fs = compile(gl, gl.FRAGMENT_SHADER, FRAGMENT);
+    const program = gl.createProgram();
+    if (!vs || !fs || !program) return false;
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
+    gl.useProgram(program);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const position = gl.getAttribLocation(program, "a_pos");
+    gl.enableVertexAttribArray(position);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+    const uniform = (name: string) => gl.getUniformLocation(program, name);
+    const uRes = uniform("u_res");
+    const uSrc = uniform("u_src");
+    const uCell = uniform("u_cell");
+    const uPan = uniform("u_pan");
+    gl.uniform3f(uniform("u_paper"), 210 / 255, 43 / 255, 24 / 255);
+    gl.uniform3f(uniform("u_ink"), 26 / 255, 8 / 255, 6 / 255);
+
+    let hasFrame = false;
+    let videoFrame = false;
+    let sourceSize: [number, number] = [360, 608];
+    let pan = 0;
+    let visible = false;
+    let frame = 0;
+    let lastTime = -1;
+
+    const upload = (source: TexImageSource, width: number, height: number) => {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, source);
+      sourceSize = [width, height];
+      hasFrame = true;
+    };
+
+    const resize = () => {
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.round(canvas.clientWidth * ratio);
+      const height = Math.round(canvas.clientHeight * ratio);
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      gl.viewport(0, 0, width, height);
+      // Celdas de 6 px en móvil y algo mayores en pantallas anchas.
+      const cssCell = Math.max(6, canvas.clientWidth / 190);
+      gl.uniform1f(uCell, cssCell * ratio);
+    };
+
+    const draw = () => {
+      if (!hasFrame) return;
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform2f(uSrc, sourceSize[0], sourceSize[1]);
+      gl.uniform1f(uPan, pan);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+
+    const loop = () => {
+      frame = 0;
+      if (!visible) return;
+      if (video.readyState >= 2 && video.currentTime !== lastTime) {
+        lastTime = video.currentTime;
+        videoFrame = true;
+        upload(video, video.videoWidth, video.videoHeight);
+      }
+      draw();
+      frame = requestAnimationFrame(loop);
+    };
+    const start = () => {
+      if (!frame) frame = requestAnimationFrame(loop);
+    };
+
+    // Primera imagen: el póster, para que la trama aparezca antes del vídeo.
+    if (posterSrc) {
+      const image = new Image();
+      image.decoding = "async";
+      image.onload = () => {
+        if (!videoFrame) upload(image, image.naturalWidth, image.naturalHeight);
+        draw();
+      };
+      image.src = posterSrc;
+    }
+
+    // El vídeo (1 MB, sin sonido) solo se descarga cuando la sección se acerca.
     let loaded = false;
     const load = () => {
-      if (loaded) return;
+      if (loaded || reduced) return;
       loaded = true;
       const sources: { src: string; type: string }[] = [
         { src: "/video/sandra-taller.webm", type: "video/webm" },
@@ -76,27 +226,45 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
       { rootMargin: "100% 0px" }
     ).observe(section);
 
-    // Solo se reproduce mientras se ve.
     new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        load();
-        video.play().catch(() => {});
+      visible = entries.some((entry) => entry.isIntersecting);
+      if (visible) {
+        resize();
+        if (!reduced) {
+          load();
+          video.play().catch(() => {});
+          start();
+        } else {
+          draw();
+        }
       } else {
         video.pause();
       }
     }).observe(section);
 
-    // Paralaje suave: el fondo se mueve algo más despacio que la página.
-    gsap.fromTo(
-      video,
-      { yPercent: -7 },
-      {
-        yPercent: 7,
-        ease: "none",
-        scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: true }
-      }
-    );
-  }
+    new ResizeObserver(() => {
+      resize();
+      draw();
+    }).observe(canvas);
+
+    // Al hacer scroll, la "cámara" recorre el vídeo vertical de arriba abajo.
+    if (!reduced) {
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top bottom",
+        end: "bottom top",
+        onUpdate: (self) => {
+          pan = self.progress * 1.6 - 0.8;
+        }
+      });
+    }
+
+    resize();
+    section.classList.add("is-halftone");
+    return true;
+  };
+
+  setup();
 </script>
 
 <style>
@@ -112,42 +280,43 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
     color: var(--white);
   }
 
-  /* El vídeo en blanco y negro se multiplica sobre el rojo: los blancos quedan
-     rojos y las sombras casi negras. Así su baja resolución se lee como textura. */
   .studio__media {
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    /* El rojo va aquí: la mezcla solo ve lo que hay dentro de esta capa. */
     background: var(--red);
   }
 
-  .studio__video {
+  .studio__canvas,
+  .studio__fallback {
     position: absolute;
-    inset: -8% 0;
+    inset: 0;
     width: 100%;
-    height: 116%;
+    height: 100%;
+  }
+
+  /* Sin WebGL: póster en blanco y negro multiplicado sobre el rojo. */
+  .studio__fallback {
     object-fit: cover;
-    filter: grayscale(1) contrast(1.4) brightness(1.08);
+    filter: grayscale(1) contrast(1.4);
     mix-blend-mode: multiply;
-    opacity: 0.9;
   }
 
-  .studio__grain {
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    mix-blend-mode: overlay;
-    opacity: 0.35;
+  .studio.is-halftone .studio__fallback {
+    display: none;
   }
 
-  /* Un poco de sombra abajo para que el texto se lea siempre. */
-  .studio__media::after {
-    content: "";
+  .studio:not(.is-halftone) .studio__canvas {
+    display: none;
+  }
+
+  /* El vídeo solo alimenta la trama; no se ve. */
+  .studio__source {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgb(0 0 0 / 0) 55%, rgb(0 0 0 / 0.35) 100%);
+    width: 1px;
+    height: 1px;
+    opacity: 0;
   }
 
   .studio__content {

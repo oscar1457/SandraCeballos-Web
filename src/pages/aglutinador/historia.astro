@@ -1,0 +1,146 @@
+---
+import AglutinadorLayout from "@/layouts/AglutinadorLayout.astro";
+import { catalogue, catalogueAuthors, curators, periods } from "@/data/aglutinador";
+
+const total = periods.length + 2;
+---
+
+<AglutinadorLayout
+  title="Historia | Espacio Aglutinador"
+  description="Cronología de Espacio Aglutinador, espacio de arte independiente fundado en La Habana en 1994 por Sandra Ceballos y Ezequiel Suárez."
+  current="historia"
+  background="#f7c143"
+>
+  <p class="counter num" aria-hidden="true"><span data-counter>1</span> / {total}</p>
+
+  <section class="panel" data-panel aria-labelledby="historia-title">
+    <h1 class="panel__text" id="historia-title">
+      <span data-lang="es">
+        <u>Espacio Aglutinador</u> es un espacio de arte independiente fundado en 1994 por Sandra Ceballos
+        y Ezequiel Suárez en la casa-taller de Sandra, en el Vedado, La Habana. Durante casi tres décadas
+        ha mostrado a artistas cubanos y extranjeros en paralelo a la escena oficial.
+      </span>
+      <span data-lang="en">
+        <u>Espacio Aglutinador</u> is an independent art space founded in 1994 by Sandra Ceballos and
+        Ezequiel Suárez in Sandra’s home-studio in Vedado, Havana. For almost three decades it has shown
+        Cuban and international artists in parallel to the official scene.
+      </span>
+    </h1>
+  </section>
+
+  {
+    periods.map((period) => (
+      <section class="panel" data-panel>
+        <h2 class="sr-only">
+          {period.years}: <span data-lang="es">{period.title}</span><span data-lang="en">{period.titleEn}</span>
+        </h2>
+        <p class="panel__text">
+          <u class="num">{period.years}</u>{" "}
+          <span data-lang="es">
+            <strong>{period.title}.</strong> {period.text}
+          </span>
+          <span data-lang="en">
+            <strong>{period.titleEn}.</strong> {period.textEn}
+          </span>
+        </p>
+      </section>
+    ))
+  }
+
+  <section class="panel panel--lists" data-panel aria-labelledby="personas-title">
+    <h2 class="sr-only" id="personas-title">
+      <span data-lang="es">Curadores y autores</span><span data-lang="en">Curators and authors</span>
+    </h2>
+    <p class="panel__text">
+      <u><span data-lang="es">Curadores</span><span data-lang="en">Curators</span></u>{" "}
+      <span data-lang="es">que han colaborado con el espacio:</span>
+      <span data-lang="en">who have collaborated with the space:</span>{" "}
+      {curators.join(", ")}.
+    </p>
+    <p class="panel__small">
+      <span data-lang="es">Textos publicados en catálogos de Aglutinador:</span>
+      <span data-lang="en">Texts published in Aglutinador catalogues:</span>{" "}
+      {catalogueAuthors.join(", ")}
+      <span data-lang="es">, entre otros.</span><span data-lang="en">, among others.</span>
+    </p>
+    <p class="panel__small">
+      <a href={catalogue.file} target="_blank" rel="noreferrer">
+        <span data-lang="es">Catálogo «{catalogue.title}» (PDF, {catalogue.size})</span>
+        <span data-lang="en">“{catalogue.title}” catalogue (PDF, {catalogue.size})</span>
+      </a>
+    </p>
+  </section>
+</AglutinadorLayout>
+
+<script>
+  // Contador "n / total" según el panel que está en pantalla.
+  const counter = document.querySelector<HTMLElement>("[data-counter]");
+  const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-panel]"));
+  if (counter && panels.length) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            counter.textContent = String(panels.indexOf(entry.target as HTMLElement) + 1);
+          }
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px" }
+    );
+    panels.forEach((panel) => observer.observe(panel));
+  }
+</script>
+
+<style>
+  .counter {
+    position: fixed;
+    top: var(--gutter);
+    left: var(--gutter);
+    z-index: 5;
+    margin: 0;
+    font-size: clamp(0.85rem, 1vw, 1rem);
+    font-weight: 600;
+  }
+
+  .panel {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+    min-height: calc(100svh - var(--bar-h));
+    padding: calc(var(--gutter) * 4) var(--gutter) var(--space-4);
+  }
+
+  .panel + .panel {
+    border-top: 1px solid rgb(0 0 0 / 0.25);
+  }
+
+  .panel__text {
+    max-width: 62ch;
+    margin: 0;
+    font-size: clamp(1.6rem, 3vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.07;
+    letter-spacing: -0.025em;
+  }
+
+  .panel__text strong {
+    font-weight: 600;
+  }
+
+  .panel__text u {
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+  }
+
+  .panel__small {
+    max-width: 70ch;
+    margin: 0;
+    font-size: clamp(1rem, 1.4vw, 1.4rem);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .panel__small a {
+    text-decoration-thickness: 0.08em;
+  }
+</style>

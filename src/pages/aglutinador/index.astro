@@ -1,0 +1,192 @@
+---
+import AglutinadorLayout from "@/layouts/AglutinadorLayout.astro";
+import { participants } from "@/data/aglutinador";
+---
+
+<AglutinadorLayout
+  title="Espacio Aglutinador | Sandra Ceballos"
+  description="Espacio Aglutinador, espacio de arte independiente fundado en La Habana en 1994. Personas que han trabajado en él."
+  current="inicio"
+>
+  <h1 class="sr-only">
+    <span data-lang="es">Espacio Aglutinador: personas que han trabajado en el espacio desde 1994</span>
+    <span data-lang="en">Espacio Aglutinador: people who have worked in the space since 1994</span>
+  </h1>
+
+  <p class="intro">
+    <span data-lang="es">
+      Espacio Aglutinador, La Habana, desde 1994. Artistas, curadores y colaboradores que han pasado
+      por el espacio.
+    </span>
+    <span data-lang="en">
+      Espacio Aglutinador, Havana, since 1994. Artists, curators and collaborators who have been part
+      of the space.
+    </span>
+  </p>
+
+  <!-- Lista de nombres que sube sola en bucle. La segunda copia solo sirve para
+       que el bucle no tenga cortes; los lectores de pantalla la ignoran. -->
+  <div class="names" data-names tabindex="0" aria-label="Lista de personas" data-aria-label-en="List of people">
+    <div class="names__spacer" data-names-spacer aria-hidden="true"></div>
+    {
+      [0, 1].map((copy) => (
+        <ul class="names__list" aria-hidden={copy === 1 ? "true" : undefined} data-names-list>
+          {participants.map((person) => (
+            <li class="names__row">
+              <span class="names__name">{person.name}</span>
+              <span class="names__role">
+                <span data-lang="es">{person.role}</span>
+                <span data-lang="en">{person.roleEn}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ))
+    }
+  </div>
+</AglutinadorLayout>
+
+<script>
+  // Desplazamiento automático hacia arriba, en bucle. Se detiene un momento
+  // cuando la persona usa la rueda, el dedo o el teclado, y con movimiento reducido.
+  const box = document.querySelector<HTMLElement>("[data-names]");
+  const list = document.querySelector<HTMLElement>("[data-names-list]");
+  const spacer = document.querySelector<HTMLElement>("[data-names-spacer]");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (box && list && spacer) {
+    const speed = 55; // píxeles por segundo
+    let pausedUntil = 0;
+    let last = performance.now();
+    let position = box.scrollTop;
+
+    const pause = () => {
+      pausedUntil = performance.now() + 2500;
+    };
+    ["wheel", "touchstart", "keydown", "pointerdown"].forEach((type) =>
+      box.addEventListener(type, pause, { passive: true })
+    );
+
+    // Al llegar al final de la primera lista, saltamos hacia atrás exactamente
+    // su altura: la segunda copia ocupa ese mismo sitio y el salto no se nota.
+    const wrap = (value: number) => {
+      const height = list.offsetHeight;
+      return height > 0 && value >= spacer.offsetHeight + height ? value - height : value;
+    };
+
+    // El navegador redondea scrollTop; guardamos la posición exacta aparte y
+    // solo la leemos del scroll cuando lo mueve la persona.
+    let selfScrolling = false;
+    box.addEventListener("scroll", () => {
+      if (selfScrolling) {
+        selfScrolling = false;
+        return;
+      }
+      const wrapped = wrap(box.scrollTop);
+      if (wrapped !== box.scrollTop) {
+        box.scrollTop = wrapped;
+      }
+      position = box.scrollTop;
+    });
+
+    const tick = (now: number) => {
+      const dt = Math.min(now - last, 100) / 1000;
+      last = now;
+      if (!reduced && now > pausedUntil && !document.hidden) {
+        position = wrap(position + speed * dt);
+        selfScrolling = true;
+        box.scrollTop = position;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+</script>
+
+<style>
+  .intro {
+    position: fixed;
+    top: var(--gutter);
+    left: var(--gutter);
+    z-index: 5;
+    max-width: 26rem;
+    margin: 0;
+    font-size: clamp(0.85rem, 1vw, 1rem);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .names {
+    position: fixed;
+    inset: 0 0 var(--bar-h);
+    overflow-y: auto;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 100%);
+  }
+
+  .names::-webkit-scrollbar {
+    display: none;
+  }
+
+  .names:focus-visible {
+    outline: 2px solid var(--black);
+    outline-offset: -4px;
+  }
+
+  .names__list {
+    margin: 0;
+    padding: 0 var(--gutter);
+    list-style: none;
+  }
+
+  /* La lista empieza a mitad de pantalla, como en la referencia. */
+  .names__spacer {
+    height: 50svh;
+  }
+
+  .names__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gutter);
+    font-size: clamp(1.9rem, 4.4vw, 5.6rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    transition: opacity 250ms var(--ease);
+  }
+
+  .names__name,
+  .names__role {
+    padding-bottom: 0.08em;
+  }
+
+  /* Al pasar el ratón por la lista, la fila señalada destaca sobre las demás. */
+  @media (hover: hover) {
+    .names:hover .names__row {
+      opacity: 0.25;
+    }
+
+    .names:hover .names__row:hover {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .intro {
+      max-width: 15rem;
+    }
+
+    .names__row {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding-bottom: 0.4em;
+      font-size: 2rem;
+    }
+
+    .names__role {
+      color: #7a7a7a;
+      font-size: 0.6em;
+    }
+  }
+</style>

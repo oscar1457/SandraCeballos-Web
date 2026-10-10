@@ -1,0 +1,137 @@
+---
+// Marco de la sección Espacio Aglutinador: misma web, diseño propio.
+// Barra fija abajo (como en la referencia) y color de fondo por página.
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import LanguageSwitch from "@/components/LanguageSwitch.astro";
+
+type Props = {
+  title: string;
+  description: string;
+  current: "inicio" | "historia" | "archivo";
+  background?: string;
+};
+
+const { title, description, current, background = "#ffffff" } = Astro.props;
+const links = [
+  { id: "historia", href: "/aglutinador/historia/", es: "Historia", en: "History" },
+  { id: "archivo", href: "/aglutinador/archivo/", es: "Archivo", en: "Archive" }
+] as const;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="agl" style={`--agl-bg:${background}`}>
+    <main id="contenido" class="agl__main">
+      <slot />
+    </main>
+    <footer class="agl-bar">
+      <a class="agl-bar__name" href="/aglutinador/" aria-current={current === "inicio" ? "page" : undefined}>
+        ESPACIO AGLUTINADOR
+      </a>
+      <nav class="agl-bar__nav" aria-label="Secciones de Aglutinador" data-aria-label-en="Aglutinador sections">
+        {
+          links.map((link, index) => (
+            <>
+              <a href={link.href} aria-current={current === link.id ? "page" : undefined}>
+                <span data-lang="es">{link.es}</span>
+                <span data-lang="en">{link.en}</span>
+              </a>
+              {index < links.length - 1 && <span class="agl-bar__comma" aria-hidden="true">,</span>}
+            </>
+          ))
+        }
+      </nav>
+      <div class="agl-bar__right">
+        <a href="/">Sandra Ceballos</a>
+        <LanguageSwitch />
+      </div>
+    </footer>
+  </div>
+  <script>
+    import "@/scripts/language.ts";
+  </script>
+</BaseLayout>
+
+<style>
+  :global(html:has(.agl)),
+  :global(body:has(.agl)) {
+    background: var(--agl-bg-root, #fff);
+  }
+
+  .agl {
+    --bar-h: 3.25rem;
+    min-height: 100svh;
+    background: var(--agl-bg);
+    color: var(--black);
+    font-weight: 500;
+  }
+
+  .agl__main {
+    min-height: 100svh;
+    padding-bottom: var(--bar-h);
+  }
+
+  .agl-bar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    align-items: center;
+    gap: var(--gutter);
+    height: var(--bar-h);
+    padding: 0 var(--gutter);
+    background: var(--agl-bg);
+    font-size: clamp(0.85rem, 1vw, 1rem);
+    font-weight: 600;
+  }
+
+  .agl-bar a {
+    text-decoration: none;
+  }
+
+  .agl-bar a:hover,
+  .agl-bar a[aria-current="page"] {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .agl-bar__nav {
+    display: flex;
+  }
+
+  .agl-bar__comma {
+    margin-right: 0.3em;
+  }
+
+  .agl-bar__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  @media (max-width: 620px) {
+    .agl {
+      --bar-h: 4.5rem;
+    }
+
+    .agl-bar {
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      align-content: center;
+      row-gap: 0.25rem;
+    }
+
+    .agl-bar__nav {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .agl-bar__right {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0;
+    }
+  }
+</style>

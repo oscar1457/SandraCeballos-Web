@@ -340,7 +340,7 @@ export const careerPanels: CareerPanel[] = [
       },
       {
         year: pending,
-        title: "Exposición colectiva",
+        title: "Don't Call It Performance",
         venue: "Museo Nacional Centro de Arte Reina Sofía",
         city: "Madrid",
         country: "España",

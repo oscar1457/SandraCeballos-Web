@@ -40,8 +40,10 @@ export const artworks: Artwork[] = [
     image: elVientoAbusador,
     thumbnail: elVientoAbusador,
     alt: "El viento abusador, acrílico sobre tela de Sandra Ceballos dedicado a Ana Mendieta.",
-    description: "De la serie Desamparo con alevosía.",
-    descriptionEn: "From the series Desamparo con alevosía."
+    description:
+      "De la serie Desamparo con alevosía. Obra basada en una investigación sobre víctimas de violencia de género en Cuba y un homenaje a la artista cubana Ana Mendieta.",
+    descriptionEn:
+      "From the series Desamparo con alevosía. A work based on research into victims of gender-based violence in Cuba and a tribute to the Cuban artist Ana Mendieta."
   },
   {
     id: "obra-09",
@@ -55,9 +57,9 @@ export const artworks: Artwork[] = [
     thumbnail: guiaEspiritual9,
     alt: "Guía espiritual número 9, óleo sobre tela de Sandra Ceballos.",
     description:
-      "Texto escrito en la obra: “Sé quién eres, tu nombre también, pero tú no sabes quién soy, mi nombre tampoco.”",
+      "Monja inspirada en un imaginario anecdótico de quién sabe cuándo y quién sabe qué. Texto escrito en la obra: “Sé quién eres, tu nombre también, pero tú no sabes quién soy, mi nombre tampoco.”",
     descriptionEn:
-      "Text written in the work: “I know who you are, your name too, but you do not know who I am, nor my name.”"
+      "A nun inspired by an anecdotal imaginary from who knows when and who knows what. Text written in the work: “I know who you are, your name too, but you do not know who I am, nor my name.”"
   },
   {
     id: "obra-10",
@@ -70,36 +72,38 @@ export const artworks: Artwork[] = [
     image: dragonbandera,
     thumbnail: dragonbandera,
     alt: "Dragon bandera, obra de Sandra Ceballos de la serie Discursos Mangas.",
-    description: "De la serie Discursos Mangas.",
-    descriptionEn: "From the series Discursos Mangas."
+    description:
+      "De la serie Discursos Mangas. En esta obra se establece un paralelo entre el superhéroe manga y un supuesto líder político: dos representaciones de poder que aglutinan tantos seguidores como detractores. Textos de discursos del presidente Fidel Castro y la figura de Dragon Ball en forma de bandera cubana.",
+    descriptionEn:
+      "From the series Discursos Mangas. The work draws a parallel between the manga superhero and a supposed political leader: two representations of power that gather as many followers as detractors. Texts from speeches by President Fidel Castro and the figure of Dragon Ball in the shape of the Cuban flag."
   },
   {
     id: "obra-11",
-    slug: "discursos-mangas-pequena",
-    title: "Discursos Mangas, pequeña",
+    slug: "discursos-mangas-1",
+    title: "Discursos Mangas #1",
     year: "2012",
     technique: "Acrílico sobre tela",
     techniqueEn: "Acrylic on canvas",
     dimensions: "150 x 125 cm",
     image: discursosMangasPequena,
     thumbnail: discursosMangasPequena,
-    alt: "Discursos Mangas, pequeña, acrílico sobre tela de Sandra Ceballos.",
-    description: "Obra de la serie Discursos Mangas.",
-    descriptionEn: "Work from the series Discursos Mangas."
+    alt: "Discursos Mangas #1, acrílico sobre tela de Sandra Ceballos con gárgolas.",
+    description: "Gárgolas, sobre textos de discursos de Fidel Castro.",
+    descriptionEn: "Gargoyles, over texts from speeches by Fidel Castro."
   },
   {
     id: "obra-12",
-    slug: "discursos-mangas",
-    title: "Discursos Mangas",
+    slug: "discursos-mangas-2",
+    title: "Discursos Mangas #2",
     year: "2012",
     technique: "Acrílico sobre tela",
     techniqueEn: "Acrylic on canvas",
     dimensions: "150 x 125 cm",
     image: discursosMangas2,
     thumbnail: discursosMangas2,
-    alt: "Discursos Mangas, acrílico sobre tela de Sandra Ceballos.",
-    description: "Obra de la serie Discursos Mangas.",
-    descriptionEn: "Work from the series Discursos Mangas."
+    alt: "Discursos Mangas #2, acrílico sobre tela de Sandra Ceballos con la figura de Ben 10.",
+    description: "Ben 10, sobre textos de discursos de Fidel Castro.",
+    descriptionEn: "Ben 10, over texts from speeches by Fidel Castro."
   },
   {
     id: "obra-13",
@@ -152,7 +156,7 @@ export const artworks: Artwork[] = [
   {
     id: "obra-03",
     slug: "guia-4",
-    title: "Guía # 4",
+    title: "Guía #4",
     year: "2025",
     technique: "Acrílico sobre tela",
     techniqueEn: "Acrylic on canvas",
@@ -168,7 +172,7 @@ export const artworks: Artwork[] = [
   {
     id: "obra-04",
     slug: "guia-espiritual-6",
-    title: "Guía espiritual # 6",
+    title: "Guía espiritual #6",
     year: "2025",
     technique: "Acrílico sobre tela y crucifijo de madera",
     techniqueEn: "Acrylic on canvas and wooden crucifix",
@@ -184,7 +188,7 @@ export const artworks: Artwork[] = [
   {
     id: "obra-05",
     slug: "guia-2",
-    title: "Guía # 2",
+    title: "Guía #2",
     year: "2025",
     technique: "Acrílico y lápiz sobre tela",
     techniqueEn: "Acrylic and pencil on canvas",

@@ -11,7 +11,11 @@ type Props = {
 const { artworks, label, variant = "cover" } = Astro.props;
 ---
 
-<nav class:list={["artwork-rail", `artwork-rail--${variant}`]} aria-label={label}>
+<nav
+  class:list={["artwork-rail", `artwork-rail--${variant}`]}
+  aria-label={label}
+  data-cover-rail={variant === "cover" ? "" : undefined}
+>
   <ol class="artwork-rail__list">
     {
       artworks.map((artwork, index) => (
@@ -20,6 +24,8 @@ const { artworks, label, variant = "cover" } = Astro.props;
             class="artwork-rail__link"
             href={`#obra/${artwork.slug}`}
             data-artwork-link
+            data-cover-preview-link={variant === "cover" ? "" : undefined}
+            data-preview-current={variant === "cover" && index === 0 ? "true" : undefined}
             data-index={index}
             aria-label={`${index + 1}. ${artwork.title}`}
           >
@@ -58,7 +64,14 @@ const { artworks, label, variant = "cover" } = Astro.props;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x proximity;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .artwork-rail__list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
   }
 
   .artwork-rail__item {
@@ -99,14 +112,34 @@ const { artworks, label, variant = "cover" } = Astro.props;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition:
+      opacity var(--duration-short) var(--ease-editorial),
+      transform var(--duration-short) var(--ease-editorial);
+  }
+
+  .artwork-rail--cover .artwork-rail__link {
+    opacity: 0.58;
+    transition: opacity var(--duration-short) var(--ease-editorial);
+  }
+
+  .artwork-rail--cover .artwork-rail__link:hover,
+  .artwork-rail--cover .artwork-rail__link:focus-visible,
+  .artwork-rail--cover .artwork-rail__link[data-preview-current="true"] {
+    opacity: 1;
   }
 
   .artwork-rail__link:hover .artwork-rail__frame,
-  .artwork-rail__link[aria-current="true"] .artwork-rail__frame {
+  .artwork-rail__link[aria-current="true"] .artwork-rail__frame,
+  .artwork-rail__link[data-preview-current="true"] .artwork-rail__frame {
     border-color: var(--color-ink);
   }
 
-  .artwork-rail__link[aria-current="true"] .artwork-rail__number {
+  .artwork-rail--cover .artwork-rail__link[data-preview-current="true"] .artwork-rail__image {
+    transform: scale(1.035);
+  }
+
+  .artwork-rail__link[aria-current="true"] .artwork-rail__number,
+  .artwork-rail__link[data-preview-current="true"] .artwork-rail__number {
     text-decoration: underline;
     text-underline-offset: 0.18em;
   }

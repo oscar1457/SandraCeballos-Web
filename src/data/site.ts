@@ -15,6 +15,7 @@ export const site = {
   descriptionEn:
     "Visual portfolio of Sandra Ceballos: recent works, career and contact.",
   email: "aglutinadorsandra@gmail.com",
+  portfolioPdf: "/files/sandra-ceballos-portfolio.pdf",
   instagram: {
     label: "@art_sandraglutina_photos",
     url: "https://www.instagram.com/art_sandraglutina_photos/"
@@ -24,10 +25,14 @@ export const site = {
   nav: {
     artwork: "Obra",
     artworkEn: "Works",
+    essentials: "Esenciales",
+    essentialsEn: "Essentials",
     career: "Trayectoria",
     careerEn: "Career",
     contact: "Contacto",
     contactEn: "Contact",
+    portfolio: "Portfolio",
+    portfolioEn: "Portfolio",
     closeGallery: "Cerrar galería",
     closeGalleryEn: "Close gallery",
     closeCareer: "Cerrar trayectoria",

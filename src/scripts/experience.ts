@@ -17,13 +17,15 @@ if (experience) {
   const previousButton = experience.querySelector<HTMLButtonElement>("[data-gallery-prev]");
   const nextButton = experience.querySelector<HTMLButtonElement>("[data-gallery-next]");
   const galleryClose = galleryHost?.querySelector<HTMLButtonElement>("[data-close-panel]");
-  const careerTitle = experience.querySelector<HTMLElement>("#career-title");
-  const careerItems = Array.from(experience.querySelectorAll<HTMLElement>("[data-career-item]"));
-  const careerTriggers = Array.from(
-    experience.querySelectorAll<HTMLButtonElement>("[data-career-trigger]")
+  const coverRail = experience.querySelector<HTMLElement>("[data-cover-rail]");
+  const coverRailList = coverRail?.querySelector<HTMLElement>(".artwork-rail__list");
+  const coverPreviewLinks = Array.from(
+    coverRail?.querySelectorAll<HTMLAnchorElement>("[data-cover-preview-link]") ?? []
   );
 
   let activeArtwork = 0;
+  let coverPreviewIndex = 0;
+  let coverPreviewTimer: number | undefined;
   let returnFocus: HTMLElement | null = null;
   let pendingFocus = false;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -35,17 +37,102 @@ if (experience) {
   const slugForIndex = (index: number) => slugFromPanel(artworkPanels[normaliseIndex(index)]!);
   const indexForSlug = (slug: string) =>
     artworkPanels.findIndex((panel) => slugFromPanel(panel) === decodeURIComponent(slug));
+  const normalisePreviewIndex = (index: number) =>
+    coverPreviewLinks.length === 0
+      ? 0
+      : ((index % coverPreviewLinks.length) + coverPreviewLinks.length) % coverPreviewLinks.length;
 
-  const updateMode = (mode: "home" | "gallery" | "career") => {
+  type CareerMode = "essentials" | "timeline";
+
+  const setCoverPreview = (index: number, shouldScroll = true) => {
+    if (coverPreviewLinks.length === 0) {
+      return;
+    }
+
+    coverPreviewIndex = normalisePreviewIndex(index);
+    coverPreviewLinks.forEach((link, linkIndex) => {
+      if (linkIndex === coverPreviewIndex) {
+        link.dataset.previewCurrent = "true";
+      } else {
+        delete link.dataset.previewCurrent;
+      }
+    });
+
+    if (!shouldScroll || !coverRailList || reducedMotion.matches) {
+      return;
+    }
+
+    const activeLink = coverPreviewLinks[coverPreviewIndex];
+    if (!activeLink) {
+      return;
+    }
+
+    const listRect = coverRailList.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+    const nextLeft =
+      coverRailList.scrollLeft +
+      linkRect.left -
+      listRect.left -
+      (listRect.width - linkRect.width) / 2;
+
+    coverRailList.scrollTo({
+      left: Math.max(0, nextLeft),
+      behavior: "smooth"
+    });
+  };
+
+  const stopCoverPreview = () => {
+    if (coverPreviewTimer !== undefined) {
+      window.clearInterval(coverPreviewTimer);
+      coverPreviewTimer = undefined;
+    }
+  };
+
+  const startCoverPreview = () => {
+    if (coverPreviewLinks.length < 2 || reducedMotion.matches || coverPreviewTimer !== undefined) {
+      return;
+    }
+
+    coverPreviewTimer = window.setInterval(() => {
+      if (experience.dataset.mode !== "home") {
+        stopCoverPreview();
+        return;
+      }
+      setCoverPreview(coverPreviewIndex + 1);
+    }, 3200);
+  };
+
+  const setCareerMode = (careerMode: CareerMode) => {
+    if (careerHost) {
+      careerHost.dataset.careerMode = careerMode;
+    }
+  };
+
+  const focusCareerTitle = (careerMode: CareerMode) => {
+    const headingId = careerMode === "timeline" ? "#career-timeline-title" : "#career-essentials-title";
+    experience.querySelector<HTMLElement>(headingId)?.focus({ preventScroll: true });
+  };
+
+  const updateMode = (mode: "home" | "gallery" | "career", careerMode?: CareerMode) => {
     experience.dataset.mode = mode;
+    if (careerMode) {
+      setCareerMode(careerMode);
+    }
+    if (mode === "home") {
+      startCoverPreview();
+    } else {
+      stopCoverPreview();
+    }
     galleryHost?.setAttribute("aria-hidden", mode === "gallery" ? "false" : "true");
     careerHost?.setAttribute("aria-hidden", mode === "career" ? "false" : "true");
     galleryOpeners.forEach((opener) =>
       opener.setAttribute("aria-expanded", mode === "gallery" ? "true" : "false")
     );
-    careerOpeners.forEach((opener) =>
-      opener.setAttribute("aria-expanded", mode === "career" ? "true" : "false")
-    );
+    careerOpeners.forEach((opener) => {
+      const isCurrentCareer =
+        mode === "career" && (!careerMode || opener.dataset.careerTarget === careerMode);
+      opener.setAttribute("aria-expanded", isCurrentCareer ? "true" : "false");
+    });
   };
 
   const bringStageIntoView = () => {
@@ -78,14 +165,6 @@ if (experience) {
     }
   };
 
-  const setCareerItem = (index: number) => {
-    careerItems.forEach((item, itemIndex) => {
-      const isActive = itemIndex === index;
-      item.classList.toggle("is-active", isActive);
-      careerTriggers[itemIndex]?.setAttribute("aria-expanded", isActive ? "true" : "false");
-    });
-  };
-
   const moveHash = (hash: string, shouldFocus = true) => {
     pendingFocus = shouldFocus;
     if (window.location.hash === hash) {
@@ -116,11 +195,12 @@ if (experience) {
       return;
     }
 
-    if (hash === "#trayectoria") {
-      updateMode("career");
+    if (hash === "#esenciales" || hash === "#trayectoria") {
+      const careerMode = hash === "#esenciales" ? "essentials" : "timeline";
+      updateMode("career", careerMode);
       bringStageIntoView();
       if (shouldFocus) {
-        careerTitle?.focus({ preventScroll: true });
+        focusCareerTitle(careerMode);
       }
       return;
     }
@@ -135,7 +215,23 @@ if (experience) {
     link.addEventListener("click", () => {
       returnFocus = link;
       pendingFocus = true;
+      if (link.dataset.coverPreviewLink !== undefined) {
+        setCoverPreview(Number(link.dataset.index) || 0, false);
+      }
     });
+  });
+
+  coverRail?.addEventListener("mouseenter", stopCoverPreview);
+  coverRail?.addEventListener("mouseleave", () => {
+    if (experience.dataset.mode === "home") {
+      startCoverPreview();
+    }
+  });
+  coverRail?.addEventListener("focusin", stopCoverPreview);
+  coverRail?.addEventListener("focusout", () => {
+    if (experience.dataset.mode === "home") {
+      startCoverPreview();
+    }
   });
 
   galleryOpeners.forEach((opener) => {
@@ -164,12 +260,6 @@ if (experience) {
 
   nextButton?.addEventListener("click", () => {
     moveHash(`#obra/${slugForIndex(activeArtwork + 1)}`);
-  });
-
-  careerTriggers.forEach((trigger, index) => {
-    trigger.addEventListener("click", () => {
-      setCareerItem(index);
-    });
   });
 
   window.addEventListener("hashchange", syncFromHash);

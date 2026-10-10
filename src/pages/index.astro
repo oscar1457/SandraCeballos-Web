@@ -4,7 +4,6 @@ import ContactForm from "@/components/ContactForm.astro";
 import Footer from "@/components/Footer.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { artworks } from "@/data/artworks";
-import { careerPanels } from "@/data/exhibitions";
 import { site } from "@/data/site";
 
 const formEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? "";
@@ -12,7 +11,7 @@ const formEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? "";
 
 <BaseLayout>
   <main id="contenido">
-    <ArtistExperience site={site} artworks={artworks} careerPanels={careerPanels} />
+    <ArtistExperience site={site} artworks={artworks} />
     <ContactForm site={site} endpoint={formEndpoint} />
   </main>
   <Footer site={site} />

@@ -1,8 +1,14 @@
 import type { ImageMetadata } from "astro";
+import adoradoWolfi from "@/assets/artworks/adorado-wolfi.jpg";
 import comidaComiendoComida from "@/assets/artworks/comida-comiendo-comida.jpg";
+import discursosMangas2 from "@/assets/artworks/discursos-mangas-2.jpg";
+import discursosMangasPequena from "@/assets/artworks/discursos-mangas-pequena.jpg";
+import dragonbandera from "@/assets/artworks/dragonbandera.jpg";
+import elVientoAbusador from "@/assets/artworks/el-viento-abusador.jpg";
 import guia2 from "@/assets/artworks/guia-2.jpg";
 import guia4 from "@/assets/artworks/guia-4.jpg";
 import guiaEspiritual6 from "@/assets/artworks/guia-espiritual-6.jpg";
+import guiaEspiritual9 from "@/assets/artworks/guia-espiritual-9.jpg";
 import laCenaDelCharlatan from "@/assets/artworks/la-cena-del-charlatan.jpg";
 import miArtilleriaEsPotente from "@/assets/artworks/mi-artilleria-es-potente.jpg";
 import quienMatoAlComendador from "@/assets/artworks/quien-mato-al-comendador.jpg";
@@ -23,6 +29,92 @@ export type Artwork = {
 };
 
 export const artworks: Artwork[] = [
+  {
+    id: "obra-08",
+    slug: "el-viento-abusador",
+    title: "El viento abusador (dedicado a Ana Mendieta)",
+    year: "2024",
+    technique: "Acrílico sobre tela",
+    techniqueEn: "Acrylic on canvas",
+    dimensions: "73 x 53 cm",
+    image: elVientoAbusador,
+    thumbnail: elVientoAbusador,
+    alt: "El viento abusador, acrílico sobre tela de Sandra Ceballos dedicado a Ana Mendieta.",
+    description: "De la serie Desamparo con alevosía.",
+    descriptionEn: "From the series Desamparo con alevosía."
+  },
+  {
+    id: "obra-09",
+    slug: "guia-espiritual-9",
+    title: "Guía espiritual #9",
+    year: "2026",
+    technique: "Óleo sobre tela",
+    techniqueEn: "Oil on canvas",
+    dimensions: "165 x 195 cm",
+    image: guiaEspiritual9,
+    thumbnail: guiaEspiritual9,
+    alt: "Guía espiritual número 9, óleo sobre tela de Sandra Ceballos.",
+    description:
+      "Texto escrito en la obra: “Sé quién eres, tu nombre también, pero tú no sabes quién soy, mi nombre tampoco.”",
+    descriptionEn:
+      "Text written in the work: “I know who you are, your name too, but you do not know who I am, nor my name.”"
+  },
+  {
+    id: "obra-10",
+    slug: "dragonbandera",
+    title: "Dragon bandera",
+    year: "2014",
+    technique: "Acrílico sobre PVC",
+    techniqueEn: "Acrylic on PVC",
+    dimensions: "90 x 60 cm",
+    image: dragonbandera,
+    thumbnail: dragonbandera,
+    alt: "Dragon bandera, obra de Sandra Ceballos de la serie Discursos Mangas.",
+    description: "De la serie Discursos Mangas.",
+    descriptionEn: "From the series Discursos Mangas."
+  },
+  {
+    id: "obra-11",
+    slug: "discursos-mangas-pequena",
+    title: "Discursos Mangas, pequeña",
+    year: "2012",
+    technique: "Acrílico sobre tela",
+    techniqueEn: "Acrylic on canvas",
+    dimensions: "150 x 125 cm",
+    image: discursosMangasPequena,
+    thumbnail: discursosMangasPequena,
+    alt: "Discursos Mangas, pequeña, acrílico sobre tela de Sandra Ceballos.",
+    description: "Obra de la serie Discursos Mangas.",
+    descriptionEn: "Work from the series Discursos Mangas."
+  },
+  {
+    id: "obra-12",
+    slug: "discursos-mangas",
+    title: "Discursos Mangas",
+    year: "2012",
+    technique: "Acrílico sobre tela",
+    techniqueEn: "Acrylic on canvas",
+    dimensions: "150 x 125 cm",
+    image: discursosMangas2,
+    thumbnail: discursosMangas2,
+    alt: "Discursos Mangas, acrílico sobre tela de Sandra Ceballos.",
+    description: "Obra de la serie Discursos Mangas.",
+    descriptionEn: "Work from the series Discursos Mangas."
+  },
+  {
+    id: "obra-13",
+    slug: "adorado-wolfi",
+    title: "Adorado Wolfi",
+    year: "2017",
+    technique: "Acrílico sobre PVC",
+    techniqueEn: "Acrylic on PVC",
+    dimensions: "95 x 65 cm",
+    image: adoradoWolfi,
+    thumbnail: adoradoWolfi,
+    alt: "Adorado Wolfi, acrílico sobre PVC de Sandra Ceballos.",
+    description: "De la serie Adorado Wolfi.",
+    descriptionEn: "From the series Adorado Wolfi."
+  },
   {
     id: "obra-01",
     slug: "mi-artilleria-es-potente",

@@ -26,7 +26,212 @@ export type CareerPanel = {
   items: Exhibition[];
 };
 
+export type EssentialHighlight = {
+  id: string;
+  title: string;
+  titleEn: string;
+  eyebrow: string;
+  year: string;
+  venue: string;
+  city: string;
+  country: string;
+  summary: string;
+  summaryEn: string;
+  image: string;
+  color: string;
+  url?: string;
+};
+
+export type CareerStage = {
+  year: string;
+  title: string;
+  titleEn: string;
+  summary: string;
+  summaryEn: string;
+};
+
 const pending = "Sin fecha";
+
+export const essentialHighlights: EssentialHighlight[] = [
+  {
+    id: "aglutinador",
+    title: "Espacio Aglutinador",
+    titleEn: "Espacio Aglutinador",
+    eyebrow: "Obra / Archivo",
+    year: "1994",
+    venue: "Espacio Aglutinador",
+    city: "La Habana",
+    country: "Cuba",
+    summary:
+      "Aglutinador forma parte central de su obra: práctica curatorial, archivo vivo y primer espacio independiente sostenido en Cuba.",
+    summaryEn:
+      "Aglutinador is central to her work: curatorial practice, living archive and Cuba's longest-running independent art space.",
+    image: "/_career/aglutinador",
+    color: "#cf5d47",
+    url: "https://www.espacioaglutinador.com/"
+  },
+  {
+    id: "documenta",
+    title: "documenta fifteen",
+    titleEn: "documenta fifteen",
+    eyebrow: "Reconocimiento",
+    year: "2022",
+    venue: "documenta Halle",
+    city: "Kassel",
+    country: "Alemania",
+    summary:
+      "INSTAR presentó eventos dedicados a Aglutinador y a prácticas autónomas, con Sandra Ceballos como invitada.",
+    summaryEn:
+      "INSTAR presented events around Aglutinador and autonomous practices, with Sandra Ceballos as invited guest.",
+    image: "/_career/documenta",
+    color: "#cf5d47",
+    url: "https://documenta-fifteen.de/en/calendar/27-anos-de-espacio-aglutinador/"
+  },
+  {
+    id: "reina-sofia",
+    title: "Museo Reina Sofía",
+    titleEn: "Reina Sofía Museum",
+    eyebrow: "Museo",
+    year: "Trayectoria",
+    venue: "Museo Nacional Centro de Arte Reina Sofía",
+    city: "Madrid",
+    country: "España",
+    summary:
+      "Su obra figura en perfiles públicos como presentada en una de las instituciones clave del arte contemporáneo en España.",
+    summaryEn:
+      "Public profiles list her work as shown at one of Spain's key contemporary art institutions.",
+    image: "/_career/reina-sofia",
+    color: "#cf5d47"
+  },
+  {
+    id: "museo-barrio",
+    title: "El Museo del Barrio",
+    titleEn: "El Museo del Barrio",
+    eyebrow: "Museo",
+    year: "Trayectoria",
+    venue: "El Museo del Barrio",
+    city: "Nueva York",
+    country: "Estados Unidos",
+    summary:
+      "Institución esencial para arte latino, latinoamericano y caribeño en Nueva York; aparece entre sus hitos expositivos.",
+    summaryEn:
+      "A key New York institution for Latinx, Latin American and Caribbean art, listed among her exhibition milestones.",
+    image: "/_career/museo-barrio",
+    color: "#cf5d47"
+  },
+  {
+    id: "bellas-artes",
+    title: "Museo Nacional de Bellas Artes de Cuba",
+    titleEn: "National Museum of Fine Arts of Cuba",
+    eyebrow: "Premio / Colección",
+    year: "1995",
+    venue: "Museo Nacional de Bellas Artes de Cuba",
+    city: "La Habana",
+    country: "Cuba",
+    summary:
+      "Sede del Premio Nacional Anual de Pintura Contemporánea Juan Francisco Elso y colección pública clave.",
+    summaryEn:
+      "Venue of the Juan Francisco Elso contemporary painting prize and a key public collection.",
+    image: "/_career/bellas-artes",
+    color: "#cf5d47"
+  },
+  {
+    id: "macba",
+    title: "MACBA",
+    titleEn: "MACBA",
+    eyebrow: "Museo / perfil",
+    year: "2025",
+    venue: "Museu d'Art Contemporani de Barcelona",
+    city: "Barcelona",
+    country: "España",
+    summary:
+      "Perfil institucional actualizado que sitúa su obra dentro de colecciones y trayectorias internacionales.",
+    summaryEn:
+      "Updated institutional profile situating her work within international collections and career references.",
+    image: "/_career/macba",
+    color: "#cf5d47",
+    url: "https://www.macba.cat/en/actor/sandra-ceballos/"
+  },
+  {
+    id: "cintas",
+    title: "CINTAS Foundation",
+    titleEn: "CINTAS Foundation",
+    eyebrow: "Beca",
+    year: "2022",
+    venue: "CINTAS Foundation",
+    city: "Miami",
+    country: "Estados Unidos",
+    summary:
+      "Beca CINTAS en artes visuales, una distinción clave para creadores cubanos y de ascendencia cubana.",
+    summaryEn:
+      "CINTAS visual arts fellowship, a key distinction for Cuban and Cuban-descendant creators.",
+    image: "/_career/cintas",
+    color: "#cf5d47",
+    url: "https://cintasfoundation.org/index.php/fellows"
+  },
+  {
+    id: "art-journal",
+    title: "Art Journal Open",
+    titleEn: "Art Journal Open",
+    eyebrow: "Prensa",
+    year: "2025",
+    venue: "College Art Association",
+    city: "Nueva York",
+    country: "Estados Unidos",
+    summary:
+      "Publicó una conversación extensa sobre democracia, censura, práctica artística y Aglutinador.",
+    summaryEn:
+      "Published an extensive conversation on democracy, censorship, artistic practice and Aglutinador.",
+    image: "/_career/art-journal",
+    color: "#cf5d47",
+    url: "https://artjournal.collegeart.org/?p=19167"
+  }
+];
+
+export const careerStages: CareerStage[] = [
+  {
+    year: "1961",
+    title: "Guantánamo",
+    titleEn: "Guantánamo",
+    summary: "Nace en Guantánamo, Cuba.",
+    summaryEn: "Born in Guantánamo, Cuba."
+  },
+  {
+    year: "1983/85",
+    title: "San Alejandro",
+    titleEn: "San Alejandro",
+    summary: "Formación en la Escuela de Artes Plásticas San Alejandro, La Habana.",
+    summaryEn: "Training at the San Alejandro School of Fine Arts, Havana."
+  },
+  {
+    year: "1994",
+    title: "Aglutinador",
+    titleEn: "Aglutinador",
+    summary: "Cofunda Espacio Aglutinador junto a Ezequiel Suárez.",
+    summaryEn: "Co-founds Espacio Aglutinador with Ezequiel Suárez."
+  },
+  {
+    year: "1997",
+    title: "Nueva York / Buffalo",
+    titleEn: "New York / Buffalo",
+    summary: "Residencia y exhibición con Art in General, Longwood Project y Hallwalls.",
+    summaryEn: "Residency and exhibition through Art in General, Longwood Project and Hallwalls."
+  },
+  {
+    year: "2022",
+    title: "CINTAS / documenta",
+    titleEn: "CINTAS / documenta",
+    summary: "Beca CINTAS y presencia de Aglutinador en documenta fifteen.",
+    summaryEn: "CINTAS fellowship and Aglutinador's presence at documenta fifteen."
+  },
+  {
+    year: "2024/25",
+    title: "ARC / Art Journal",
+    titleEn: "ARC / Art Journal",
+    summary: "Beca RESILIENCE y conversación publicada por Art Journal Open.",
+    summaryEn: "RESILIENCE Fellowship and conversation published by Art Journal Open."
+  }
+];
 
 export const careerPanels: CareerPanel[] = [
   {

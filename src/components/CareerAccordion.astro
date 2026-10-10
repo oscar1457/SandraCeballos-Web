@@ -1,107 +1,198 @@
 ---
-import type { CareerPanel } from "@/data/exhibitions";
+import {
+  careerStages,
+  essentialHighlights
+} from "@/data/exhibitions";
 import type { Site } from "@/data/site";
 
 type Props = {
-  panels: CareerPanel[];
   site: Site;
 };
 
-const { panels, site } = Astro.props;
+const { site } = Astro.props;
+
+const timelinePositions = [
+  { x: "21%", y: "75.1%", placement: "below" },
+  { x: "34%", y: "64.1%", placement: "above" },
+  { x: "47%", y: "53.2%", placement: "below" },
+  { x: "60%", y: "42.2%", placement: "above" },
+  { x: "73%", y: "31.3%", placement: "below" },
+  { x: "86%", y: "20.4%", placement: "above" }
+] as const;
 ---
 
-<section class="career-view" aria-labelledby="career-title" data-career-view>
+<section class="career-view" aria-label={site.nav.career} data-career-view>
   <div class="career-view__topline">
     <button class="text-button" type="button" data-close-panel>
       <span data-lang="es">{site.nav.closeCareer}</span>
       <span data-lang="en">{site.nav.closeCareerEn}</span>
     </button>
     <p>
-      <span data-lang="es">Trayectoria seleccionada</span>
-      <span data-lang="en">Selected career</span>
+      <span class="career-view__mode-label" data-career-label="essentials">
+        <span data-lang="es">Esenciales</span>
+        <span data-lang="en">Essentials</span>
+      </span>
+      <span class="career-view__mode-label" data-career-label="timeline">
+        <span data-lang="es">Trayectoria</span>
+        <span data-lang="en">Career</span>
+      </span>
     </p>
   </div>
 
-  <div class="career-view__intro">
-    <h2 id="career-title" tabindex="-1">
-      <span data-lang="es">Trayectoria</span>
-      <span data-lang="en">Career</span>
-    </h2>
-    <p>
-      <span data-lang="es">{site.biographyNote}</span>
-      <span data-lang="en">{site.biographyNoteEn}</span>
-    </p>
+  <div class="career-view__content career-view__content--essentials" data-career-section="essentials">
+    <header class="career-view__intro">
+      <p class="career-view__kicker">
+        <span data-lang="es">Aglutinador también es obra</span>
+        <span data-lang="en">Aglutinador is also work</span>
+      </p>
+      <h2 id="career-essentials-title" tabindex="-1">
+        <span data-lang="es">Esenciales</span>
+        <span data-lang="en">Essentials</span>
+      </h2>
+      <p>
+        <span data-lang="es">
+          Los hitos de mayor reconocimiento institucional, editorial y curatorial.
+        </span>
+        <span data-lang="en">
+          The strongest institutional, editorial and curatorial milestones.
+        </span>
+      </p>
+    </header>
+
+    <div class="essentials-board" aria-label="Hitos esenciales">
+      {
+        essentialHighlights.map((item, index) => {
+          const Wrapper = item.url ? "a" : "article";
+          const wrapperProps = item.url
+            ? { href: item.url, target: "_blank", rel: "noreferrer" }
+            : {};
+
+          return (
+            <Wrapper
+              class:list={["essential-card", `essential-card--${index + 1}`]}
+              style={`--accent:${item.color}`}
+              {...wrapperProps}
+            >
+              <span class="essential-card__label">{item.eyebrow}</span>
+              <span class="essential-card__visual" aria-hidden="true">
+                <span>{item.title}</span>
+                <strong>{item.year}</strong>
+                <em>{item.venue} · {item.city}</em>
+              </span>
+              <span class="essential-card__info">
+                <strong>{item.venue}</strong>
+                <span data-lang="es">{item.summary}</span>
+                <span data-lang="en">{item.summaryEn}</span>
+              </span>
+            </Wrapper>
+          );
+        })
+      }
+    </div>
   </div>
 
-  <div class="career-accordion" data-career-accordion>
-    {
-      panels.map((panel, index) => (
-        <article
-          class:list={["career-item", index === 0 && "is-active"]}
-          style={`--panel-color:${panel.color}`}
-          data-career-item
-        >
-          <button
-            class="career-item__trigger"
-            id={`career-trigger-${panel.id}`}
-            type="button"
-            aria-expanded={index === 0 ? "true" : "false"}
-            aria-controls={`career-panel-${panel.id}`}
-            data-career-trigger
-          >
-            <span>{panel.eyebrow}</span>
-            <strong>
-              <span data-lang="es">{panel.label}</span>
-              <span data-lang="en">{panel.labelEn}</span>
-            </strong>
-          </button>
-          <div
-            class="career-item__panel"
-            id={`career-panel-${panel.id}`}
-            role="region"
-            aria-labelledby={`career-trigger-${panel.id}`}
-            data-career-panel
-          >
-            <div class="career-item__content">
-              <p class="career-item__summary">
-                <span data-lang="es">{panel.summary}</span>
-                <span data-lang="en">{panel.summaryEn}</span>
-              </p>
-              <ul>
-                {panel.items.map((item) => (
-                  <li>
-                    <span class="career-item__year">{item.year}</span>
-                    <span class="career-item__detail">
-                      <strong>{item.title}</strong>
-	                    <span>
-	                        {item.venue}, {item.city}, {item.country}
-	                      </span>
-	                      {
-	                        item.url && (
-	                          <a href={item.url} target="_blank" rel="noreferrer">
-	                            <span data-lang="es">Ver fuente</span>
-	                            <span data-lang="en">View source</span>
-	                          </a>
-	                        )
-	                      }
-	                    </span>
-	                  </li>
-	                ))}
-	              </ul>
-	            </div>
-	          </div>
-	        </article>
-      ))
-    }
+  <div class="career-view__content career-view__content--timeline" data-career-section="timeline">
+    <section class="career-timeline" aria-labelledby="career-timeline-title">
+      <svg class="career-timeline__axis" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="8" y1="86" x2="96" y2="12"></line>
+      </svg>
+
+      <header class="career-timeline__headline">
+        <p class="career-view__kicker">
+          <span data-lang="es">Trayectoria</span>
+          <span data-lang="en">Career</span>
+        </p>
+        <h2 id="career-timeline-title" tabindex="-1">
+          <span data-lang="es">Etapas</span>
+          <span data-lang="en">Stages</span>
+        </h2>
+      </header>
+
+      <div class="career-timeline__statement">
+        <h3 id="career-stages-title">
+          <span data-lang="es">Puntos clave</span>
+          <span data-lang="en">Key points</span>
+        </h3>
+        <p>
+          <span data-lang="es">
+            Lectura cronológica de su práctica artística, curatorial y pública.
+          </span>
+          <span data-lang="en">
+            A chronological reading of her artistic, curatorial and public practice.
+          </span>
+        </p>
+      </div>
+
+      <ol aria-labelledby="career-stages-title">
+        {
+          careerStages.map((stage, index) => {
+            const fallbackPosition = timelinePositions[timelinePositions.length - 1]!;
+            const position = timelinePositions[index] ?? fallbackPosition;
+
+            return (
+              <li
+                class:list={[
+                  "career-timeline__item",
+                  `career-timeline__item--${index + 1}`,
+                  `is-${position.placement}`
+                ]}
+                style={`--x:${position.x};--y:${position.y}`}
+              >
+                <article class="career-timeline__node" tabindex="0">
+                  <span class="career-timeline__dot" aria-hidden="true"></span>
+                  <span class="career-timeline__text">
+                    <time>{stage.year}</time>
+                    <strong>
+                      <span data-lang="es">{stage.title}</span>
+                      <span data-lang="en">{stage.titleEn}</span>
+                    </strong>
+                    <p class="career-timeline__detail">
+                      <span data-lang="es">{stage.summary}</span>
+                      <span data-lang="en">{stage.summaryEn}</span>
+                    </p>
+                  </span>
+                </article>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </section>
   </div>
 </section>
 
 <style>
   .career-view {
     display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr);
-    gap: clamp(1rem, 1.8vw, 1.75rem);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: clamp(0.85rem, 1.5vw, 1.25rem);
     min-height: 100%;
+  }
+
+  .career-view__content[data-career-section="timeline"],
+  [data-career-label="timeline"] {
+    display: none !important;
+  }
+
+  :global([data-career-mode="timeline"]) .career-view__content[data-career-section="essentials"],
+  :global([data-career-mode="timeline"]) [data-career-label="essentials"] {
+    display: none !important;
+  }
+
+  :global([data-career-mode="timeline"]) .career-view__content[data-career-section="timeline"] {
+    display: grid !important;
+  }
+
+  :global([data-career-mode="timeline"]) [data-career-label="timeline"] {
+    display: inline;
+  }
+
+  :global([data-career-mode="essentials"]) .career-view__content[data-career-section="essentials"] {
+    display: grid !important;
+  }
+
+  :global([data-career-mode="essentials"]) [data-career-label="essentials"] {
+    display: inline;
   }
 
   .career-view__topline {
@@ -111,244 +202,639 @@ const { panels, site } = Astro.props;
     gap: var(--space-2);
   }
 
-  .career-view__topline p {
+  .career-view__topline p,
+  .career-view__kicker,
+  .essential-card__label {
     margin: 0;
     font-size: var(--text-label);
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
+  }
+
+  .career-view__content {
+    display: grid;
+    grid-template-rows: auto minmax(18rem, 1fr) auto;
+    gap: clamp(1rem, 1.8vw, 1.5rem);
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .career-view__content--timeline {
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+  }
+
+  .career-view__intro--timeline {
+    align-items: start;
+  }
+
+  .career-view__content::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
   }
 
   .career-view__intro {
     display: grid;
-    grid-template-columns: minmax(18rem, 0.58fr) minmax(24rem, 1fr);
-    gap: clamp(2rem, 5vw, 6rem);
-    align-items: start;
+    grid-template-columns: minmax(18rem, 0.8fr) minmax(18rem, 1fr);
+    grid-template-areas:
+      "kicker copy"
+      "title copy";
+    gap: 0.25rem clamp(2rem, 5vw, 5rem);
+    align-items: end;
   }
 
-  .career-view__intro h2 {
+  .career-view__kicker {
+    grid-area: kicker;
+  }
+
+  .career-view__intro h2,
+  .career-timeline__copy h3 {
     margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(3.75rem, 6.2vw, 6.75rem);
-    line-height: 0.9;
+    line-height: 0.86;
     letter-spacing: 0;
     text-transform: uppercase;
   }
 
-  .career-view__intro p {
-    max-width: 36rem;
+  .career-view__intro h2 {
+    grid-area: title;
+    font-size: clamp(3.5rem, 7vw, 7.25rem);
+  }
+
+  .career-view__intro > p:last-child {
+    grid-area: copy;
+    max-width: 33rem;
     margin: 0;
-    padding-top: 0.7rem;
     font-size: var(--text-small);
   }
 
-  .career-accordion {
-    display: flex;
-    height: min(28rem, 43svh);
-    min-height: 20rem;
-    border: 1px solid var(--color-ink);
+  .essentials-board {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(6, minmax(2.5rem, 1fr));
+    height: clamp(22rem, 43svh, 31rem);
+    min-height: 0;
     overflow: hidden;
+    border: 1px solid var(--color-line);
+    background:
+      linear-gradient(126deg, transparent 0 42%, color-mix(in srgb, #b5a63e 70%, transparent) 42.15% 42.45%, transparent 42.6%),
+      linear-gradient(154deg, transparent 0 52%, color-mix(in srgb, #cf5d47 58%, transparent) 52.1% 52.45%, transparent 52.6%),
+      var(--color-paper);
   }
 
-	  .career-item {
-	    display: grid;
-	    grid-template-columns: var(--stripe-width) 0fr;
-	    flex: 0 1 var(--stripe-width);
-	    min-width: var(--stripe-width);
-	    background: var(--panel-color);
-	    transition: background-color 160ms ease;
-	  }
-
-  .career-item.is-active {
-    grid-template-columns: var(--stripe-width) minmax(22rem, 1fr);
-    flex-basis: min(58rem, 58vw);
+  .essential-card {
+    position: relative;
+    display: grid;
+    align-content: stretch;
+    min-width: 0;
+    min-height: 0;
+    padding: 0.55rem;
+    color: var(--color-ink);
+    text-decoration: none;
+    isolation: isolate;
     background: var(--color-paper);
   }
 
-  .career-item__trigger {
+  .essential-card::before {
+    content: "";
+    position: absolute;
+    inset: auto 0 -0.15rem 0;
+    z-index: -1;
+    height: 0.35rem;
+    background: var(--accent);
+  }
+
+  .essential-card__visual {
+    position: relative;
     display: grid;
-    grid-template-rows: auto 1fr;
-    gap: var(--space-2);
-    justify-items: center;
-    width: var(--stripe-width);
-    min-height: 100%;
-    padding: var(--space-2) 0.55rem;
-    border: 0;
-    border-right: 1px solid var(--color-ink);
-    background: var(--panel-color);
-    color: var(--color-ink);
-    font: inherit;
-    cursor: pointer;
+    grid-template-rows: 1fr auto;
+    align-content: end;
+    gap: 0.25rem;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 0.65rem;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+    border-bottom: 0.35rem solid var(--accent);
+    background:
+      linear-gradient(122deg, transparent 0 52%, color-mix(in srgb, var(--accent) 82%, transparent) 52.2% 53%, transparent 53.2%),
+      linear-gradient(8deg, transparent 0 70%, color-mix(in srgb, var(--accent) 62%, transparent) 70.2% 71%, transparent 71.2%),
+      var(--color-paper);
   }
 
-  .career-item__trigger span {
-    font-size: var(--text-label);
+  .essential-card__visual::before,
+  .essential-card__visual::after {
+    content: "";
+    position: absolute;
+    background: var(--color-ink);
+  }
+
+  .essential-card__visual::before {
+    right: 0.65rem;
+    top: 0.65rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+  }
+
+  .essential-card__visual::after {
+    left: 0.65rem;
+    right: 0.65rem;
+    bottom: 2.4rem;
+    height: 1px;
+    opacity: 0.42;
+  }
+
+  .essential-card__visual span,
+  .essential-card__visual em {
+    max-width: 19ch;
+    font-size: clamp(0.68rem, 0.75vw, 0.82rem);
+    font-style: normal;
     font-weight: 800;
-  }
-
-  .career-item__trigger strong {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    font-size: var(--text-label);
     line-height: 1;
     text-transform: uppercase;
   }
 
-	  .career-item__panel {
-	    min-width: 0;
-	    overflow: hidden;
-	  }
+  .essential-card__visual strong {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 3.4rem);
+    line-height: 0.82;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
 
-	  .career-item__content {
-	    display: grid;
-	    grid-template-columns: minmax(0, 1fr);
-	    grid-template-areas:
-	      "summary"
-	      "list";
-	    gap: var(--space-3);
-	    width: min(48rem, calc(92vw - (var(--stripe-width) * 5)));
-	    max-width: 100%;
-	    min-width: 0;
-	    height: 100%;
-	    padding: clamp(1.75rem, 3vw, 3rem);
-	    overflow-y: auto;
-	    background: var(--color-paper);
-	    visibility: hidden;
-	    transition: none;
-	  }
+  .essential-card__info {
+    position: absolute;
+    left: 0.55rem;
+    right: 0.55rem;
+    bottom: 0.9rem;
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.7rem;
+    border: 1px solid var(--color-ink);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-size: var(--text-small);
+    line-height: 1.18;
+    opacity: 0;
+    transform: translateY(0.45rem);
+    pointer-events: none;
+    transition:
+      opacity var(--duration-short) var(--ease-editorial),
+      transform var(--duration-short) var(--ease-editorial);
+  }
 
-	  .career-item.is-active .career-item__content {
-	    visibility: visible;
-	  }
+  .essential-card:hover .essential-card__info,
+  .essential-card:focus-visible .essential-card__info {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-	  .career-item__summary {
-	    grid-area: summary;
-	    max-width: 42rem;
-	    margin: 0;
-	    font-size: clamp(1.15rem, 1.35vw, 1.45rem);
-	    line-height: 1.22;
-	  }
+  .essential-card:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
 
-	  .career-item ul {
-	    grid-area: list;
-	    display: grid;
-	    gap: var(--space-2);
-	    margin: 0;
+  .essential-card--1 {
+    grid-column: 1 / span 3;
+    grid-row: 1 / span 3;
+  }
+
+  .essential-card--2 {
+    grid-column: 4 / span 3;
+    grid-row: 1 / span 3;
+  }
+
+  .essential-card--3 {
+    grid-column: 7 / span 3;
+    grid-row: 1 / span 3;
+  }
+
+  .essential-card--4 {
+    grid-column: 10 / span 3;
+    grid-row: 1 / span 3;
+  }
+
+  .essential-card--5 {
+    grid-column: 1 / span 3;
+    grid-row: 4 / span 3;
+  }
+
+  .essential-card--6 {
+    grid-column: 4 / span 3;
+    grid-row: 4 / span 3;
+  }
+
+  .essential-card--7 {
+    grid-column: 7 / span 3;
+    grid-row: 4 / span 3;
+  }
+
+  .essential-card--8 {
+    grid-column: 10 / span 3;
+    grid-row: 4 / span 3;
+  }
+
+  .career-timeline {
+    position: relative;
+    height: 100%;
+    min-height: clamp(24rem, 53svh, 34rem);
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-paper) 94%, #cf5d47 6%);
+  }
+
+  .career-timeline__axis {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .career-timeline__axis line {
+    stroke: var(--color-ink);
+    stroke-width: 0.16;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .career-timeline__headline {
+    position: absolute;
+    top: 9%;
+    left: 5.5%;
+    z-index: 2;
+    display: grid;
+    gap: 0.3rem;
+    max-width: 22rem;
+  }
+
+  .career-timeline__headline .career-view__kicker {
+    grid-area: auto;
+    order: 2;
+  }
+
+  .career-timeline__headline h2 {
+    order: 1;
+  }
+
+  .career-timeline__headline h2,
+  .career-timeline__statement h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    line-height: 0.9;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .career-timeline__headline h2 {
+    font-size: clamp(1.9rem, 3.1vw, 3.15rem);
+  }
+
+  .career-timeline__statement {
+    position: absolute;
+    right: 6%;
+    bottom: 14%;
+    z-index: 2;
+    display: grid;
+    gap: 0.55rem;
+    width: min(25rem, 31vw);
+    text-align: center;
+  }
+
+  .career-timeline__statement h3 {
+    font-size: clamp(2.15rem, 4.7vw, 4.8rem);
+  }
+
+  .career-timeline__statement p {
+    margin: 0;
+    font-size: var(--text-small);
+    line-height: 1.28;
+  }
+
+  .career-timeline ol {
+    position: absolute;
+    inset: 0;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .career-item li {
-    display: grid;
-    grid-template-columns: minmax(5rem, 0.24fr) 1fr;
-    gap: var(--space-2);
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--color-line);
+  .career-timeline__item {
+    position: absolute;
+    left: var(--mobile-x, var(--x));
+    top: var(--mobile-y, var(--y));
+    display: block;
+    width: clamp(8rem, 15vw, 15rem);
+    transform: translate(-50%, -50%);
   }
 
-  .career-item__year {
-    font-size: var(--text-label);
-    font-weight: 800;
+  .career-timeline__node {
+    position: relative;
+    width: 100%;
+    min-height: 6rem;
+    outline: none;
+    background: transparent;
+    color: var(--color-ink);
+    cursor: default;
+  }
+
+  .career-timeline__text {
+    position: absolute;
+    left: 50%;
+    display: grid;
+    gap: 0.15rem;
+    width: min(15rem, 20vw);
+    text-align: center;
+    transition:
+      opacity var(--duration-short) var(--ease-editorial),
+      transform var(--duration-short) var(--ease-editorial);
+  }
+
+  .career-timeline__item.is-above .career-timeline__text {
+    bottom: calc(50% + 0.95rem);
+    transform: translateX(-50%);
+  }
+
+  .career-timeline__item.is-below .career-timeline__text {
+    top: calc(50% + 0.95rem);
+    transform: translateX(-50%);
+  }
+
+  .career-timeline__dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: clamp(0.72rem, 0.95vw, 0.95rem);
+    height: clamp(0.72rem, 0.95vw, 0.95rem);
+    border-radius: 999px;
+    background: var(--color-ink);
+    transform: translate(-50%, -50%);
+    transition:
+      background-color var(--duration-short) var(--ease-editorial),
+      box-shadow var(--duration-short) var(--ease-editorial),
+      transform var(--duration-short) var(--ease-editorial);
+  }
+
+  .career-timeline__node:hover .career-timeline__dot,
+  .career-timeline__node:focus-visible .career-timeline__dot {
+    background: var(--color-paper);
+    box-shadow: 0 0 0 0.32rem var(--color-ink);
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+
+  .career-timeline__item.is-above .career-timeline__node:hover .career-timeline__text,
+  .career-timeline__item.is-above .career-timeline__node:focus-visible .career-timeline__text {
+    transform: translate(-50%, -0.35rem);
+  }
+
+  .career-timeline__item.is-below .career-timeline__node:hover .career-timeline__text,
+  .career-timeline__item.is-below .career-timeline__node:focus-visible .career-timeline__text {
+    transform: translate(-50%, 0.35rem);
+  }
+
+  .career-timeline time {
+    font-size: clamp(1.35rem, 2vw, 2.1rem);
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .career-timeline strong {
+    font-size: clamp(0.7rem, 0.8vw, 0.86rem);
+    letter-spacing: 0.02em;
     text-transform: uppercase;
   }
 
-	  .career-item__detail {
-	    display: grid;
-	    gap: 0.25rem;
-	  }
-
-	  .career-item__detail a {
-	    width: fit-content;
-	    font-size: var(--text-label);
-	    font-weight: 800;
-	    text-transform: uppercase;
-	  }
-
-  .career-item__detail strong {
-    font-size: var(--text-base);
+  .career-timeline__detail {
+    margin: 0;
+    font-size: clamp(0.62rem, 0.68vw, 0.76rem);
+    line-height: 1.22;
   }
 
-	  .career-item__detail span {
-	    font-size: var(--text-small);
-	  }
-
-  @media (max-width: 860px) {
+  @media (max-width: 980px) {
     .career-view__intro {
       grid-template-columns: 1fr;
-      gap: var(--space-2);
+      grid-template-areas:
+        "kicker"
+        "title"
+        "copy";
+      align-items: start;
     }
 
-    .career-view__intro h2 {
-      font-size: clamp(3.1rem, 16vw, 5.5rem);
-    }
-
-    .career-view__intro p {
-      padding-top: 0;
-    }
-
-    .career-accordion {
-      display: grid;
-      height: auto;
+    .essentials-board {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: none;
+      align-items: start;
+      gap: var(--space-1);
       min-height: 0;
-      border: 0;
-      gap: 1px;
-      background: var(--color-ink);
       overflow: visible;
+      border: 0;
+      background: transparent;
     }
 
-    .career-item,
-    .career-item.is-active {
-      display: block;
-      min-width: 0;
+    .essential-card,
+    .essential-card--1,
+    .essential-card--2,
+    .essential-card--3,
+    .essential-card--4,
+    .essential-card--5,
+    .essential-card--6,
+    .essential-card--7,
+    .essential-card--8 {
+      grid-column: auto;
+      grid-row: auto;
+      align-content: start;
+      min-height: 20rem;
+      height: auto;
+      border: 1px solid var(--color-line);
       background: var(--color-paper);
     }
 
-    .career-item__trigger {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      min-height: 3.25rem;
-      padding: var(--space-2);
-      border: 0;
-      background: var(--panel-color);
+    .essential-card__info {
+      bottom: 0.9rem;
     }
 
-    .career-item__trigger strong {
-      writing-mode: horizontal-tb;
-      transform: none;
+    .career-timeline {
+      min-height: clamp(28rem, 68svh, 42rem);
+    }
+
+    .career-timeline__headline {
+      top: 7%;
+      left: 5%;
+      max-width: 16rem;
+    }
+
+    .career-timeline__headline h2 {
+      font-size: clamp(1.65rem, 5vw, 2.4rem);
+    }
+
+    .career-timeline__statement {
+      right: 5%;
+      bottom: 8%;
+      width: min(18rem, 42vw);
+    }
+
+    .career-timeline__statement h3 {
+      font-size: clamp(1.85rem, 6vw, 3.1rem);
+    }
+
+    .career-timeline__text {
+      width: min(10rem, 26vw);
+    }
+
+    .career-timeline time {
+      font-size: clamp(1.05rem, 4vw, 1.65rem);
+    }
+
+    .career-timeline__detail {
+      font-size: clamp(0.58rem, 1.55vw, 0.68rem);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .career-view__content {
+      grid-template-rows: auto auto auto;
+    }
+
+    .career-view__intro h2 {
+      font-size: clamp(3rem, 16vw, 4.5rem);
+    }
+
+    .career-timeline {
+      min-height: 42rem;
+    }
+
+    .career-timeline__headline {
+      top: 5%;
+      max-width: 12rem;
+    }
+
+    .career-timeline__statement {
+      right: 4%;
+      bottom: 6%;
+      width: 9.8rem;
+    }
+
+    .career-timeline__statement p {
+      font-size: 0.68rem;
+    }
+
+    .career-timeline__item {
+      width: 8rem;
+    }
+
+    .career-timeline__item--1 {
+      --mobile-x: 21%;
+      --mobile-y: 78%;
+    }
+
+    .career-timeline__item--2 {
+      --mobile-x: 34%;
+      --mobile-y: 67%;
+    }
+
+    .career-timeline__item--3 {
+      --mobile-x: 47%;
+      --mobile-y: 56%;
+    }
+
+    .career-timeline__item--4 {
+      --mobile-x: 60%;
+      --mobile-y: 45%;
+    }
+
+    .career-timeline__item--5 {
+      --mobile-x: 73%;
+      --mobile-y: 34%;
+    }
+
+    .career-timeline__item--6 {
+      --mobile-x: 86%;
+      --mobile-y: 23%;
+    }
+
+    .career-timeline__text {
+      width: 6.75rem;
+      gap: 0.08rem;
+    }
+
+    .career-timeline__item.is-above .career-timeline__text {
+      right: calc(50% + 0.85rem);
+      left: auto;
+      top: 50%;
+      bottom: auto;
       text-align: right;
+      transform: translateY(-50%);
     }
 
-	    .career-item__panel {
-	      display: none;
-	      transition: none;
-	    }
-
-	    .career-item.is-active .career-item__panel {
-	      display: block;
-	    }
-
-	    .career-item__content {
-	      grid-template-columns: 1fr;
-	      grid-template-areas:
-	        "summary"
-	        "list";
-	      width: 100%;
-	      min-width: 0;
-	      height: auto;
-	      padding: var(--space-3);
-	      overflow: visible;
-	      opacity: 1;
-	      visibility: visible;
-	    }
-
-    .career-item__summary {
-      font-size: var(--text-base);
+    .career-timeline__item.is-below .career-timeline__text {
+      left: calc(50% + 0.85rem);
+      top: 50%;
+      text-align: left;
+      transform: translateY(-50%);
     }
 
-    .career-item li {
+    .career-timeline__item.is-above .career-timeline__node:hover .career-timeline__text,
+    .career-timeline__item.is-above .career-timeline__node:focus .career-timeline__text,
+    .career-timeline__item.is-below .career-timeline__node:hover .career-timeline__text,
+    .career-timeline__item.is-below .career-timeline__node:focus .career-timeline__text {
+      transform: translateY(-50%);
+    }
+
+    .career-timeline strong {
+      font-size: 0.58rem;
+    }
+
+    .career-timeline__detail {
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      z-index: 3;
+      width: min(11rem, 46vw);
+      padding: 0.45rem;
+      border: 1px solid var(--color-ink);
+      background: var(--color-paper);
+      font-size: 0.6rem;
+      opacity: 0;
+      transform: translateY(0.25rem);
+      transition:
+        opacity var(--duration-short) var(--ease-editorial),
+        transform var(--duration-short) var(--ease-editorial);
+    }
+
+    .career-timeline__item.is-above .career-timeline__detail {
+      right: 0;
+    }
+
+    .career-timeline__item.is-below .career-timeline__detail {
+      left: 0;
+    }
+
+    .career-timeline__node:hover .career-timeline__detail,
+    .career-timeline__node:focus .career-timeline__detail {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .essentials-board {
       grid-template-columns: 1fr;
-      gap: 0.35rem;
+    }
+
+    .essential-card {
+      min-height: 12rem;
+    }
+
+    .essential-card__visual {
+      min-height: 10.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .essential-card__info {
+      transition-duration: 80ms;
     }
   }
 </style>

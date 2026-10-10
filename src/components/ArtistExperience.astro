@@ -5,16 +5,14 @@ import ArtworkViewer from "@/components/ArtworkViewer.astro";
 import CareerAccordion from "@/components/CareerAccordion.astro";
 import LanguageSwitch from "@/components/LanguageSwitch.astro";
 import type { Artwork } from "@/data/artworks";
-import type { CareerPanel } from "@/data/exhibitions";
 import type { Site } from "@/data/site";
 
 type Props = {
   site: Site;
   artworks: Artwork[];
-  careerPanels: CareerPanel[];
 };
 
-const { site, artworks, careerPanels } = Astro.props;
+const { site, artworks } = Astro.props;
 const firstArtwork = artworks[0];
 if (!firstArtwork) {
   throw new Error("ArtistExperience requiere al menos una obra.");
@@ -58,23 +56,41 @@ if (!firstArtwork) {
           >
             <span data-lang="es">{site.nav.viewArtwork}</span>
             <span data-lang="en">{site.nav.viewArtworkEn}</span>
-            <span aria-hidden="true">→</span>
+          </a>
+          <a
+            class="cover-panel__button"
+            href="#esenciales"
+            data-open-career
+            data-career-target="essentials"
+            aria-controls="trayectoria-panel"
+            aria-expanded="false"
+          >
+            <span data-lang="es">{site.nav.essentials}</span>
+            <span data-lang="en">{site.nav.essentialsEn}</span>
           </a>
           <a
             class="cover-panel__button"
             href="#trayectoria"
             data-open-career
+            data-career-target="timeline"
             aria-controls="trayectoria-panel"
             aria-expanded="false"
           >
             <span data-lang="es">{site.nav.career}</span>
             <span data-lang="en">{site.nav.careerEn}</span>
-            <span aria-hidden="true">→</span>
           </a>
           <a class="cover-panel__button" href="#contacto">
             <span data-lang="es">{site.nav.contact}</span>
             <span data-lang="en">{site.nav.contactEn}</span>
-            <span aria-hidden="true">↓</span>
+          </a>
+          <a
+            class="cover-panel__button"
+            href={site.portfolioPdf}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span data-lang="es">{site.nav.portfolio}</span>
+            <span data-lang="en">{site.nav.portfolioEn}</span>
           </a>
         </nav>
       </div>
@@ -103,7 +119,7 @@ if (!firstArtwork) {
       aria-hidden="true"
       data-career-panel-host
     >
-      <CareerAccordion panels={careerPanels} site={site} />
+      <CareerAccordion site={site} />
     </section>
   </div>
 </section>
@@ -216,11 +232,10 @@ if (!firstArtwork) {
   }
 
   .cover-panel__nav {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(8.5rem, 1fr));
     gap: var(--space-1);
-    max-width: 34rem;
+    width: min(100%, 30rem);
   }
 
   .cover-panel__nav a,
@@ -232,9 +247,10 @@ if (!firstArtwork) {
   .cover-panel__button {
     display: inline-flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: var(--space-2);
-    min-width: clamp(8rem, 13vw, 11rem);
+    min-width: 0;
+    width: 100%;
     min-height: 2.75rem;
     padding: 0 0.75rem;
     border: 1px solid var(--color-ink);
@@ -242,13 +258,25 @@ if (!firstArtwork) {
     font-size: var(--text-label);
     font-weight: 800;
     text-transform: uppercase;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .cover-panel__button > span:not([aria-hidden="true"]) {
+    min-width: 0;
   }
 
   .cover-panel__button:hover,
   .cover-panel__button:focus-visible {
     background: var(--color-ink);
-    color: var(--color-paper);
+    color: var(--color-paper) !important;
     text-decoration: none !important;
+  }
+
+  .cover-panel__button:hover *,
+  .cover-panel__button:focus-visible * {
+    color: var(--color-paper) !important;
   }
 
   .cover-panel__bottom a:hover {
@@ -293,9 +321,38 @@ if (!firstArtwork) {
       overflow-y: auto;
     }
 
+    [data-career-panel-host] {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    [data-career-panel-host]::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
+
+    .cover-panel__middle {
+      grid-template-columns: 1fr;
+      align-content: center;
+      gap: var(--space-3);
+    }
+
+    .cover-panel__nav {
+      width: 100%;
+      max-width: 34rem;
+    }
+
     .cover-panel h1 {
       font-size: clamp(4rem, 14vw, 8rem);
       line-height: 0.84;
+    }
+  }
+
+  @media (min-width: 1180px) {
+    .cover-panel__nav {
+      grid-template-columns: repeat(5, minmax(6.8rem, 1fr));
+      width: min(100%, 50rem);
     }
   }
 
@@ -328,12 +385,11 @@ if (!firstArtwork) {
     }
 
     .cover-panel__nav {
-      align-items: stretch;
       width: 100%;
     }
 
     .cover-panel__button {
-      flex: 1 1 100%;
+      min-height: 3rem;
     }
 
     .cover-panel__role {
@@ -343,6 +399,12 @@ if (!firstArtwork) {
     .cover-panel h1 {
       font-size: clamp(3.3rem, 17vw, 5.8rem);
       line-height: 0.88;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .cover-panel__nav {
+      grid-template-columns: 1fr;
     }
   }
 

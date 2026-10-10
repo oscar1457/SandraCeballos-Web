@@ -46,10 +46,14 @@ export const site = {
   },
   footer: {
     privacy: "Privacidad",
-    legal: "Aviso legal"
+    privacyEn: "Privacy",
+    legal: "Aviso legal",
+    legalEn: "Legal notice"
   },
   biography:
     "Sandra Ceballos es artista multidisciplinar y curadora cubana. Cursó estudios en San Alejandro, cofundó Espacio Aglutinador en La Habana en 1994 junto a Ezequiel Suárez y ha desarrollado una práctica sostenida entre creación, archivo, curaduría independiente y resistencia cultural.",
+  biographyEn:
+    "Sandra Ceballos is a Cuban multidisciplinary artist and curator. She studied at San Alejandro, co-founded Espacio Aglutinador in Havana in 1994 with Ezequiel Suárez, and has sustained a practice spanning creation, archive, independent curating and cultural resistance.",
   biographyNote:
     "Selección de biografía, exposiciones, premios y prensa.",
   biographyNoteEn:
@@ -76,8 +80,12 @@ export const site = {
     successEn: "Message sent. Thank you for writing.",
     endpointMissing:
       "Falta configurar PUBLIC_FORMSPREE_ENDPOINT. El mensaje no se ha enviado.",
+    endpointMissingEn:
+      "PUBLIC_FORMSPREE_ENDPOINT is not configured. The message was not sent.",
     genericError:
       "No se pudo enviar el mensaje. Revisa los campos o inténtalo de nuevo.",
+    genericErrorEn:
+      "The message could not be sent. Check the fields or try again.",
     required: "Este campo es obligatorio.",
     requiredEn: "This field is required.",
     invalidEmail: "Introduce un correo válido.",

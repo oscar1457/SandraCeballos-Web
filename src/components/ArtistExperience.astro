@@ -38,15 +38,15 @@ if (!firstArtwork) {
       <LanguageSwitch />
     </div>
 
-    <section class="experience-panel cover-panel" aria-label="Portada editorial" data-cover-panel>
-      <ArtworkRail artworks={artworks} label="Obras destacadas" variant="cover" />
+    <section class="experience-panel cover-panel" aria-label="Portada" data-aria-label-en="Cover" data-cover-panel>
+      <ArtworkRail artworks={artworks} label="Obras destacadas" labelEn="Featured works" variant="cover" />
 
       <div class="cover-panel__middle">
         <p class="cover-panel__role">
           <span data-lang="es">{site.role}</span>
           <span data-lang="en">{site.roleEn}</span>
         </p>
-        <nav class="cover-panel__nav" aria-label="Navegación principal">
+        <nav class="cover-panel__nav" aria-label="Navegación principal" data-aria-label-en="Main navigation">
           <a
             class="cover-panel__button"
             href={`#obra/${firstArtwork.slug}`}
@@ -105,7 +105,8 @@ if (!firstArtwork) {
     <section
       class="experience-panel detail-panel"
       id="galeria-obras"
-      aria-label="Galeria de obras"
+      aria-label="Galería de obras"
+      data-aria-label-en="Artwork gallery"
       aria-hidden="true"
       data-gallery-panel-host
     >
@@ -116,6 +117,7 @@ if (!firstArtwork) {
       class="experience-panel detail-panel"
       id="trayectoria-panel"
       aria-label="Trayectoria"
+      data-aria-label-en="Career"
       aria-hidden="true"
       data-career-panel-host
     >

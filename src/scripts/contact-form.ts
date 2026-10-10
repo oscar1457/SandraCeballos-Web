@@ -21,11 +21,11 @@ forms.forEach((form) => {
     },
     endpointMissing: {
       es: status?.dataset.endpointMissing ?? "Falta configurar el endpoint.",
-      en: status?.dataset.endpointMissing ?? "The endpoint is not configured."
+      en: status?.dataset.endpointMissingEn ?? "The endpoint is not configured."
     },
     genericError: {
       es: status?.dataset.errorMessage ?? "No se pudo enviar el mensaje.",
-      en: status?.dataset.errorMessage ?? "The message could not be sent."
+      en: status?.dataset.errorMessageEn ?? "The message could not be sent."
     },
     required: {
       es: status?.dataset.requiredMessage ?? "Este campo es obligatorio.",

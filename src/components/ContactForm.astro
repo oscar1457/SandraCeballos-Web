@@ -105,7 +105,7 @@ const { site, endpoint } = Astro.props;
             <span data-lang="es">{site.form.privacyPrefix}</span>
             <span data-lang="en">{site.form.privacyPrefixEn}</span>
             {" "}
-            <a href="/privacidad" aria-label="Política de privacidad">
+            <a href="/privacidad">
               <span data-lang="es">{site.form.privacyLink}</span>
               <span data-lang="en">{site.form.privacyLinkEn}</span>
             </a>.
@@ -130,7 +130,9 @@ const { site, endpoint } = Astro.props;
           data-success-message={site.form.success}
           data-success-message-en={site.form.successEn}
           data-endpoint-missing={site.form.endpointMissing}
+          data-endpoint-missing-en={site.form.endpointMissingEn}
           data-error-message={site.form.genericError}
+          data-error-message-en={site.form.genericErrorEn}
           data-required-message={site.form.required}
           data-required-message-en={site.form.requiredEn}
           data-email-message={site.form.invalidEmail}

@@ -11,10 +11,17 @@ const year = new Date().getFullYear();
 
 <footer class="site-footer">
   <p>{site.name} © {year}</p>
-  <nav aria-label="Enlaces secundarios">
+  <nav aria-label="Enlaces secundarios" data-aria-label-en="Secondary links">
+    <a href={`mailto:${site.email}`}>{site.email}</a>
     <a href={site.instagram.url} rel="noreferrer" target="_blank">{site.instagram.label}</a>
-    <a href="/privacidad">{site.footer.privacy}</a>
-    <a href="/aviso-legal">{site.footer.legal}</a>
+    <a href="/privacidad">
+      <span data-lang="es">{site.footer.privacy}</span>
+      <span data-lang="en">{site.footer.privacyEn}</span>
+    </a>
+    <a href="/aviso-legal">
+      <span data-lang="es">{site.footer.legal}</span>
+      <span data-lang="en">{site.footer.legalEn}</span>
+    </a>
   </nav>
 </footer>
 

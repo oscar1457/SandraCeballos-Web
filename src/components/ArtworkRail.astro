@@ -5,15 +5,17 @@ import type { Artwork } from "@/data/artworks";
 type Props = {
   artworks: Artwork[];
   label: string;
+  labelEn?: string;
   variant?: "cover" | "gallery";
 };
 
-const { artworks, label, variant = "cover" } = Astro.props;
+const { artworks, label, labelEn, variant = "cover" } = Astro.props;
 ---
 
 <nav
   class:list={["artwork-rail", `artwork-rail--${variant}`]}
   aria-label={label}
+  data-aria-label-en={labelEn}
   data-cover-rail={variant === "cover" ? "" : undefined}
 >
   <ol class="artwork-rail__list">

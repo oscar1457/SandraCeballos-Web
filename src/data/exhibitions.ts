@@ -50,7 +50,8 @@ export type CareerStage = {
   summaryEn: string;
 };
 
-const pending = "Sin fecha";
+// Dato pendiente de confirmar con Sandra: se muestra como "—".
+const pending = "";
 
 export const essentialHighlights: EssentialHighlight[] = [
   {
@@ -65,7 +66,7 @@ export const essentialHighlights: EssentialHighlight[] = [
     summary:
       "Aglutinador forma parte central de su obra: práctica curatorial, archivo vivo y primer espacio independiente sostenido en Cuba.",
     summaryEn:
-      "Aglutinador is central to her work: curatorial practice, living archive and Cuba's longest-running independent art space.",
+      "Aglutinador is central to her work: curatorial practice, living archive and the first sustained independent art space in Cuba.",
     image: "/_career/aglutinador",
     color: "#cf5d47",
     url: "https://www.espacioaglutinador.com/"
@@ -92,7 +93,7 @@ export const essentialHighlights: EssentialHighlight[] = [
     title: "Museo Reina Sofía",
     titleEn: "Reina Sofía Museum",
     eyebrow: "Museo",
-    year: "Trayectoria",
+    year: pending,
     venue: "Museo Nacional Centro de Arte Reina Sofía",
     city: "Madrid",
     country: "España",
@@ -108,7 +109,7 @@ export const essentialHighlights: EssentialHighlight[] = [
     title: "El Museo del Barrio",
     titleEn: "El Museo del Barrio",
     eyebrow: "Museo",
-    year: "Trayectoria",
+    year: pending,
     venue: "El Museo del Barrio",
     city: "Nueva York",
     country: "Estados Unidos",
@@ -197,7 +198,7 @@ export const careerStages: CareerStage[] = [
     summaryEn: "Born in Guantánamo, Cuba."
   },
   {
-    year: "1983/85",
+    year: "1983/1985",
     title: "San Alejandro",
     titleEn: "San Alejandro",
     summary: "Formación en la Escuela de Artes Plásticas San Alejandro, La Habana.",
@@ -225,7 +226,7 @@ export const careerStages: CareerStage[] = [
     summaryEn: "CINTAS fellowship and Aglutinador's presence at documenta fifteen."
   },
   {
-    year: "2024/25",
+    year: "2024/2025",
     title: "ARC / Art Journal",
     titleEn: "ARC / Art Journal",
     summary: "Beca RESILIENCE y conversación publicada por Art Journal Open.",
@@ -248,7 +249,7 @@ export const careerPanels: CareerPanel[] = [
       {
         year: "1961",
         title: "Nacimiento de Sandra Ceballos",
-        venue: pending,
+        venue: "",
         city: "Guantánamo",
         country: "Cuba",
         type: "biografía",
@@ -332,7 +333,7 @@ export const careerPanels: CareerPanel[] = [
       {
         year: pending,
         title: "Exposición colectiva",
-        venue: "Museo Nacional Centro de Arte Reina Sofia",
+        venue: "Museo Nacional Centro de Arte Reina Sofía",
         city: "Madrid",
         country: "España",
         type: "colectiva"

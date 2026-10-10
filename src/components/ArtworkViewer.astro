@@ -81,16 +81,16 @@ const { artworks, site } = Astro.props;
     }
   </div>
 
-  <div class="gallery-view__controls" aria-label="Controles de galería">
-    <button class="nav-button" type="button" data-gallery-prev aria-label={site.nav.previous}>
+  <div class="gallery-view__controls" aria-label="Controles de galería" data-aria-label-en="Gallery controls">
+    <button class="nav-button" type="button" data-gallery-prev aria-label={site.nav.previous} data-aria-label-en={site.nav.previousEn}>
       <span aria-hidden="true">←</span>
     </button>
-    <button class="nav-button" type="button" data-gallery-next aria-label={site.nav.next}>
+    <button class="nav-button" type="button" data-gallery-next aria-label={site.nav.next} data-aria-label-en={site.nav.nextEn}>
       <span aria-hidden="true">→</span>
     </button>
   </div>
 
-  <ArtworkRail artworks={artworks} label="Seleccionar obra en galería" variant="gallery" />
+  <ArtworkRail artworks={artworks} label="Seleccionar obra en galería" labelEn="Select a work in the gallery" variant="gallery" />
 </section>
 
 <style>

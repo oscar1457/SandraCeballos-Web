@@ -6,7 +6,7 @@ type Props = {
 const { label = "Idioma" } = Astro.props;
 ---
 
-<div class="language-switch" aria-label={label}>
+<div class="language-switch" role="group" aria-label={label} data-aria-label-en="Language">
   <button type="button" data-language-switch="es" aria-current="true">ES</button>
   <button type="button" data-language-switch="en">EN</button>
 </div>

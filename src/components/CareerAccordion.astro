@@ -1,5 +1,6 @@
 ---
 import {
+  careerPanels,
   careerStages,
   essentialHighlights
 } from "@/data/exhibitions";
@@ -11,17 +12,26 @@ type Props = {
 
 const { site } = Astro.props;
 
-const timelinePositions = [
-  { x: "21%", y: "75.1%", placement: "below" },
-  { x: "34%", y: "64.1%", placement: "above" },
-  { x: "47%", y: "53.2%", placement: "below" },
-  { x: "60%", y: "42.2%", placement: "above" },
-  { x: "73%", y: "31.3%", placement: "below" },
-  { x: "86%", y: "20.4%", placement: "above" }
-] as const;
+// Reparte las etapas a lo largo del eje diagonal (de x=21% a x=86%),
+// sea cual sea su número. El eje va de (8, 86) a (96, 12).
+const axisY = (x: number) => 86 - ((x - 8) * 74) / 88;
+const timelinePositions = careerStages.map((_, index) => {
+  const steps = Math.max(careerStages.length - 1, 1);
+  const x = 21 + (65 * index) / steps;
+  const y = axisY(x);
+  return {
+    x: `${x.toFixed(1)}%`,
+    y: `${y.toFixed(1)}%`,
+    mobileY: `${Math.min(y + 3, 92).toFixed(1)}%`,
+    placement: index % 2 === 0 ? "below" : "above"
+  };
+});
+
+// El panel de biografía ya se muestra arriba; el CV lista el resto.
+const cvPanels = careerPanels.filter((panel) => panel.id !== "biografia");
 ---
 
-<section class="career-view" aria-label={site.nav.career} data-career-view>
+<section class="career-view" aria-label={site.nav.career} data-aria-label-en={site.nav.careerEn} data-career-view>
   <div class="career-view__topline">
     <button class="text-button" type="button" data-close-panel>
       <span data-lang="es">{site.nav.closeCareer}</span>
@@ -50,16 +60,12 @@ const timelinePositions = [
         <span data-lang="en">Essentials</span>
       </h2>
       <p>
-        <span data-lang="es">
-          Los hitos de mayor reconocimiento institucional, editorial y curatorial.
-        </span>
-        <span data-lang="en">
-          The strongest institutional, editorial and curatorial milestones.
-        </span>
+        <span data-lang="es">{site.biography}</span>
+        <span data-lang="en">{site.biographyEn}</span>
       </p>
     </header>
 
-    <div class="essentials-board" aria-label="Hitos esenciales">
+    <div class="essentials-board" aria-label="Hitos esenciales" data-aria-label-en="Key milestones">
       {
         essentialHighlights.map((item, index) => {
           const Wrapper = item.url ? "a" : "article";
@@ -76,7 +82,7 @@ const timelinePositions = [
               <span class="essential-card__label">{item.eyebrow}</span>
               <span class="essential-card__visual" aria-hidden="true">
                 <span>{item.title}</span>
-                <strong>{item.year}</strong>
+                <strong>{item.year || "—"}</strong>
                 <em>{item.venue} · {item.city}</em>
               </span>
               <span class="essential-card__info">
@@ -89,6 +95,43 @@ const timelinePositions = [
         })
       }
     </div>
+
+    <section class="career-cv" aria-labelledby="career-cv-title">
+      <h3 id="career-cv-title">
+        <span data-lang="es">Currículum</span>
+        <span data-lang="en">Curriculum vitae</span>
+      </h3>
+      <div class="career-cv__grid">
+        {
+          cvPanels.map((panel) => (
+            <section class="career-cv__group" style={`--accent:${panel.color}`}>
+              <h4>
+                <span data-lang="es">{panel.label}</span>
+                <span data-lang="en">{panel.labelEn}</span>
+              </h4>
+              <ul>
+                {panel.items.map((item) => {
+                  const place = [item.venue, item.city, item.country].filter(Boolean).join(", ");
+                  return (
+                    <li>
+                      <span class="career-cv__year">{item.year || "—"}</span>
+                      <span class="career-cv__text">
+                        {item.url ? (
+                          <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a>
+                        ) : (
+                          <strong>{item.title}</strong>
+                        )}
+                        {place && <span class="career-cv__place">{place}</span>}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+    </section>
   </div>
 
   <div class="career-view__content career-view__content--timeline" data-career-section="timeline">
@@ -126,8 +169,7 @@ const timelinePositions = [
       <ol aria-labelledby="career-stages-title">
         {
           careerStages.map((stage, index) => {
-            const fallbackPosition = timelinePositions[timelinePositions.length - 1]!;
-            const position = timelinePositions[index] ?? fallbackPosition;
+            const position = timelinePositions[index]!;
 
             return (
               <li
@@ -136,7 +178,7 @@ const timelinePositions = [
                   `career-timeline__item--${index + 1}`,
                   `is-${position.placement}`
                 ]}
-                style={`--x:${position.x};--y:${position.y}`}
+                style={`--x:${position.x};--y:${position.y};--my:${position.mobileY}`}
               >
                 <article class="career-timeline__node" tabindex="0">
                   <span class="career-timeline__dot" aria-hidden="true"></span>
@@ -166,7 +208,8 @@ const timelinePositions = [
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     gap: clamp(0.85rem, 1.5vw, 1.25rem);
-    min-height: 100%;
+    height: 100%;
+    min-height: 0;
   }
 
   .career-view__content[data-career-section="timeline"],
@@ -615,6 +658,69 @@ const timelinePositions = [
     line-height: 1.22;
   }
 
+  .career-cv {
+    display: grid;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-ink);
+  }
+
+  .career-cv h3,
+  .career-cv h4 {
+    margin: 0;
+    font-size: var(--text-label);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .career-cv__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--space-3);
+  }
+
+  .career-cv__group {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 0.35rem solid var(--accent);
+  }
+
+  .career-cv ul {
+    display: grid;
+    gap: 0.7rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .career-cv li {
+    display: grid;
+    grid-template-columns: 5.75rem 1fr;
+    gap: 0.6rem;
+    font-size: var(--text-small);
+    line-height: 1.25;
+  }
+
+  .career-cv__year {
+    font-weight: 800;
+  }
+
+  .career-cv__text {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .career-cv__text strong,
+  .career-cv__text a {
+    font-weight: 600;
+  }
+
+  .career-cv__place {
+    color: color-mix(in srgb, var(--color-ink) 68%, transparent);
+  }
+
   @media (max-width: 980px) {
     .career-view__intro {
       grid-template-columns: 1fr;
@@ -727,34 +833,8 @@ const timelinePositions = [
       width: 8rem;
     }
 
-    .career-timeline__item--1 {
-      --mobile-x: 21%;
-      --mobile-y: 78%;
-    }
-
-    .career-timeline__item--2 {
-      --mobile-x: 34%;
-      --mobile-y: 67%;
-    }
-
-    .career-timeline__item--3 {
-      --mobile-x: 47%;
-      --mobile-y: 56%;
-    }
-
-    .career-timeline__item--4 {
-      --mobile-x: 60%;
-      --mobile-y: 45%;
-    }
-
-    .career-timeline__item--5 {
-      --mobile-x: 73%;
-      --mobile-y: 34%;
-    }
-
-    .career-timeline__item--6 {
-      --mobile-x: 86%;
-      --mobile-y: 23%;
+    .career-timeline__item {
+      --mobile-y: var(--my);
     }
 
     .career-timeline__text {

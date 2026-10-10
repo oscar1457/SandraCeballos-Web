@@ -16,11 +16,32 @@ const setLanguage = (language: SupportedLanguage) => {
       button.dataset.languageSwitch === language ? "true" : "false"
     );
   });
-  window.localStorage.setItem("sandra-language", language);
+  // Etiquetas para lectores de pantalla: el español es el valor por defecto
+  // y el inglés vive en data-aria-label-en.
+  document.querySelectorAll<HTMLElement>("[data-aria-label-en]").forEach((element) => {
+    if (element.dataset.ariaLabelEs === undefined) {
+      element.dataset.ariaLabelEs = element.getAttribute("aria-label") ?? "";
+    }
+    const label =
+      language === "en" ? element.dataset.ariaLabelEn : element.dataset.ariaLabelEs;
+    if (label) {
+      element.setAttribute("aria-label", label);
+    }
+  });
+  try {
+    window.localStorage.setItem("sandra-language", language);
+  } catch {
+    // Sin almacenamiento (modo privado): el idioma no se recuerda, pero funciona.
+  }
 };
 
 if (languageButtons.length > 0) {
-  const savedLanguage = window.localStorage.getItem("sandra-language");
+  let savedLanguage: string | null = null;
+  try {
+    savedLanguage = window.localStorage.getItem("sandra-language");
+  } catch {
+    savedLanguage = null;
+  }
   setLanguage(isSupportedLanguage(savedLanguage) ? savedLanguage : "es");
 
   languageButtons.forEach((button) => {

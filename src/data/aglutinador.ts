@@ -76,6 +76,10 @@ export type Period = {
   titleEn: string;
   text: string;
   textEn: string;
+  // Imagen opcional del archivo que corresponde a ese periodo.
+  image?: ImageMetadata;
+  caption?: string;
+  captionEn?: string;
 };
 
 // Cronología resumida a partir del documento de Sandra Ceballos.
@@ -85,7 +89,10 @@ export const periods: Period[] = [
     title: "Fundación",
     titleEn: "Foundation",
     text: "Sandra Ceballos y Ezequiel Suárez crean Espacio Aglutinador en la casa-taller de Sandra, en el Vedado, La Habana, con la muestra «Arte degenerado en la era del mercado». Meses después se inaugura «El frente Bauhaus», de Ezequiel Suárez, una exposición censurada en la Galería de 23 y 12. Ese mismo año se incorpora al equipo de curadores Orlando Hernández con la muestra personal de Manuel Vidal y, más adelante, las de Glexis Novoa, Maite Díaz González, Chago Armada, Bernardo Sarria, Carlos Garaicoa, Enrique Lanza, Cleva Solís, Colette Rodríguez y Alberto Casado.",
-    textEn: "Sandra Ceballos and Ezequiel Suárez create Espacio Aglutinador in Sandra’s home-studio in Vedado, Havana, with the show “Arte degenerado en la era del mercado”. Months later “El frente Bauhaus” by Ezequiel Suárez opens, an exhibition that had been censored at the 23 y 12 Gallery. That same year Orlando Hernández joins the curatorial team with Manuel Vidal’s solo show and, later, those of Glexis Novoa, Maite Díaz González, Chago Armada, Bernardo Sarria, Carlos Garaicoa, Enrique Lanza, Cleva Solís, Colette Rodríguez and Alberto Casado."
+    textEn: "Sandra Ceballos and Ezequiel Suárez create Espacio Aglutinador in Sandra’s home-studio in Vedado, Havana, with the show “Arte degenerado en la era del mercado”. Months later “El frente Bauhaus” by Ezequiel Suárez opens, an exhibition that had been censored at the 23 y 12 Gallery. That same year Orlando Hernández joins the curatorial team with Manuel Vidal’s solo show and, later, those of Glexis Novoa, Maite Díaz González, Chago Armada, Bernardo Sarria, Carlos Garaicoa, Enrique Lanza, Cleva Solís, Colette Rodríguez and Alberto Casado.",
+    image: logo,
+    caption: "Logotipo de Espacio Aglutinador",
+    captionEn: "Espacio Aglutinador logo"
   },
   {
     years: "1995–1996",
@@ -113,7 +120,10 @@ export const periods: Period[] = [
     title: "Un espacio comprometido",
     titleEn: "A committed space",
     text: "Con Sandra Ceballos como curadora, productora y diseñadora de montaje, el espacio asume proyectos más comprometidos con los conflictos existenciales, políticos y sociales del país. «Curadores, go home!» fue atacada por el Consejo Nacional de las Artes Plásticas; años después llegó «Curadores, come home!», con Rachel Weiss, Magaly Espinosa, Gerardo Mosquera y Elvia Rosa Castro.",
-    textEn: "With Sandra Ceballos as curator, producer and exhibition designer, the space takes on projects more engaged with the country’s existential, political and social conflicts. “Curadores, go home!” was attacked by the National Council of Visual Arts; years later came “Curadores, come home!”, with Rachel Weiss, Magaly Espinosa, Gerardo Mosquera and Elvia Rosa Castro."
+    textEn: "With Sandra Ceballos as curator, producer and exhibition designer, the space takes on projects more engaged with the country’s existential, political and social conflicts. “Curadores, go home!” was attacked by the National Council of Visual Arts; years later came “Curadores, come home!”, with Rachel Weiss, Magaly Espinosa, Gerardo Mosquera and Elvia Rosa Castro.",
+    image: curadoresGoHome,
+    caption: "Cartel de «Curadores, go home!»",
+    captionEn: "Poster for “Curadores, go home!”"
   },
   {
     years: "2007–2012",
@@ -127,14 +137,20 @@ export const periods: Period[] = [
     title: "Malditos de la posguerra",
     titleEn: "Malditos de la posguerra",
     text: "Un programa de exposiciones para rescatar a artistas cubanos, vivos o muertos, exiliados o no, que sufrieron la censura, la represión y el olvido calculado: «1988: Proyecto G», con Juan Sí González; «OmniZonaFranca: un arte necesario»; «Crónicas y evidencias», con Ángel Delgado y Alberto Casado; «Desde las catacumbas» y «Exilio: outside, pero inside too».",
-    textEn: "A programme of exhibitions to recover Cuban artists, living or dead, exiled or not, who suffered censorship, repression and calculated oblivion: “1988: Proyecto G”, with Juan Sí González; “OmniZonaFranca: un arte necesario”; “Crónicas y evidencias”, with Ángel Delgado and Alberto Casado; “Desde las catacumbas” and “Exilio: outside, pero inside too”."
+    textEn: "A programme of exhibitions to recover Cuban artists, living or dead, exiled or not, who suffered censorship, repression and calculated oblivion: “1988: Proyecto G”, with Juan Sí González; “OmniZonaFranca: un arte necesario”; “Crónicas y evidencias”, with Ángel Delgado and Alberto Casado; “Desde las catacumbas” and “Exilio: outside, pero inside too”.",
+    image: malditosCatalogo,
+    caption: "Catálogo de «Malditos de la posguerra»",
+    captionEn: "“Malditos de la posguerra” catalogue"
   },
   {
     years: "2021–2022",
     title: "27 años y documenta",
     titleEn: "27 years and documenta",
     text: "La muestra «27 años de Espacio Aglutinador» presenta el archivo físico del espacio. En 2022, Espacio Aglutinador se presenta en documenta fifteen, en Kassel.",
-    textEn: "The show “27 years of Espacio Aglutinador” presents the space’s physical archive. In 2022 Espacio Aglutinador is presented at documenta fifteen in Kassel."
+    textEn: "The show “27 years of Espacio Aglutinador” presents the space’s physical archive. In 2022 Espacio Aglutinador is presented at documenta fifteen in Kassel.",
+    image: anos01,
+    caption: "«27 años de Espacio Aglutinador», archivo físico",
+    captionEn: "“27 years of Espacio Aglutinador”, physical archive"
   }
 ];
 

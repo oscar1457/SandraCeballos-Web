@@ -1,0 +1,272 @@
+---
+// Sección "En el taller": vídeo vertical de Sandra trabajando, entre la obra y
+// la trayectoria. Se reproduce sin sonido solo cuando está en pantalla; el
+// sonido se activa con un botón.
+import { getImage } from "astro:assets";
+import posterImage from "@/assets/sandra-taller-poster.jpg";
+
+const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
+---
+
+<section class="studio" id="taller" data-header="light" aria-labelledby="studio-title" data-studio>
+  <div class="studio__text">
+    <h2 class="studio__title" id="studio-title">
+      <span data-lang="es">En el taller</span>
+      <span data-lang="en">In the studio</span>
+    </h2>
+    <p class="studio__lead">
+      <span data-lang="es">
+        Sandra Ceballos trabajando en su taller: dibujo, color y escritura a mano sobre papel, trazo a
+        trazo.
+      </span>
+      <span data-lang="en">
+        Sandra Ceballos at work in her studio: drawing, colour and handwriting on paper, stroke by stroke.
+      </span>
+    </p>
+    <div class="studio__controls">
+      <button type="button" class="studio__button" data-studio-play aria-pressed="false">
+        <span data-lang="es"><span data-when="playing">Pausar</span><span data-when="paused">Reproducir</span></span>
+        <span data-lang="en"><span data-when="playing">Pause</span><span data-when="paused">Play</span></span>
+      </button>
+      <button type="button" class="studio__button" data-studio-sound aria-pressed="false">
+        <span data-lang="es"><span data-when="muted">Activar sonido</span><span data-when="sound">Silenciar</span></span>
+        <span data-lang="en"><span data-when="muted">Sound on</span><span data-when="sound">Mute</span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="studio__frame">
+    <video
+      class="studio__video"
+      data-studio-video
+      poster={poster.src}
+      width="576"
+      height="972"
+      muted
+      loop
+      playsinline
+      preload="none"
+      aria-label="Vídeo: Sandra Ceballos dibujando en su taller"
+      data-aria-label-en="Video: Sandra Ceballos drawing in her studio"
+    ></video>
+  </div>
+</section>
+
+<script>
+  const section = document.querySelector<HTMLElement>("[data-studio]");
+  const video = section?.querySelector<HTMLVideoElement>("[data-studio-video]");
+  const playButton = section?.querySelector<HTMLButtonElement>("[data-studio-play]");
+  const soundButton = section?.querySelector<HTMLButtonElement>("[data-studio-sound]");
+
+  if (section && video && playButton && soundButton) {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Si la persona pausa a mano, no se vuelve a reproducir sola al hacer scroll.
+    let userPaused = reduced;
+    let visible = false;
+
+    // El vídeo (4–6 MB) solo se descarga cuando la sección se acerca a la
+    // pantalla. WebM para Chrome y Firefox; MP4 para Safari y el resto.
+    let loaded = false;
+    const load = () => {
+      if (loaded) return;
+      loaded = true;
+      const sources: { src: string; type: string }[] = [
+        { src: "/video/sandra-taller.webm", type: "video/webm" },
+        { src: "/video/sandra-taller.mp4", type: "video/mp4" }
+      ];
+      sources.forEach(({ src, type }) => {
+        const source = document.createElement("source");
+        source.src = src;
+        source.type = type;
+        video.append(source);
+      });
+      video.load();
+    };
+
+    const render = () => {
+      section.dataset.state = video.paused ? "paused" : "playing";
+      section.dataset.sound = video.muted ? "muted" : "sound";
+      playButton.setAttribute("aria-pressed", String(!video.paused));
+      soundButton.setAttribute("aria-pressed", String(!video.muted));
+    };
+
+    const play = () => {
+      load();
+      video.play().catch(() => render());
+    };
+
+    video.addEventListener("play", render);
+    video.addEventListener("pause", render);
+    video.addEventListener("volumechange", render);
+
+    new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) load();
+      },
+      { rootMargin: "100% 0px" }
+    ).observe(section);
+
+    new IntersectionObserver(
+      (entries) => {
+        visible = entries.some((entry) => entry.isIntersecting);
+        if (visible && !userPaused) {
+          play();
+        } else if (!visible) {
+          video.pause();
+        }
+      },
+      { threshold: 0.35 }
+    ).observe(video);
+
+    playButton.addEventListener("click", () => {
+      if (video.paused) {
+        userPaused = false;
+        play();
+      } else {
+        userPaused = true;
+        video.pause();
+      }
+    });
+
+    soundButton.addEventListener("click", () => {
+      video.muted = !video.muted;
+      if (!video.muted && video.paused) {
+        userPaused = false;
+        play();
+      }
+    });
+
+    render();
+  }
+</script>
+
+<style>
+  .studio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--gutter);
+    align-items: stretch;
+    min-height: 100svh;
+    padding: calc(var(--header-h, 4rem) + var(--gutter)) var(--gutter) var(--gutter);
+    background: var(--red);
+    color: var(--white);
+  }
+
+  .studio__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  .studio__title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2.8rem, 9vw, 10rem);
+    font-weight: 400;
+    line-height: 0.85;
+    text-transform: uppercase;
+  }
+
+  .studio__lead {
+    max-width: 30ch;
+    margin: auto 0 0;
+    font-size: clamp(1.15rem, 1.8vw, 2rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .studio__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .studio__button {
+    padding: 0.55em 1em;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 200ms var(--ease),
+      color 200ms var(--ease);
+  }
+
+  .studio__button:hover,
+  .studio__button:focus-visible {
+    background: var(--white);
+    color: var(--red);
+  }
+
+  .studio__button:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 3px;
+  }
+
+  /* Textos del botón según el estado del vídeo. */
+  .studio [data-when] {
+    display: none;
+  }
+
+  .studio[data-state="playing"] [data-when="playing"],
+  .studio[data-state="paused"] [data-when="paused"],
+  .studio:not([data-state]) [data-when="paused"],
+  .studio[data-sound="muted"] [data-when="muted"],
+  .studio:not([data-sound]) [data-when="muted"],
+  .studio[data-sound="sound"] [data-when="sound"] {
+    display: inline;
+  }
+
+  .studio__frame {
+    align-self: end;
+  }
+
+  .studio__video {
+    display: block;
+    width: auto;
+    height: min(calc(100svh - var(--header-h, 4rem) - var(--gutter) * 2), 60rem);
+    aspect-ratio: 576 / 972;
+    background: var(--red-deep);
+    object-fit: cover;
+  }
+
+  /* En móvil: título, vídeo, texto y botones, uno debajo de otro. */
+  @media (max-width: 760px) {
+    .studio {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3);
+      min-height: 0;
+      padding-bottom: var(--space-4);
+    }
+
+    .studio__text {
+      display: contents;
+    }
+
+    .studio__frame {
+      order: 1;
+    }
+
+    .studio__lead {
+      order: 2;
+      margin-top: 0;
+    }
+
+    .studio__controls {
+      order: 3;
+    }
+
+    .studio__video {
+      width: 100%;
+      height: auto;
+      max-height: 80svh;
+      margin-inline: auto;
+    }
+  }
+</style>

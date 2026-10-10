@@ -68,6 +68,8 @@ const viewerData = photos.map(({ full, srcset, caption, captionEn }) => ({ full,
 </AglutinadorLayout>
 
 <script>
+  import "@/scripts/agl-smooth.ts";
+
   type Photo = { full: string; srcset: string; caption: string; captionEn: string };
   const dialog = document.querySelector<HTMLDialogElement>("[data-viewer]");
   const data = JSON.parse(document.getElementById("archive-data")?.textContent ?? "[]") as Photo[];

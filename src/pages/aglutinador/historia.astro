@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import AglutinadorLayout from "@/layouts/AglutinadorLayout.astro";
 import { catalogue, catalogueAuthors, curators, periods } from "@/data/aglutinador";
 
@@ -13,8 +14,9 @@ const total = periods.length + 2;
 >
   <p class="counter num" aria-hidden="true"><span data-counter>1</span> / {total}</p>
 
-  <section class="panel" data-panel aria-labelledby="historia-title">
-    <h1 class="panel__text" id="historia-title">
+  <!-- Entrada: un párrafo grande, como un titular, sin ocupar toda la pantalla. -->
+  <section class="lead" data-panel aria-labelledby="historia-title">
+    <h1 class="lead__text" id="historia-title">
       <span data-lang="es">
         <u>Espacio Aglutinador</u> es un espacio de arte independiente fundado en 1994 por Sandra Ceballos
         y Ezequiel Suárez en la casa-taller de Sandra, en el Vedado, La Habana. Durante casi tres décadas
@@ -28,119 +30,242 @@ const total = periods.length + 2;
     </h1>
   </section>
 
+  <!-- Cronología: año | título y texto | imagen del archivo (si la hay). -->
   {
     periods.map((period) => (
-      <section class="panel" data-panel>
-        <h2 class="sr-only">
-          {period.years}: <span data-lang="es">{period.title}</span><span data-lang="en">{period.titleEn}</span>
-        </h2>
-        <p class="panel__text">
-          <u class="num">{period.years}</u>{" "}
-          <span data-lang="es">
-            <strong>{period.title}.</strong> {period.text}
-          </span>
-          <span data-lang="en">
-            <strong>{period.titleEn}.</strong> {period.textEn}
-          </span>
+      <section class="entry" data-panel>
+        <p class="entry__year num" aria-hidden="true">
+          <u>{period.years}</u>
         </p>
+        <div class="entry__body">
+          <h2 class="entry__title">
+            <span class="sr-only">{period.years}: </span>
+            <span data-lang="es">{period.title}</span>
+            <span data-lang="en">{period.titleEn}</span>
+          </h2>
+          <p class="entry__text">
+            <span data-lang="es">{period.text}</span>
+            <span data-lang="en">{period.textEn}</span>
+          </p>
+        </div>
+        {period.image && (
+          <figure class="entry__figure">
+            <Image
+              src={period.image}
+              alt={period.caption ?? ""}
+              widths={[360, 640, 900]}
+              sizes="(max-width: 900px) 70vw, 22vw"
+              loading="lazy"
+            />
+            <figcaption>
+              <span data-lang="es">{period.caption}</span>
+              <span data-lang="en">{period.captionEn}</span>
+            </figcaption>
+          </figure>
+        )}
       </section>
     ))
   }
 
-  <section class="panel panel--lists" data-panel aria-labelledby="personas-title">
-    <h2 class="sr-only" id="personas-title">
-      <span data-lang="es">Curadores y autores</span><span data-lang="en">Curators and authors</span>
-    </h2>
-    <p class="panel__text">
-      <u><span data-lang="es">Curadores</span><span data-lang="en">Curators</span></u>{" "}
-      <span data-lang="es">que han colaborado con el espacio:</span>
-      <span data-lang="en">who have collaborated with the space:</span>{" "}
-      {curators.join(", ")}.
+  <section class="entry entry--lists" data-panel aria-labelledby="personas-title">
+    <p class="entry__year" aria-hidden="true">
+      <u><span data-lang="es">Personas</span><span data-lang="en">People</span></u>
     </p>
-    <p class="panel__small">
-      <span data-lang="es">Textos publicados en catálogos de Aglutinador:</span>
-      <span data-lang="en">Texts published in Aglutinador catalogues:</span>{" "}
-      {catalogueAuthors.join(", ")}
-      <span data-lang="es">, entre otros.</span><span data-lang="en">, among others.</span>
-    </p>
-    <p class="panel__small">
-      <a href={catalogue.file} target="_blank" rel="noreferrer">
-        <span data-lang="es">Catálogo «{catalogue.title}» (PDF, {catalogue.size})</span>
-        <span data-lang="en">“{catalogue.title}” catalogue (PDF, {catalogue.size})</span>
-      </a>
-    </p>
+    <div class="entry__body">
+      <h2 class="entry__title" id="personas-title">
+        <span data-lang="es">Curadores</span><span data-lang="en">Curators</span>
+      </h2>
+      <p class="entry__text">{curators.join(", ")}.</p>
+      <h2 class="entry__title">
+        <span data-lang="es">Textos de catálogo</span><span data-lang="en">Catalogue texts</span>
+      </h2>
+      <p class="entry__text">
+        {catalogueAuthors.join(", ")}<span data-lang="es">, entre otros.</span><span data-lang="en">, among others.</span>
+      </p>
+      <p class="entry__text">
+        <a href={catalogue.file} target="_blank" rel="noreferrer">
+          <span data-lang="es">Catálogo «{catalogue.title}» (PDF, {catalogue.size})</span>
+          <span data-lang="en">“{catalogue.title}” catalogue (PDF, {catalogue.size})</span>
+        </a>
+      </p>
+    </div>
   </section>
 </AglutinadorLayout>
 
 <script>
-  // Contador "n / total" según el panel que está en pantalla.
+  import "@/scripts/agl-smooth.ts";
+
+  // Contador "n / total": el apartado activo es el último cuyo inicio ya ha
+  // pasado el primer cuarto de la pantalla.
   const counter = document.querySelector<HTMLElement>("[data-counter]");
   const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-panel]"));
   if (counter && panels.length) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            counter.textContent = String(panels.indexOf(entry.target as HTMLElement) + 1);
-          }
-        });
-      },
-      { rootMargin: "-45% 0px -45% 0px" }
-    );
-    panels.forEach((panel) => observer.observe(panel));
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const line = window.innerHeight * 0.25;
+      let active = 0;
+      panels.forEach((panel, index) => {
+        if (panel.getBoundingClientRect().top <= line) active = index;
+      });
+      // Al llegar al final de la página, el último apartado.
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+        active = panels.length - 1;
+      }
+      counter.textContent = String(active + 1);
+    };
+    const queue = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue);
+    update();
   }
 </script>
 
 <style>
   .counter {
     position: fixed;
-    top: var(--gutter);
-    left: var(--gutter);
+    top: 0;
+    left: 0;
     z-index: 5;
     margin: 0;
+    padding: var(--gutter);
+    background: var(--agl-bg);
     font-size: clamp(0.85rem, 1vw, 1rem);
     font-weight: 600;
   }
 
-  .panel {
-    display: grid;
-    align-content: start;
-    gap: var(--space-3);
-    min-height: calc(100svh - var(--bar-h));
-    padding: calc(var(--gutter) * 4) var(--gutter) var(--space-4);
+  .lead {
+    padding: calc(var(--gutter) * 5) var(--gutter) var(--space-5);
   }
 
-  .panel + .panel {
-    border-top: 1px solid rgb(0 0 0 / 0.25);
-  }
-
-  .panel__text {
-    max-width: 62ch;
+  .lead__text {
+    max-width: 30ch;
     margin: 0;
-    font-size: clamp(1.6rem, 3vw, 3.6rem);
+    font-size: clamp(2rem, 4.6vw, 5.4rem);
     font-weight: 600;
-    line-height: 1.07;
-    letter-spacing: -0.025em;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
   }
 
-  .panel__text strong {
-    font-weight: 600;
-  }
-
-  .panel__text u {
+  .lead__text u,
+  .entry__year u {
     text-decoration-thickness: 0.06em;
     text-underline-offset: 0.12em;
   }
 
-  .panel__small {
-    max-width: 70ch;
+  /* Cada periodo es una fila de tres columnas separadas por una línea fina. */
+  .entry {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 6fr) minmax(0, 3fr);
+    gap: var(--space-3) var(--gutter);
+    align-items: start;
+    padding: var(--space-3) var(--gutter) var(--space-4);
+    border-top: 1px solid rgb(0 0 0 / 0.3);
+  }
+
+  .entry__year {
+    position: sticky;
+    top: calc(var(--gutter) * 3.5);
     margin: 0;
-    font-size: clamp(1rem, 1.4vw, 1.4rem);
+    font-size: clamp(1.5rem, 2.6vw, 3.2rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .entry__body {
+    display: grid;
+    gap: var(--space-2);
+    grid-column: 2;
+  }
+
+  .entry__title {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.6vw, 3.2rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .entry__title + .entry__text {
+    margin-top: var(--space-1);
+  }
+
+  .entry__text + .entry__title {
+    margin-top: var(--space-3);
+  }
+
+  .entry__text {
+    max-width: 58ch;
+    margin: 0;
+    font-size: clamp(1.05rem, 1.35vw, 1.45rem);
+    font-weight: 500;
+    line-height: 1.32;
+  }
+
+  .entry__text a {
+    font-weight: 600;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.15em;
+  }
+
+  .entry__figure {
+    grid-column: 3;
+    margin: 0;
+  }
+
+  .entry__figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 70svh;
+    object-fit: contain;
+    object-position: left top;
+  }
+
+  .entry__figure figcaption {
+    margin-top: var(--space-1);
+    font-size: 0.85rem;
     font-weight: 600;
     line-height: 1.25;
   }
 
-  .panel__small a {
-    text-decoration-thickness: 0.08em;
+  /* El último apartado deja aire para que la barra de abajo no tape nada. */
+  .entry:last-of-type {
+    padding-bottom: var(--space-5);
+  }
+
+  @media (max-width: 900px) {
+    /* En móvil el contador es una franja: el texto pasa por debajo sin asomar. */
+    .counter {
+      right: 0;
+    }
+
+    .lead {
+      padding-top: calc(var(--gutter) * 6);
+    }
+
+    .entry {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-2);
+    }
+
+    .entry__year {
+      position: static;
+    }
+
+    .entry__body,
+    .entry__figure {
+      grid-column: 1;
+    }
+
+    .entry__figure {
+      max-width: 26rem;
+    }
   }
 </style>

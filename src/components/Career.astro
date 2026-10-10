@@ -6,7 +6,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
 ---
 
 <section class="career" id="trayectoria" data-header="dark" aria-labelledby="career-title">
-  <div class="career__letter" aria-hidden="true">C</div>
+  <div class="career__letter" aria-hidden="true" data-career-letter>C</div>
 
   <h2 class="career__statement" id="career-title">
     <span data-lang="es">
@@ -32,8 +32,8 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
       </summary>
       <ol class="rows">
         {
-          careerStages.map((stage) => (
-            <li class="row">
+          careerStages.map((stage, index) => (
+            <li class="row" style={`--row:${index}`}>
               <span class="num">{stage.year}</span>
               <span>
                 <strong>
@@ -58,8 +58,8 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
       </summary>
       <ul class="rows">
         {
-          essentialHighlights.map((item) => (
-            <li class="row">
+          essentialHighlights.map((item, index) => (
+            <li class="row" style={`--row:${index}`}>
               <span class="num">{item.year || "—"}</span>
               <span>
                 <strong>
@@ -98,8 +98,8 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
             </span>
           </summary>
           <ul class="rows">
-            {panel.items.map((item) => (
-              <li class="row">
+            {panel.items.map((item, index) => (
+              <li class="row" style={`--row:${index}`}>
                 <span class="num">{item.year || "—"}</span>
                 <span>
                   <strong>
@@ -120,6 +120,138 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
   </div>
 </section>
 
+<script>
+  // Animaciones de Trayectoria:
+  // 1. Al llegar con el scroll: la frase aparece palabra a palabra, la C crece
+  //    y gira, y los apartados entran uno tras otro.
+  // 2. Al pulsar un apartado: se abre y se cierra deslizándose.
+  // 3. Con ratón: la C sigue suavemente al cursor.
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Separa la frase en palabras para animarlas una a una. No mide el texto,
+  // así funciona también con el idioma que está oculto.
+  const splitWords = (element: HTMLElement) => {
+    const words = (element.textContent ?? "").trim().split(/\s+/);
+    element.textContent = "";
+    return words.map((word, index) => {
+      const inner = document.createElement("span");
+      inner.className = "word";
+      inner.textContent = word;
+      element.append(inner);
+      if (index < words.length - 1) {
+        element.append(" ");
+      }
+      return inner;
+    });
+  };
+
+  const section = document.getElementById("trayectoria");
+  const letter = document.querySelector<HTMLElement>("[data-career-letter]");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  if (section && letter && !reduced) {
+
+    // 1a. Frase grande, palabra a palabra.
+    section.querySelectorAll<HTMLElement>(".career__statement > span").forEach((span) => {
+      const words = splitWords(span);
+      gsap.from(words, {
+        yPercent: 70,
+        opacity: 0,
+        duration: 0.9,
+        ease: "power3.out",
+        stagger: 0.04,
+        clearProps: "transform,opacity",
+        scrollTrigger: { trigger: section, start: "top 70%" }
+      });
+    });
+
+    // 1b. La C crece y gira mientras se entra en la sección.
+    gsap.fromTo(
+      letter,
+      { scale: 0.6, rotate: -18, opacity: 0 },
+      {
+        scale: 1,
+        rotate: 0,
+        opacity: 1,
+        ease: "none",
+        scrollTrigger: { trigger: section, start: "top bottom", end: "top 15%", scrub: 0.8 }
+      }
+    );
+
+    // 1c. Texto de entrada y apartados, uno tras otro.
+    const entries = section.querySelectorAll(".career__lead, .career__item");
+    gsap.from(entries, {
+      y: 40,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      stagger: 0.07,
+      scrollTrigger: { trigger: ".career__index", start: "top 85%" }
+    });
+
+    // 3. La C sigue al ratón.
+    if (canHover) {
+      const moveX = gsap.quickTo(letter, "x", { duration: 1.2, ease: "power3.out" });
+      const moveY = gsap.quickTo(letter, "y", { duration: 1.2, ease: "power3.out" });
+      section.addEventListener("pointermove", (event) => {
+        const rect = section.getBoundingClientRect();
+        moveX(((event.clientX - rect.left) / rect.width - 0.5) * 80);
+        moveY(((event.clientY - rect.top) / rect.height - 0.5) * 50);
+      });
+      section.addEventListener("pointerleave", () => {
+        moveX(0);
+        moveY(0);
+      });
+    }
+  }
+
+  // 2. Abrir y cerrar apartados con movimiento (sin movimiento reducido: instantáneo).
+  if (section && !reduced) {
+    section.querySelectorAll<HTMLDetailsElement>(".career__item").forEach((item) => {
+      const summary = item.querySelector("summary");
+      const content = item.querySelector<HTMLElement>(".rows");
+      if (!summary || !content) {
+        return;
+      }
+      summary.addEventListener("click", (event) => {
+        event.preventDefault();
+        gsap.killTweensOf(content);
+        if (!item.open) {
+          item.open = true;
+          gsap.fromTo(
+            content,
+            { height: 0, overflow: "hidden" },
+            {
+              height: "auto",
+              duration: 0.7,
+              ease: "power3.inOut",
+              onComplete: () => {
+                gsap.set(content, { clearProps: "height,overflow" });
+                ScrollTrigger.refresh();
+              }
+            }
+          );
+        } else {
+          gsap.to(content, {
+            height: 0,
+            overflow: "hidden",
+            duration: 0.5,
+            ease: "power3.inOut",
+            onComplete: () => {
+              item.open = false;
+              gsap.set(content, { clearProps: "height,overflow" });
+              ScrollTrigger.refresh();
+            }
+          });
+        }
+      });
+    });
+  }
+</script>
+
 <style>
   .career {
     position: relative;
@@ -137,7 +269,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    translate: -50% -50%;
     color: var(--stone);
     font-family: var(--font-serif);
     font-size: min(150svh, 110vw);
@@ -154,6 +286,12 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     line-height: 1;
     letter-spacing: -0.04em;
     text-indent: 25%;
+  }
+
+  /* Cada palabra es un bloque propio para animarla; sin la sangría del párrafo. */
+  .career__statement :global(.word) {
+    display: inline-block;
+    text-indent: 0;
   }
 
   .career__index {
@@ -180,13 +318,51 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
   }
 
   .career__item summary {
+    position: relative;
     display: grid;
-    grid-template-columns: 6rem 1fr;
+    grid-template-columns: 6rem 1fr auto;
     padding: 0.55rem 0;
     font-size: var(--text-small);
     font-weight: 600;
     list-style: none;
     cursor: pointer;
+    isolation: isolate;
+    transition: color 350ms var(--ease);
+  }
+
+  /* Al pasar el cursor: una franja negra entra desde la izquierda. */
+  .career__item summary::before {
+    content: "";
+    position: absolute;
+    inset: 0 calc(-1 * var(--gutter) / 2);
+    z-index: -1;
+    background: var(--black);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 450ms var(--ease);
+  }
+
+  .career__item summary > span {
+    transition: transform 450ms var(--ease);
+  }
+
+  @media (hover: hover) {
+    .career__item summary:hover {
+      color: var(--white);
+    }
+
+    .career__item summary:hover::before {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .career__item summary:hover > span:nth-child(2) {
+      transform: translateX(0.6rem);
+    }
+  }
+
+  .career__item summary:focus-visible {
+    outline-offset: -2px;
   }
 
   .career__item summary::-webkit-details-marker {
@@ -196,6 +372,13 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
   .career__item summary::after {
     content: "+";
     grid-column: 3;
+    transition: transform 450ms var(--ease);
+  }
+
+  @media (hover: hover) {
+    .career__item summary:hover::after {
+      transform: rotate(90deg);
+    }
   }
 
   .career__item[open] summary::after {
@@ -209,12 +392,70 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
   }
 
   .row {
+    position: relative;
     display: grid;
     grid-template-columns: 6rem minmax(0, 1fr);
     padding: 0.45rem 0;
     border-top: 1px solid var(--color-line);
     font-size: var(--text-small);
     font-weight: 500;
+    isolation: isolate;
+  }
+
+  /* Filas del contenido: una línea roja crece bajo la fila y el texto se desplaza. */
+  .row::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 500ms var(--ease);
+  }
+
+  .row > span {
+    transition:
+      transform 450ms var(--ease),
+      color 300ms var(--ease);
+  }
+
+  @media (hover: hover) {
+    .row:hover::after {
+      transform: scaleX(1);
+    }
+
+    .row:hover > span:first-child {
+      color: var(--red);
+    }
+
+    .row:hover > span:last-child {
+      transform: translateX(0.6rem);
+    }
+  }
+
+  .row a {
+    text-decoration-color: transparent;
+    transition: text-decoration-color 300ms var(--ease);
+  }
+
+  .row a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Al abrir un apartado, sus filas aparecen una tras otra. */
+  .career__item[open] .row {
+    animation: row-in 500ms var(--ease-out) both;
+    animation-delay: calc(var(--row, 0) * 35ms);
+  }
+
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.4rem);
+    }
   }
 
   .row > span:last-child {
@@ -233,6 +474,14 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
   @media (max-width: 900px) {
     .career__index {
       grid-column: 1 / -1;
+    }
+
+    .career__item summary {
+      grid-template-columns: 2.75rem 1fr auto;
+    }
+
+    .row {
+      grid-template-columns: 5.25rem minmax(0, 1fr);
     }
 
     .career__statement {

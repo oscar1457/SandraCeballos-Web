@@ -17,8 +17,8 @@ export const site = {
   email: "aglutinadorsandra@gmail.com",
   portfolioPdf: "/files/sandra-ceballos-portfolio.pdf",
   instagram: {
-    label: "@art_sandraglutina_photos",
-    url: "https://www.instagram.com/art_sandraglutina_photos/"
+    label: "@art_sandraceballos_photos",
+    url: "https://www.instagram.com/art_sandraceballos_photos/"
   },
   backgroundImage,
   ogImage,
@@ -122,7 +122,7 @@ export const site = {
     }
   ],
   socialProfiles: [
-    "https://www.instagram.com/art_sandraglutina_photos/",
+    "https://www.instagram.com/art_sandraceballos_photos/",
     "https://www.espacioaglutinador.com/"
   ]
 } as const;

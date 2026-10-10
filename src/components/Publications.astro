@@ -13,6 +13,10 @@ const shots = [publicationImages.covers, publicationImages.spread];
           <span data-lang="es">Publicaciones</span>
           <span data-lang="en">Publications</span>
         </h2>
+        <p class="pubs__hint" aria-hidden="true">
+          <span data-lang="es">Desliza para ver los catálogos →</span>
+          <span data-lang="en">Swipe to see the catalogues →</span>
+        </p>
         <ul class="pubs__list">
           {
             publications.map((publication) => (
@@ -150,6 +154,13 @@ const shots = [publicationImages.covers, publicationImages.spread];
     text-transform: uppercase;
   }
 
+  .pubs__hint {
+    display: none;
+    margin: 0;
+    font-size: var(--text-small);
+    font-weight: 500;
+  }
+
   .pubs__list {
     display: grid;
     gap: var(--space-2);
@@ -203,7 +214,12 @@ const shots = [publicationImages.covers, publicationImages.spread];
 
     .pubs__track {
       height: auto;
-      padding-top: 8rem;
+      padding: 5rem var(--gutter) var(--space-4);
+      gap: var(--space-3);
+    }
+
+    .pubs__hint {
+      display: block;
     }
 
     .pubs__panel {

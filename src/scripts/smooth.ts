@@ -27,8 +27,13 @@ if (header && sections.length > 0) {
       return rect.top <= probe && rect.bottom > probe;
     });
     header.dataset.tone = current?.dataset.header === "dark" ? "dark" : "light";
+    // La cabecera toma el color de fondo de la sección para que el texto de la
+    // página no se mezcle con el menú al pasar por debajo.
+    const background = current ? getComputedStyle(current).backgroundColor : "transparent";
+    header.style.setProperty("--header-bg", background);
   };
   updateTone();
   window.addEventListener("scroll", updateTone, { passive: true });
+  ScrollTrigger.addEventListener("refresh", updateTone);
   window.addEventListener("resize", updateTone);
 }

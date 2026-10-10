@@ -24,7 +24,22 @@ const { site, workCount } = Astro.props;
       <span data-lang="en">{site.roleEn}</span>
     </span>
   </a>
-  <nav class="site-header__nav" aria-label="Navegación principal" data-aria-label-en="Main navigation">
+  <button
+    type="button"
+    class="site-header__menu"
+    aria-expanded="false"
+    aria-controls="site-nav"
+    data-menu-button
+  >
+    <span data-lang="es">Menú</span><span data-lang="en">Menu</span>
+  </button>
+  <nav
+    class="site-header__nav"
+    id="site-nav"
+    aria-label="Navegación principal"
+    data-aria-label-en="Main navigation"
+    data-menu
+  >
     <a href="#obra">
       <span data-lang="es">Obra</span><span data-lang="en">Work</span><sup class="num">{workCount}</sup>
     </a>
@@ -41,6 +56,29 @@ const { site, workCount } = Astro.props;
   </nav>
 </header>
 
+<script>
+  // Menú de móvil: abre y cierra la lista de secciones a pantalla completa.
+  const header = document.querySelector<HTMLElement>("[data-site-header]");
+  const button = document.querySelector<HTMLButtonElement>("[data-menu-button]");
+  if (header && button) {
+    const setOpen = (open: boolean) => {
+      header.classList.toggle("is-open", open);
+      button.setAttribute("aria-expanded", String(open));
+      document.documentElement.classList.toggle("menu-open", open);
+    };
+    button.addEventListener("click", () => setOpen(!header.classList.contains("is-open")));
+    header.querySelectorAll("[data-menu] a").forEach((link) =>
+      link.addEventListener("click", () => setOpen(false))
+    );
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && header.classList.contains("is-open")) {
+        setOpen(false);
+        button.focus();
+      }
+    });
+  }
+</script>
+
 <style>
   .site-header {
     position: fixed;
@@ -51,21 +89,18 @@ const { site, workCount } = Astro.props;
     justify-content: space-between;
     gap: var(--space-2);
     padding: var(--gutter);
+    background: var(--header-bg, transparent);
     color: var(--white);
     font-size: var(--text-small);
     font-weight: 500;
     line-height: 1.1;
-    transition: color 300ms var(--ease);
-    pointer-events: none;
+    transition:
+      color 300ms var(--ease),
+      background-color 300ms var(--ease);
   }
 
   .site-header[data-tone="dark"] {
     color: var(--black);
-  }
-
-  .site-header a,
-  .site-header :global(button) {
-    pointer-events: auto;
   }
 
   .site-header__logo {
@@ -101,15 +136,70 @@ const { site, workCount } = Astro.props;
     font-size: 0.6em;
   }
 
+  .site-header__menu {
+    display: none;
+    position: relative;
+    z-index: 2;
+    padding: 0.4rem 0;
+    border: 0;
+    background: none;
+    font-size: inherit;
+    font-weight: 500;
+  }
+
   @media (max-width: 760px) {
     .site-header {
-      flex-wrap: wrap;
+      align-items: center;
     }
 
+    .site-header__logo {
+      position: relative;
+      z-index: 2;
+    }
+
+    .site-header__menu {
+      display: block;
+    }
+
+    /* El menú ocupa toda la pantalla, en negro, con enlaces grandes. */
     .site-header__nav {
-      width: 100%;
-      flex-wrap: wrap;
-      gap: 0.4rem 0.9rem;
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+      gap: 0.4rem;
+      padding: 6rem var(--gutter) 3rem;
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-serif);
+      font-size: clamp(2.6rem, 13vw, 4rem);
+      line-height: 1;
+      text-transform: uppercase;
+      clip-path: inset(0 0 100% 0);
+      visibility: hidden;
+      transition:
+        clip-path 600ms var(--ease),
+        visibility 0s linear 600ms;
+    }
+
+    .site-header.is-open {
+      color: var(--white);
+    }
+
+    .site-header.is-open .site-header__nav {
+      clip-path: inset(0 0 0 0);
+      visibility: visible;
+      transition: clip-path 600ms var(--ease);
+      pointer-events: auto;
+    }
+
+    .site-header__nav :global(.language-switch) {
+      margin-top: var(--space-3);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      text-transform: none;
     }
   }
 </style>

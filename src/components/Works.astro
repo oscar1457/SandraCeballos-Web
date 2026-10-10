@@ -556,11 +556,11 @@ const pad = (n: number) => String(n);
 
   @media (max-width: 760px) {
     .works__switch {
-      top: 7.5rem;
+      top: 4.75rem;
     }
 
     .works__now {
-      top: 9.5rem;
+      top: 6.5rem;
       grid-template-columns: auto 1fr auto;
       gap: 0.75rem;
     }
@@ -600,8 +600,17 @@ const pad = (n: number) => String(n);
       display: none;
     }
 
+    /* En móvil la vista previa va encima de la lista, en el hueco libre. */
+    .works[data-mode="list"] .list {
+      grid-template-rows: minmax(0, 1fr) auto;
+      top: 10rem;
+    }
+
     .list__preview {
-      display: none;
+      order: -1;
+      justify-content: flex-start;
+      height: 100%;
+      min-height: 8rem;
     }
 
     .sheet__panel {

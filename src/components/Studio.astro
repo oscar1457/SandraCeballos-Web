@@ -1,7 +1,7 @@
 ---
-// Sección "En el taller": vídeo vertical de Sandra trabajando, entre la obra y
-// la trayectoria. Se reproduce sin sonido solo cuando está en pantalla; el
-// sonido se activa con un botón.
+// Sección "En el taller", entre la obra y la trayectoria. El vídeo de Sandra
+// trabajando no se muestra como vídeo sino como fondo: duotono rojo, grano y
+// paralaje, sin sonido ni controles.
 import { getImage } from "astro:assets";
 import posterImage from "@/assets/sandra-taller-poster.jpg";
 
@@ -9,33 +9,8 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
 ---
 
 <section class="studio" id="taller" data-header="light" aria-labelledby="studio-title" data-studio>
-  <div class="studio__text">
-    <h2 class="studio__title" id="studio-title">
-      <span data-lang="es">En el taller</span>
-      <span data-lang="en">In the studio</span>
-    </h2>
-    <p class="studio__lead">
-      <span data-lang="es">
-        Sandra Ceballos trabajando en su taller: dibujo, color y escritura a mano sobre papel, trazo a
-        trazo.
-      </span>
-      <span data-lang="en">
-        Sandra Ceballos at work in her studio: drawing, colour and handwriting on paper, stroke by stroke.
-      </span>
-    </p>
-    <div class="studio__controls">
-      <button type="button" class="studio__button" data-studio-play aria-pressed="false">
-        <span data-lang="es"><span data-when="playing">Pausar</span><span data-when="paused">Reproducir</span></span>
-        <span data-lang="en"><span data-when="playing">Pause</span><span data-when="paused">Play</span></span>
-      </button>
-      <button type="button" class="studio__button" data-studio-sound aria-pressed="false">
-        <span data-lang="es"><span data-when="muted">Activar sonido</span><span data-when="sound">Silenciar</span></span>
-        <span data-lang="en"><span data-when="muted">Sound on</span><span data-when="sound">Mute</span></span>
-      </button>
-    </div>
-  </div>
-
-  <div class="studio__frame">
+  <!-- Fondo decorativo: el vídeo del taller tratado en duotono rojo, con grano. -->
+  <div class="studio__media" aria-hidden="true">
     <video
       class="studio__video"
       data-studio-video
@@ -46,26 +21,37 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
       loop
       playsinline
       preload="none"
-      aria-label="Vídeo: Sandra Ceballos dibujando en su taller"
-      data-aria-label-en="Video: Sandra Ceballos drawing in her studio"
+      tabindex="-1"
     ></video>
+    <div class="studio__grain"></div>
+  </div>
+
+  <div class="studio__content">
+    <h2 class="studio__title" id="studio-title">
+      <span data-lang="es">En el taller</span>
+      <span data-lang="en">In the studio</span>
+    </h2>
+    <p class="studio__lead">
+      <span data-lang="es">Dibujo, color y escritura a mano sobre papel, trazo a trazo.</span>
+      <span data-lang="en">Drawing, colour and handwriting on paper, stroke by stroke.</span>
+    </p>
   </div>
 </section>
 
 <script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
   const section = document.querySelector<HTMLElement>("[data-studio]");
   const video = section?.querySelector<HTMLVideoElement>("[data-studio-video]");
-  const playButton = section?.querySelector<HTMLButtonElement>("[data-studio-play]");
-  const soundButton = section?.querySelector<HTMLButtonElement>("[data-studio-sound]");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (section && video && playButton && soundButton) {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Si la persona pausa a mano, no se vuelve a reproducir sola al hacer scroll.
-    let userPaused = reduced;
-    let visible = false;
-
-    // El vídeo (4–6 MB) solo se descarga cuando la sección se acerca a la
-    // pantalla. WebM para Chrome y Firefox; MP4 para Safari y el resto.
+  // Con movimiento reducido se queda la imagen fija (el póster).
+  if (section && video && !reduced) {
+    // El vídeo (3 MB, sin sonido) solo se descarga cuando la sección se acerca.
+    // WebM para Chrome y Firefox; MP4 para Safari y el resto.
     let loaded = false;
     const load = () => {
       if (loaded) return;
@@ -83,22 +69,6 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
       video.load();
     };
 
-    const render = () => {
-      section.dataset.state = video.paused ? "paused" : "playing";
-      section.dataset.sound = video.muted ? "muted" : "sound";
-      playButton.setAttribute("aria-pressed", String(!video.paused));
-      soundButton.setAttribute("aria-pressed", String(!video.muted));
-    };
-
-    const play = () => {
-      load();
-      video.play().catch(() => render());
-    };
-
-    video.addEventListener("play", render);
-    video.addEventListener("pause", render);
-    video.addEventListener("volumechange", render);
-
     new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) load();
@@ -106,167 +76,110 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
       { rootMargin: "100% 0px" }
     ).observe(section);
 
-    new IntersectionObserver(
-      (entries) => {
-        visible = entries.some((entry) => entry.isIntersecting);
-        if (visible && !userPaused) {
-          play();
-        } else if (!visible) {
-          video.pause();
-        }
-      },
-      { threshold: 0.35 }
-    ).observe(video);
-
-    playButton.addEventListener("click", () => {
-      if (video.paused) {
-        userPaused = false;
-        play();
+    // Solo se reproduce mientras se ve.
+    new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        load();
+        video.play().catch(() => {});
       } else {
-        userPaused = true;
         video.pause();
       }
-    });
+    }).observe(section);
 
-    soundButton.addEventListener("click", () => {
-      video.muted = !video.muted;
-      if (!video.muted && video.paused) {
-        userPaused = false;
-        play();
+    // Paralaje suave: el fondo se mueve algo más despacio que la página.
+    gsap.fromTo(
+      video,
+      { yPercent: -7 },
+      {
+        yPercent: 7,
+        ease: "none",
+        scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: true }
       }
-    });
-
-    render();
+    );
   }
 </script>
 
 <style>
   .studio {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--gutter);
-    align-items: stretch;
+    grid-template-rows: auto 1fr auto;
     min-height: 100svh;
-    padding: calc(var(--header-h, 4rem) + var(--gutter)) var(--gutter) var(--gutter);
+    padding: calc(4rem + var(--gutter)) var(--gutter) var(--gutter);
+    overflow: hidden;
+    isolation: isolate;
     background: var(--red);
     color: var(--white);
   }
 
-  .studio__text {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    min-width: 0;
+  /* El vídeo en blanco y negro se multiplica sobre el rojo: los blancos quedan
+     rojos y las sombras casi negras. Así su baja resolución se lee como textura. */
+  .studio__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    /* El rojo va aquí: la mezcla solo ve lo que hay dentro de esta capa. */
+    background: var(--red);
+  }
+
+  .studio__video {
+    position: absolute;
+    inset: -8% 0;
+    width: 100%;
+    height: 116%;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.4) brightness(1.08);
+    mix-blend-mode: multiply;
+    opacity: 0.9;
+  }
+
+  .studio__grain {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    opacity: 0.35;
+  }
+
+  /* Un poco de sombra abajo para que el texto se lea siempre. */
+  .studio__media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(0 0 0 / 0) 55%, rgb(0 0 0 / 0.35) 100%);
+  }
+
+  .studio__content {
+    display: contents;
   }
 
   .studio__title {
     margin: 0;
     font-family: var(--font-serif);
-    font-size: clamp(2.8rem, 9vw, 10rem);
+    font-size: clamp(3.2rem, 13vw, 15rem);
     font-weight: 400;
-    line-height: 0.85;
+    line-height: 0.82;
     text-transform: uppercase;
   }
 
   .studio__lead {
-    max-width: 30ch;
-    margin: auto 0 0;
-    font-size: clamp(1.15rem, 1.8vw, 2rem);
+    grid-row: 3;
+    max-width: 22ch;
+    margin: 0;
+    font-size: clamp(1.15rem, 2vw, 2.2rem);
     font-weight: 600;
-    line-height: 1.15;
+    line-height: 1.1;
     letter-spacing: -0.02em;
   }
 
-  .studio__controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-
-  .studio__button {
-    padding: 0.55em 1em;
-    border: 1px solid currentColor;
-    border-radius: 999px;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      background-color 200ms var(--ease),
-      color 200ms var(--ease);
-  }
-
-  .studio__button:hover,
-  .studio__button:focus-visible {
-    background: var(--white);
-    color: var(--red);
-  }
-
-  .studio__button:focus-visible {
-    outline: 2px solid var(--white);
-    outline-offset: 3px;
-  }
-
-  /* Textos del botón según el estado del vídeo. */
-  .studio [data-when] {
-    display: none;
-  }
-
-  .studio[data-state="playing"] [data-when="playing"],
-  .studio[data-state="paused"] [data-when="paused"],
-  .studio:not([data-state]) [data-when="paused"],
-  .studio[data-sound="muted"] [data-when="muted"],
-  .studio:not([data-sound]) [data-when="muted"],
-  .studio[data-sound="sound"] [data-when="sound"] {
-    display: inline;
-  }
-
-  .studio__frame {
-    align-self: end;
-  }
-
-  .studio__video {
-    display: block;
-    width: auto;
-    height: min(calc(100svh - var(--header-h, 4rem) - var(--gutter) * 2), 60rem);
-    aspect-ratio: 576 / 972;
-    background: var(--red-deep);
-    object-fit: cover;
-  }
-
-  /* En móvil: título, vídeo, texto y botones, uno debajo de otro. */
   @media (max-width: 760px) {
     .studio {
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-3);
-      min-height: 0;
-      padding-bottom: var(--space-4);
+      min-height: 90svh;
     }
 
-    .studio__text {
-      display: contents;
-    }
-
-    .studio__frame {
-      order: 1;
-    }
-
-    .studio__lead {
-      order: 2;
-      margin-top: 0;
-    }
-
-    .studio__controls {
-      order: 3;
-    }
-
-    .studio__video {
-      width: 100%;
-      height: auto;
-      max-height: 80svh;
-      margin-inline: auto;
+    .studio__title {
+      font-size: clamp(3rem, 17vw, 6rem);
     }
   }
 </style>

@@ -9,11 +9,10 @@ const { site } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer page">
-  <p>{site.name} © {year}</p>
+<footer class="site-footer" data-header="dark">
+  <a href={`mailto:${site.email}`}>{site.email}</a>
+  <span class="num">{site.name} / {year}</span>
   <nav aria-label="Enlaces secundarios" data-aria-label-en="Secondary links">
-    <a href={`mailto:${site.email}`}>{site.email}</a>
-    <a href={site.instagram.url} rel="noreferrer" target="_blank">{site.instagram.label}</a>
     <a href="/privacidad">
       <span data-lang="es">{site.footer.privacy}</span>
       <span data-lang="en">{site.footer.privacyEn}</span>
@@ -27,25 +26,24 @@ const year = new Date().getFullYear();
 
 <style>
   .site-footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2) var(--space-3);
-    margin-top: var(--space-5);
-    padding-block: var(--space-3);
-    border-top: 1px solid var(--color-line);
-    color: var(--color-muted);
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: var(--space-2);
+    padding: var(--gutter) var(--gutter) var(--space-4);
+    background: var(--stone);
+    color: var(--black);
     font-size: var(--text-small);
-  }
-
-  .site-footer p {
-    margin: 0;
+    font-weight: 500;
   }
 
   .site-footer nav {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem var(--space-3);
+    gap: var(--space-2);
+  }
+
+  @media (max-width: 620px) {
+    .site-footer {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

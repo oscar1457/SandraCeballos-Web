@@ -1,48 +1,41 @@
 ---
 import { careerPanels, careerStages, essentialHighlights } from "@/data/exhibitions";
-import type { Site } from "@/data/site";
 
-type Props = {
-  site: Site;
-};
-
-const { site } = Astro.props;
-
-// La biografía ya aparece en la portada; aquí va el resto del CV.
 const cvPanels = careerPanels.filter((panel) => panel.id !== "biografia");
 const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
 ---
 
-<section class="section page career" id="trayectoria" aria-labelledby="career-title">
-  <header class="section__head career__head">
-    <h2 class="section__title" id="career-title">
-      <span data-lang="es">{site.nav.career}</span>
-      <span data-lang="en">{site.nav.careerEn}</span>
-    </h2>
-    <p class="section__intro">
-      <span data-lang="es">
-        En 1994 cofundó Espacio Aglutinador en La Habana, el primer espacio de arte independiente
-        sostenido en Cuba. Su práctica une obra propia, curaduría y archivo.
-      </span>
-      <span data-lang="en">
-        In 1994 she co-founded Espacio Aglutinador in Havana, the first sustained independent art
-        space in Cuba. Her practice joins her own work, curating and archive.
-      </span>
-    </p>
-  </header>
+<section class="career" id="trayectoria" data-header="dark" aria-labelledby="career-title">
+  <div class="career__letter" aria-hidden="true">C</div>
 
-  <div class="career__body">
-    <section class="career__block" aria-labelledby="career-timeline">
-      <h3 id="career-timeline">
-        <span data-lang="es">Cronología</span>
-        <span data-lang="en">Timeline</span>
-      </h3>
+  <h2 class="career__statement" id="career-title">
+    <span data-lang="es">
+      Pintura, curaduría independiente y archivo: una práctica unida a la historia de Espacio
+      Aglutinador desde 1994.
+    </span>
+    <span data-lang="en">
+      Painting, independent curating and archive: a practice tied to the history of Espacio
+      Aglutinador since 1994.
+    </span>
+  </h2>
+
+  <div class="career__index">
+    <p class="career__lead">
+      <span data-lang="es">Trayectoria, hitos y currículum. Pulsa cada apartado para abrirlo.</span>
+      <span data-lang="en">Career, highlights and CV. Select each section to open it.</span>
+    </p>
+
+    <details class="career__item">
+      <summary>
+        <span class="num">(1)</span>
+        <span><span data-lang="es">Cronología</span><span data-lang="en">Timeline</span></span>
+      </summary>
       <ol class="rows">
         {
           careerStages.map((stage) => (
             <li class="row">
-              <span class="row__year">{stage.year}</span>
-              <span class="row__main">
+              <span class="num">{stage.year}</span>
+              <span>
                 <strong>
                   <span data-lang="es">{stage.title}</span>
                   <span data-lang="en">{stage.titleEn}</span>
@@ -56,19 +49,19 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
           ))
         }
       </ol>
-    </section>
+    </details>
 
-    <section class="career__block" aria-labelledby="career-highlights">
-      <h3 id="career-highlights">
-        <span data-lang="es">Hitos</span>
-        <span data-lang="en">Highlights</span>
-      </h3>
+    <details class="career__item">
+      <summary>
+        <span class="num">(2)</span>
+        <span><span data-lang="es">Hitos</span><span data-lang="en">Highlights</span></span>
+      </summary>
       <ul class="rows">
         {
           essentialHighlights.map((item) => (
             <li class="row">
-              <span class="row__year">{item.year || "—"}</span>
-              <span class="row__main">
+              <span class="num">{item.year || "—"}</span>
+              <span>
                 <strong>
                   {item.url ? (
                     <a href={item.url} target="_blank" rel="noreferrer">
@@ -82,8 +75,8 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
                     </>
                   )}
                 </strong>
-                <span class="row__place">{place(item.city, item.country)}</span>
                 <span class="row__note">
+                  {place(item.city, item.country)}.{" "}
                   <span data-lang="es">{item.summary}</span>
                   <span data-lang="en">{item.summaryEn}</span>
                 </span>
@@ -92,124 +85,158 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
           ))
         }
       </ul>
-    </section>
+    </details>
 
-    <section class="career__block career__block--cv" aria-labelledby="career-cv">
-      <h3 id="career-cv">
-        <span data-lang="es">Currículum</span>
-        <span data-lang="en">Curriculum vitae</span>
-      </h3>
-      <div class="cv">
-        {
-          cvPanels.map((panel) => (
-            <section class="cv__group">
-              <h4>
-                <span data-lang="es">{panel.label}</span>
-                <span data-lang="en">{panel.labelEn}</span>
-              </h4>
-              <ul class="rows rows--compact">
-                {panel.items.map((item) => (
-                  <li class="row">
-                    <span class="row__year">{item.year || "—"}</span>
-                    <span class="row__main">
-                      {item.url ? (
-                        <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a>
-                      ) : (
-                        <span>{item.title}</span>
-                      )}
-                      <span class="row__place">{place(item.venue, item.city, item.country)}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))
-        }
-      </div>
-    </section>
+    {
+      cvPanels.map((panel, index) => (
+        <details class="career__item">
+          <summary>
+            <span class="num">({index + 3})</span>
+            <span>
+              <span data-lang="es">{panel.label}</span>
+              <span data-lang="en">{panel.labelEn}</span>
+            </span>
+          </summary>
+          <ul class="rows">
+            {panel.items.map((item) => (
+              <li class="row">
+                <span class="num">{item.year || "—"}</span>
+                <span>
+                  <strong>
+                    {item.url ? (
+                      <a href={item.url} target="_blank" rel="noreferrer">{item.title}</a>
+                    ) : (
+                      item.title
+                    )}
+                  </strong>
+                  <span class="row__note">{place(item.venue, item.city, item.country)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))
+    }
   </div>
 </section>
 
 <style>
-  .career__body {
+  .career {
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4) clamp(2rem, 6vw, 6rem);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--space-4) var(--gutter);
+    min-height: 100svh;
+    padding: 9rem var(--gutter) var(--space-5);
+    overflow: hidden;
+    background: var(--white);
+    color: var(--black);
   }
 
-  .career__block--cv {
+  .career__letter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--stone);
+    font-family: var(--font-serif);
+    font-size: min(150svh, 110vw);
+    line-height: 0.7;
+    pointer-events: none;
+  }
+
+  .career__statement {
+    position: relative;
     grid-column: 1 / -1;
+    margin: 0;
+    font-size: clamp(2.2rem, 4.6vw, 5.2rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    text-indent: 25%;
   }
 
-  .career h3 {
-    margin: 0 0 var(--space-2);
-    font-size: var(--text-base);
-    font-weight: 600;
+  .career__index {
+    position: relative;
+    grid-column: 6 / span 6;
   }
 
-  .career h4 {
-    margin: 0 0 0.75rem;
+  .career__lead {
+    margin: 0 0 var(--space-3);
+    max-width: 28rem;
+    font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .career__item {
+    border-bottom: 1px solid var(--black);
+    background: var(--white);
+  }
+
+  .career__item:first-of-type {
+    border-top: 1px solid var(--black);
+  }
+
+  .career__item summary {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    padding: 0.55rem 0;
     font-size: var(--text-small);
     font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .career__item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .career__item summary::after {
+    content: "+";
+    grid-column: 3;
+  }
+
+  .career__item[open] summary::after {
+    content: "–";
   }
 
   .rows {
     margin: 0;
-    padding: 0;
+    padding: 0 0 var(--space-2);
     list-style: none;
-    border-top: 1px solid var(--color-line);
   }
 
   .row {
     display: grid;
-    grid-template-columns: 6.5rem minmax(0, 1fr);
-    gap: 1rem;
-    padding-block: 0.9rem;
-    border-bottom: 1px solid var(--color-line);
-  }
-
-  .row__year {
-    color: var(--color-muted);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .row__main {
-    display: grid;
-    gap: 0.2rem;
-  }
-
-  .row__main strong {
+    grid-template-columns: 6rem minmax(0, 1fr);
+    padding: 0.45rem 0;
+    border-top: 1px solid var(--color-line);
+    font-size: var(--text-small);
     font-weight: 500;
   }
 
-  .row__place,
+  .row > span:last-child {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .row strong {
+    font-weight: 600;
+  }
+
   .row__note {
     color: var(--color-muted);
-    font-size: var(--text-small);
   }
 
-  .rows--compact .row {
-    padding-block: 0.6rem;
-    font-size: var(--text-small);
-  }
-
-  .rows--compact .row__year {
-    font-size: var(--text-small);
-  }
-
-  .cv {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-    gap: var(--space-3) clamp(2rem, 4vw, 4rem);
-  }
-
-  @media (max-width: 800px) {
-    .career__body {
-      grid-template-columns: 1fr;
+  @media (max-width: 900px) {
+    .career__index {
+      grid-column: 1 / -1;
     }
 
-    .row {
-      grid-template-columns: 5.5rem minmax(0, 1fr);
+    .career__statement {
+      text-indent: 0;
     }
   }
 </style>

@@ -1,0 +1,138 @@
+---
+import { Image } from "astro:assets";
+import ContactForm from "@/components/ContactForm.astro";
+import { publicationImages } from "@/data/publications";
+import type { Site } from "@/data/site";
+
+type Props = {
+  site: Site;
+  endpoint: string;
+};
+
+const { site, endpoint } = Astro.props;
+const background = publicationImages.titlePage;
+---
+
+<section class="contact" id="contacto" data-header="light" aria-labelledby="contact-title">
+  <!-- Fondo: la portadilla roja de "Absolut Sandra". -->
+  <Image
+    class="contact__bg"
+    src={background.image}
+    alt=""
+    widths={[960, 1536]}
+    sizes="100vw"
+    loading="lazy"
+  />
+
+  <div class="contact__inner">
+    <div class="contact__intro">
+      <h2 class="contact__title" id="contact-title">
+        <span data-lang="es">Contacto</span>
+        <span data-lang="en">Contact</span>
+      </h2>
+      <ul class="contact__links">
+        <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+        <li>
+          <a href={site.instagram.url} target="_blank" rel="noreferrer">Instagram {site.instagram.label}</a>
+        </li>
+        <li>
+          <a href={site.portfolioPdf} target="_blank" rel="noreferrer">
+            <span data-lang="es">Portafolio en PDF (10 MB)</span>
+            <span data-lang="en">Portfolio PDF (10 MB)</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="contact__card">
+      <p class="contact__lead">
+        <span data-lang="es">{site.contactIntro}</span>
+        <span data-lang="en">{site.contactIntroEn}</span>
+      </p>
+      <ContactForm site={site} endpoint={endpoint} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    background: var(--red);
+    color: var(--white);
+  }
+
+  .contact__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(1.05);
+  }
+
+  /* Velo para que el texto blanco se lea sobre la foto. */
+  .contact::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.45), transparent 9rem),
+      linear-gradient(90deg, rgb(150 20 8 / 0.82) 0 45%, rgb(0 0 0 / 0.25));
+  }
+
+  .contact__inner {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: var(--space-4);
+    align-items: end;
+    min-height: 100svh;
+    padding: 8rem var(--gutter) var(--space-4);
+  }
+
+  .contact__title {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-serif);
+    font-size: var(--text-huge);
+    font-weight: 400;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .contact__links {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 500;
+  }
+
+  .contact__card {
+    padding: var(--space-3);
+    background: var(--white);
+    color: var(--black);
+  }
+
+  .contact__lead {
+    margin: 0 0 var(--space-3);
+    font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  @media (max-width: 900px) {
+    .contact__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .contact::before {
+      background: rgb(150 20 8 / 0.78);
+    }
+  }
+</style>

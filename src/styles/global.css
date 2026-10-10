@@ -1,40 +1,47 @@
 /*
-  Estilo "sala de galería": pared clara, texto discreto, las obras mandan.
-  Los nombres de las variables se mantienen para que las páginas legales
-  y el formulario sigan funcionando.
+  Estilo inspirado en un archivo editorial: negro, blanco y el rojo de los
+  catálogos de Sandra. Grotesca (Inter Tight) para el texto y serif
+  (DM Serif Display) para los títulos grandes, como en "Absolut Sandra".
+  Los nombres de variables antiguos se mantienen para las páginas legales.
 */
 :root {
   color-scheme: light;
-  --color-paper: #f6f6f3;
-  --color-paper-muted: #ececE7;
-  --color-ink: #1f1f1d;
-  --color-muted: #6b6b66;
-  --color-line: #d9d9d3;
-  --color-error: #a1261c;
-  --font-body: "Schibsted Grotesk Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: var(--font-body);
-  --font-serif: var(--font-body);
+  --red: #d22b18;
+  --red-deep: #a81f10;
+  --black: #000;
+  --white: #fff;
+  --stone: #a19f97;
+  --grey-dark: #1d1d1d;
+  --grey-text: #7a7a7a;
+
+  --color-paper: var(--white);
+  --color-ink: var(--black);
+  --color-muted: #6b6b6b;
+  --color-line: #d6d6d6;
+  --color-error: #b3261e;
+
+  --font-sans: "Inter Tight Variable", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "DM Serif Display", Georgia, serif;
+  --font-body: var(--font-sans);
+  --font-display: var(--font-serif);
+
+  --text-small: 0.8125rem;
+  --text-label: 0.75rem;
   --text-base: 1rem;
-  --text-small: 0.875rem;
-  --text-label: 0.8125rem;
-  --text-lead: clamp(1.15rem, 0.6vw + 1rem, 1.4rem);
-  --text-title: clamp(2.6rem, 6vw, 5.5rem);
+  --text-big: clamp(2.5rem, 5.6vw, 6.5rem);
+  --text-huge: clamp(3rem, 8vw, 9rem);
+
+  --gutter: clamp(0.75rem, 1.2vw, 1.25rem);
   --space-1: 0.5rem;
   --space-2: 1rem;
   --space-3: clamp(1.5rem, 2.5vw, 2.25rem);
   --space-4: clamp(2.5rem, 5vw, 4.5rem);
   --space-5: clamp(4rem, 9vw, 8rem);
-  --page: min(100% - 2rem, 84rem);
-  --duration-short: 200ms;
-  --ease-editorial: cubic-bezier(0.2, 0, 0, 1);
-  --z-header: 10;
-  --z-focus: 30;
-}
 
-@media (min-width: 700px) {
-  :root {
-    --page: min(100% - 4rem, 84rem);
-  }
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --z-header: 20;
+  --z-focus: 40;
 }
 
 *,
@@ -45,20 +52,28 @@
 
 html {
   min-width: 320px;
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--font-body);
+  background: var(--black);
+  color: var(--black);
+  font-family: var(--font-sans);
   font-size: 16px;
-  line-height: 1.55;
-  scroll-behavior: smooth;
-  scroll-padding-top: 4.5rem;
+  line-height: 1.35;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
 }
 
 body {
   margin: 0;
   overflow-x: clip;
-  background: var(--color-paper);
+  background: var(--white);
 }
 
 img,
@@ -72,62 +87,38 @@ button,
 input,
 textarea {
   font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
 }
 
 a {
   color: inherit;
+  text-underline-offset: 0.18em;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-ink);
+  outline: 2px solid currentColor;
   outline-offset: 3px;
 }
 
 ::selection {
-  background: var(--color-ink);
-  color: var(--color-paper);
-}
-
-.page {
-  width: var(--page);
-  margin-inline: auto;
-}
-
-.section {
-  padding-block: var(--space-5) 0;
-}
-
-.section__head {
-  display: grid;
-  gap: 0.5rem;
-  margin-bottom: var(--space-4);
-}
-
-.section__title {
-  margin: 0;
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-}
-
-.section__intro {
-  max-width: 38rem;
-  margin: 0;
-  color: var(--color-muted);
+  background: var(--red);
+  color: var(--white);
 }
 
 .skip-link {
   position: fixed;
-  top: 0.75rem;
-  left: 0.75rem;
+  top: 0.5rem;
+  left: 0.5rem;
   z-index: var(--z-focus);
   transform: translateY(-200%);
   padding: 0.6rem 0.9rem;
-  background: var(--color-ink);
-  color: var(--color-paper);
+  background: var(--white);
+  color: var(--black);
 }
 
 .skip-link:focus {
@@ -143,20 +134,22 @@ a {
   white-space: nowrap;
 }
 
+/* Etiquetas pequeñas tipo "(1)" de la referencia. */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
 html:not([data-current-lang="en"]) [data-lang="en"],
 html[data-current-lang="en"] [data-lang="es"] {
   display: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {
     transition-duration: 1ms !important;
     animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

@@ -1,31 +1,30 @@
 ---
 import Career from "@/components/Career.astro";
-import ContactForm from "@/components/ContactForm.astro";
+import Contact from "@/components/Contact.astro";
 import Footer from "@/components/Footer.astro";
-import Hero from "@/components/Hero.astro";
+import Intro from "@/components/Intro.astro";
+import Publications from "@/components/Publications.astro";
 import SiteHeader from "@/components/SiteHeader.astro";
-import WorkWall from "@/components/WorkWall.astro";
+import Works from "@/components/Works.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { artworks } from "@/data/artworks";
 import { site } from "@/data/site";
 
 const formEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? "";
-
-// Obra de portada: la misma que antes servía de fondo.
-const heroArtwork =
-  artworks.find((artwork) => artwork.image === site.backgroundImage) ?? artworks[0]!;
 ---
 
 <BaseLayout>
-  <SiteHeader site={site} />
+  <SiteHeader site={site} workCount={artworks.length} />
   <main id="contenido">
-    <Hero site={site} artwork={heroArtwork} />
-    <WorkWall artworks={artworks} />
-    <Career site={site} />
-    <ContactForm site={site} endpoint={formEndpoint} />
+    <Intro site={site} />
+    <Works artworks={artworks} />
+    <Career />
+    <Publications />
+    <Contact site={site} endpoint={formEndpoint} />
   </main>
   <Footer site={site} />
   <script>
     import "@/scripts/language.ts";
+    import "@/scripts/smooth.ts";
   </script>
 </BaseLayout>

@@ -286,6 +286,14 @@ export const careerPanels: CareerPanel[] = [
       "Selection of milestones found in public sources and career documentation.",
     items: [
       {
+        year: "2024",
+        title: "Desamparo con alevosía",
+        venue: "Galería Plus Artists",
+        city: "Madrid",
+        country: "España",
+        type: "individual"
+      },
+      {
         year: pending,
         title: "Diálogo de Sandra y Manuel Vidal",
         venue: "Galería L",

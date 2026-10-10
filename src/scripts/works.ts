@@ -1,0 +1,204 @@
+// Obra: rueda que gira con el scroll, modo lista y ficha de cada obra.
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+type Work = {
+  slug: string;
+  thumb: string;
+  full: string;
+  fullSrcset: string;
+  alt: string;
+  title: string;
+  year: string;
+  technique: string;
+  techniqueEn: string;
+  dimensions: string;
+  description: string;
+  descriptionEn: string;
+};
+
+const section = document.querySelector<HTMLElement>("[data-works]");
+const dataNode = document.getElementById("works-data");
+const sheet = document.querySelector<HTMLDialogElement>("[data-sheet]");
+
+if (section && dataNode && sheet) {
+  const works = JSON.parse(dataNode.textContent ?? "[]") as Work[];
+  const total = works.length;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const items = Array.from(section.querySelectorAll<HTMLElement>("[data-wheel-item]"));
+  const rows = Array.from(section.querySelectorAll<HTMLButtonElement>("[data-list-row]"));
+  const preview = section.querySelector<HTMLImageElement>("[data-list-preview]");
+  const modeButtons = Array.from(section.querySelectorAll<HTMLButtonElement>("[data-mode-button]"));
+  const nowField = (name: string) => section.querySelector<HTMLElement>(`[data-now="${name}"]`)!;
+
+  // ---------- Texto grande: número, título, año ----------
+  let shown = 0;
+  const setNow = (index: number) => {
+    if (index === shown) {
+      return;
+    }
+    const direction = index > shown ? 1 : -1;
+    shown = index;
+    const work = works[index]!;
+    const next = works[(index + 1) % total]!;
+    const values: Record<string, string> = {
+      num: String(index + 1),
+      title: work.title,
+      next: next.title,
+      year: work.year
+    };
+    Object.entries(values).forEach(([name, value]) => {
+      const node = nowField(name);
+      if (reduced) {
+        node.textContent = value;
+        return;
+      }
+      gsap.killTweensOf(node);
+      gsap.to(node, {
+        yPercent: -105 * direction,
+        duration: 0.18,
+        ease: "power2.in",
+        onComplete: () => {
+          node.textContent = value;
+          gsap.fromTo(node, { yPercent: 105 * direction }, { yPercent: 0, duration: 0.45, ease: "power3.out" });
+        }
+      });
+    });
+    rows.forEach((row, rowIndex) => row.classList.toggle("is-current", rowIndex === index));
+    if (preview) {
+      preview.src = work.thumb;
+    }
+  };
+
+  // ---------- Rueda ----------
+  const placeWheel = (position: number) => {
+    const narrow = window.innerWidth < 760;
+    // Grados entre obras: el abanico se abre más cuanto más ancha es la pantalla.
+    const step = narrow ? 30 : 26;
+    items.forEach((item, index) => {
+      const angle = (index - position) * step;
+      const distance = Math.abs(angle);
+      item.style.transform = `translateX(-50%) rotate(${angle}deg) translateY(calc(-1 * var(--radius)))`;
+      item.style.opacity = distance > 85 ? "0" : String(1 - Math.max(0, distance - 40) / 60);
+      item.style.zIndex = String(100 - Math.round(distance));
+      item.style.visibility = distance > 90 ? "hidden" : "visible";
+      const card = item.firstElementChild as HTMLElement | null;
+      if (card) {
+        card.style.filter = distance < 6 ? "none" : `grayscale(${Math.min(distance / 40, 0.85)})`;
+        card.tabIndex = distance > 90 ? -1 : 0;
+      }
+    });
+    setNow(Math.min(total - 1, Math.max(0, Math.round(position))));
+  };
+
+  let trigger: ScrollTrigger | null = null;
+  const enableWheel = () => {
+    trigger?.kill();
+    trigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top top",
+      end: "bottom bottom",
+      onUpdate: (self) => placeWheel(self.progress * (total - 1))
+    });
+    placeWheel(0);
+  };
+
+  // ---------- Cambio de modo ----------
+  const setMode = (mode: "wheel" | "list") => {
+    section.dataset.mode = mode;
+    modeButtons.forEach((button) =>
+      button.setAttribute("aria-pressed", String(button.dataset.modeButton === mode))
+    );
+    if (mode === "wheel") {
+      enableWheel();
+    } else {
+      trigger?.kill();
+      trigger = null;
+    }
+    ScrollTrigger.refresh();
+  };
+
+  modeButtons.forEach((button) =>
+    button.addEventListener("click", () => setMode(button.dataset.modeButton === "list" ? "list" : "wheel"))
+  );
+
+  rows.forEach((row) => {
+    const index = Number(row.dataset.listRow);
+    row.addEventListener("mouseenter", () => setNow(index));
+    row.addEventListener("focus", () => setNow(index));
+  });
+
+  // ---------- Ficha ----------
+  const sheetField = (name: string) => sheet.querySelector<HTMLElement>(`[data-sheet="${name}"]`)!;
+  const sheetImage = sheetField("image") as HTMLImageElement;
+  let sheetIndex = 0;
+  let opener: HTMLElement | null = null;
+
+  const fillSheet = (index: number) => {
+    sheetIndex = (index + total) % total;
+    const work = works[sheetIndex]!;
+    sheetImage.src = work.full;
+    sheetImage.srcset = work.fullSrcset;
+    sheetImage.sizes = "(max-width: 760px) 100vw, 55vw";
+    sheetImage.alt = work.alt;
+    sheetField("count").textContent = `${sheetIndex + 1} / ${total}`;
+    ["title", "year", "technique", "techniqueEn", "dimensions", "description", "descriptionEn"].forEach(
+      (key) => {
+        sheetField(key).textContent = work[key as keyof Work];
+      }
+    );
+    history.replaceState(null, "", `#obra/${work.slug}`);
+  };
+
+  const openSheet = (index: number) => {
+    fillSheet(index);
+    if (!sheet.open) {
+      sheet.showModal();
+    }
+  };
+
+  section.querySelectorAll<HTMLButtonElement>("[data-open-work]").forEach((button) => {
+    button.addEventListener("click", () => {
+      opener = button;
+      openSheet(Number(button.dataset.openWork) || 0);
+    });
+  });
+
+  sheet.querySelector("[data-sheet-close]")?.addEventListener("click", () => sheet.close());
+  sheet.querySelector("[data-sheet-prev]")?.addEventListener("click", () => fillSheet(sheetIndex - 1));
+  sheet.querySelector("[data-sheet-next]")?.addEventListener("click", () => fillSheet(sheetIndex + 1));
+  sheet.addEventListener("click", (event) => {
+    // Clic en la zona desenfocada (fuera del panel blanco) cierra la ficha.
+    if (event.target === sheet) {
+      sheet.close();
+    }
+  });
+  sheet.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") fillSheet(sheetIndex - 1);
+    if (event.key === "ArrowRight") fillSheet(sheetIndex + 1);
+  });
+  sheet.addEventListener("close", () => {
+    history.replaceState(null, "", "#obra");
+    opener?.focus({ preventScroll: true });
+    opener = null;
+  });
+
+  // ---------- Inicio ----------
+  setMode(reduced ? "list" : "wheel");
+  window.addEventListener("resize", () => {
+    if (section.dataset.mode === "wheel" && trigger) {
+      placeWheel(trigger.progress * (total - 1));
+    }
+  });
+
+  const hash = window.location.hash.match(/^#obra\/(.+)$/);
+  if (hash) {
+    const index = works.findIndex((work) => work.slug === decodeURIComponent(hash[1]!));
+    if (index >= 0) {
+      openSheet(index);
+    }
+  }
+}

@@ -1,0 +1,192 @@
+---
+import type { Site } from "@/data/site";
+
+type Props = {
+  site: Site;
+};
+
+const { site } = Astro.props;
+---
+
+<section class="intro" id="inicio" data-header="light" aria-labelledby="intro-title">
+  <!-- Letras gigantes de fondo: las iniciales S y C se alternan. -->
+  <div class="intro__letters" aria-hidden="true">
+    <span class="intro__letter is-active">S</span>
+    <span class="intro__letter">C</span>
+  </div>
+
+  <p class="intro__text intro__text--top">
+    <span class="intro__index num">(1)</span>
+    <span data-lang="es">{site.biography}</span>
+    <span data-lang="en">{site.biographyEn}</span>
+  </p>
+
+  <div class="intro__row">
+    <h1 id="intro-title" class="intro__name">{site.name}</h1>
+    <p class="intro__role">
+      <span data-lang="es">/{site.role}</span>
+      <span data-lang="en">/{site.roleEn}</span>
+    </p>
+  </div>
+
+  <p class="intro__text intro__text--bottom">
+    <span class="intro__index num">(2)</span>
+    <span data-lang="es">
+      En 1994 cofundó Espacio Aglutinador en La Habana junto a Ezequiel Suárez, el primer espacio de
+      arte independiente sostenido en Cuba. Aglutinador forma parte central de su obra: práctica
+      curatorial, archivo vivo y resistencia cultural.
+    </span>
+    <span data-lang="en">
+      In 1994 she co-founded Espacio Aglutinador in Havana with Ezequiel Suárez, the first sustained
+      independent art space in Cuba. Aglutinador is central to her work: curatorial practice, living
+      archive and cultural resistance.
+    </span>
+  </p>
+
+  <div class="intro__foot">
+    <span>© {new Date().getFullYear()}</span>
+    <a href="#obra">
+      <span data-lang="es">Bajar</span>
+      <span data-lang="en">Scroll</span>
+    </a>
+  </div>
+</section>
+
+<script>
+  // Alterna la S y la C cada pocos segundos (no lo hace con movimiento reducido).
+  const letters = Array.from(document.querySelectorAll<HTMLElement>(".intro__letter"));
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (letters.length > 1 && !reduced) {
+    let current = 0;
+    window.setInterval(() => {
+      letters[current]?.classList.remove("is-active");
+      current = (current + 1) % letters.length;
+      letters[current]?.classList.add("is-active");
+    }, 3200);
+  }
+</script>
+
+<style>
+  .intro {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr auto 1fr auto;
+    min-height: 100svh;
+    padding: 5.5rem var(--gutter) var(--gutter);
+    overflow: hidden;
+    background: var(--red);
+    color: var(--white);
+  }
+
+  .intro__letters {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+  }
+
+  .intro__letter {
+    grid-area: 1 / 1;
+    color: var(--red-deep);
+    font-family: var(--font-serif);
+    font-size: min(118svh, 95vw);
+    line-height: 0.75;
+    opacity: 0;
+    transform: scale(0.96);
+    transition:
+      opacity 900ms var(--ease),
+      transform 1400ms var(--ease-out);
+  }
+
+  .intro__letter.is-active {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+
+  .intro__text {
+    position: relative;
+    max-width: 50rem;
+    margin: 0;
+    font-size: var(--text-small);
+    font-weight: 500;
+    line-height: 1.15;
+    text-indent: 25%;
+  }
+
+  .intro__text--top {
+    align-self: start;
+    margin-left: 25%;
+  }
+
+  .intro__text--bottom {
+    align-self: end;
+    max-width: 30rem;
+    margin-left: 25%;
+    padding-bottom: var(--space-3);
+  }
+
+  /* El número (1)/(2) va al principio del párrafo; el texto empieza más a la derecha. */
+  .intro__index {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .intro__row {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 var(--space-3);
+  }
+
+  .intro__name {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: var(--text-huge);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  .intro__role {
+    margin: 0;
+    font-size: var(--text-big);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+
+  .intro__foot {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-label);
+    font-weight: 500;
+  }
+
+  .intro__foot a {
+    text-decoration: none;
+  }
+
+  @media (max-width: 760px) {
+    .intro {
+      padding-top: 7rem;
+    }
+
+    .intro__text,
+    .intro__text--top,
+    .intro__text--bottom {
+      margin-left: 0;
+      text-indent: 0;
+    }
+
+    .intro__index {
+      position: static;
+      margin-right: 0.5rem;
+    }
+  }
+</style>

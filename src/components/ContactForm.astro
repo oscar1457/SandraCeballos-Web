@@ -9,171 +9,125 @@ type Props = {
 const { site, endpoint } = Astro.props;
 ---
 
-<section class="section page contact" id="contacto" aria-labelledby="contact-title">
-  <div class="contact__grid">
-    <div class="contact__intro">
-      <h2 class="section__title" id="contact-title">
-        <span data-lang="es">{site.nav.contact}</span>
-        <span data-lang="en">{site.nav.contactEn}</span>
-      </h2>
-      <p class="section__intro">
-        <span data-lang="es">{site.contactIntro}</span>
-        <span data-lang="en">{site.contactIntroEn}</span>
-      </p>
-      <ul class="contact__links">
-        <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
-        <li><a href={site.instagram.url} target="_blank" rel="noreferrer">Instagram {site.instagram.label}</a></li>
-        <li>
-          <a href={site.portfolioPdf} target="_blank" rel="noreferrer">
-            <span data-lang="es">Portafolio en PDF (10 MB)</span>
-            <span data-lang="en">Portfolio PDF (10 MB)</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-    <div class="contact__body">
-      <form
-        class="contact-form"
-        action={endpoint || "#contacto"}
-        method="POST"
-        data-contact-form
-        data-endpoint={endpoint}
-      >
-        <div class="contact-form__field">
-          <label for="contact-name">
-            <span data-lang="es">{site.form.name}</span>
-            <span data-lang="en">{site.form.nameEn}</span>
-          </label>
-          <input
-            id="contact-name"
-            name="name"
-            type="text"
-            autocomplete="name"
-            required
-            aria-describedby="contact-name-error"
-          />
-          <p class="contact-form__error" id="contact-name-error" data-error-for="name"></p>
-        </div>
-
-        <div class="contact-form__field">
-          <label for="contact-email">
-            <span data-lang="es">{site.form.email}</span>
-            <span data-lang="en">{site.form.emailEn}</span>
-          </label>
-          <input
-            id="contact-email"
-            name="email"
-            type="email"
-            autocomplete="email"
-            required
-            aria-describedby="contact-email-error"
-          />
-          <p class="contact-form__error" id="contact-email-error" data-error-for="email"></p>
-        </div>
-
-        <div class="contact-form__field">
-          <label for="contact-subject">
-            <span data-lang="es">{site.form.subjectOptional}</span>
-            <span data-lang="en">{site.form.subjectOptionalEn}</span>
-          </label>
-          <input
-            id="contact-subject"
-            name="subject"
-            type="text"
-            autocomplete="off"
-            aria-describedby="contact-subject-error"
-          />
-          <p class="contact-form__error" id="contact-subject-error" data-error-for="subject"></p>
-        </div>
-
-        <div class="contact-form__field contact-form__field--full">
-          <label for="contact-message">
-            <span data-lang="es">{site.form.message}</span>
-            <span data-lang="en">{site.form.messageEn}</span>
-          </label>
-          <textarea
-            id="contact-message"
-            name="message"
-            rows="7"
-            required
-            aria-describedby="contact-message-error"
-          ></textarea>
-          <p class="contact-form__error" id="contact-message-error" data-error-for="message"></p>
-        </div>
-
-        <div class="contact-form__honeypot" aria-hidden="true">
-          <label for="contact-gotcha">No completar</label>
-          <input id="contact-gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
-        </div>
-
-        <div class="contact-form__footer">
-          <p>
-            <span data-lang="es">{site.form.privacyPrefix}</span>
-            <span data-lang="en">{site.form.privacyPrefixEn}</span>
-            {" "}
-            <a href="/privacidad">
-              <span data-lang="es">{site.form.privacyLink}</span>
-              <span data-lang="en">{site.form.privacyLinkEn}</span>
-            </a>.
-          </p>
-          <button
-            type="submit"
-            data-submit-label={site.form.submit}
-            data-submit-label-en={site.form.submitEn}
-            data-sending-label={site.form.sending}
-            data-sending-label-en={site.form.sendingEn}
-          >
-            <span data-lang="es">{site.form.submit}</span>
-            <span data-lang="en">{site.form.submitEn}</span>
-          </button>
-        </div>
-
-        <p
-          class="contact-form__status"
-          role="status"
-          aria-live="polite"
-          data-form-status
-          data-success-message={site.form.success}
-          data-success-message-en={site.form.successEn}
-          data-endpoint-missing={site.form.endpointMissing}
-          data-endpoint-missing-en={site.form.endpointMissingEn}
-          data-error-message={site.form.genericError}
-          data-error-message-en={site.form.genericErrorEn}
-          data-required-message={site.form.required}
-          data-required-message-en={site.form.requiredEn}
-          data-email-message={site.form.invalidEmail}
-          data-email-message-en={site.form.invalidEmailEn}
-        ></p>
-      </form>
-    </div>
+<form
+  class="contact-form"
+  action={endpoint || "#contacto"}
+  method="POST"
+  data-contact-form
+  data-endpoint={endpoint}
+>
+  <div class="contact-form__field">
+    <label for="contact-name">
+      <span data-lang="es">{site.form.name}</span>
+      <span data-lang="en">{site.form.nameEn}</span>
+    </label>
+    <input
+      id="contact-name"
+      name="name"
+      type="text"
+      autocomplete="name"
+      required
+      aria-describedby="contact-name-error"
+    />
+    <p class="contact-form__error" id="contact-name-error" data-error-for="name"></p>
   </div>
-</section>
+
+  <div class="contact-form__field">
+    <label for="contact-email">
+      <span data-lang="es">{site.form.email}</span>
+      <span data-lang="en">{site.form.emailEn}</span>
+    </label>
+    <input
+      id="contact-email"
+      name="email"
+      type="email"
+      autocomplete="email"
+      required
+      aria-describedby="contact-email-error"
+    />
+    <p class="contact-form__error" id="contact-email-error" data-error-for="email"></p>
+  </div>
+
+  <div class="contact-form__field">
+    <label for="contact-subject">
+      <span data-lang="es">{site.form.subjectOptional}</span>
+      <span data-lang="en">{site.form.subjectOptionalEn}</span>
+    </label>
+    <input
+      id="contact-subject"
+      name="subject"
+      type="text"
+      autocomplete="off"
+      aria-describedby="contact-subject-error"
+    />
+    <p class="contact-form__error" id="contact-subject-error" data-error-for="subject"></p>
+  </div>
+
+  <div class="contact-form__field contact-form__field--full">
+    <label for="contact-message">
+      <span data-lang="es">{site.form.message}</span>
+      <span data-lang="en">{site.form.messageEn}</span>
+    </label>
+    <textarea
+      id="contact-message"
+      name="message"
+      rows="7"
+      required
+      aria-describedby="contact-message-error"
+    ></textarea>
+    <p class="contact-form__error" id="contact-message-error" data-error-for="message"></p>
+  </div>
+
+  <div class="contact-form__honeypot" aria-hidden="true">
+    <label for="contact-gotcha">No completar</label>
+    <input id="contact-gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="contact-form__footer">
+    <p>
+      <span data-lang="es">{site.form.privacyPrefix}</span>
+      <span data-lang="en">{site.form.privacyPrefixEn}</span>
+      {" "}
+      <a href="/privacidad">
+        <span data-lang="es">{site.form.privacyLink}</span>
+        <span data-lang="en">{site.form.privacyLinkEn}</span>
+      </a>.
+    </p>
+    <button
+      type="submit"
+      data-submit-label={site.form.submit}
+      data-submit-label-en={site.form.submitEn}
+      data-sending-label={site.form.sending}
+      data-sending-label-en={site.form.sendingEn}
+    >
+      <span data-lang="es">{site.form.submit}</span>
+      <span data-lang="en">{site.form.submitEn}</span>
+    </button>
+  </div>
+
+  <p
+    class="contact-form__status"
+    role="status"
+    aria-live="polite"
+    data-form-status
+    data-success-message={site.form.success}
+    data-success-message-en={site.form.successEn}
+    data-endpoint-missing={site.form.endpointMissing}
+    data-endpoint-missing-en={site.form.endpointMissingEn}
+    data-error-message={site.form.genericError}
+    data-error-message-en={site.form.genericErrorEn}
+    data-required-message={site.form.required}
+    data-required-message-en={site.form.requiredEn}
+    data-email-message={site.form.invalidEmail}
+    data-email-message-en={site.form.invalidEmailEn}
+  ></p>
+</form>
 
 <script>
   import "@/scripts/contact-form.ts";
 </script>
 
 <style>
-  .contact__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: var(--space-4);
-  }
-
-  .contact__intro {
-    display: grid;
-    align-content: start;
-    gap: var(--space-2);
-  }
-
-  .contact__links {
-    display: grid;
-    gap: 0.4rem;
-    margin: var(--space-1) 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
   .contact-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -182,7 +136,7 @@ const { site, endpoint } = Astro.props;
 
   .contact-form__field {
     display: grid;
-    gap: 0.35rem;
+    gap: 0.3rem;
   }
 
   .contact-form__field--full,
@@ -192,29 +146,29 @@ const { site, endpoint } = Astro.props;
   }
 
   .contact-form label {
-    color: var(--color-muted);
     font-size: var(--text-small);
+    font-weight: 600;
   }
 
   .contact-form input,
   .contact-form textarea {
     width: 100%;
-    padding: 0.55rem 0;
+    padding: 0.5rem 0;
     border: 0;
-    border-bottom: 1px solid var(--color-ink);
+    border-bottom: 1px solid var(--black);
     border-radius: 0;
     background: transparent;
-    color: inherit;
+    font-weight: 500;
   }
 
   .contact-form input:focus-visible,
   .contact-form textarea:focus-visible {
     outline: none;
-    border-bottom-width: 2px;
+    border-bottom: 2px solid var(--red);
   }
 
   .contact-form textarea {
-    min-height: 8rem;
+    min-height: 7rem;
     resize: vertical;
   }
 
@@ -223,14 +177,13 @@ const { site, endpoint } = Astro.props;
   }
 
   .contact-form__error {
-    min-height: 1.1rem;
     margin: 0;
     color: var(--color-error);
     font-size: var(--text-small);
   }
 
   .contact-form__error:empty {
-    min-height: 0;
+    display: none;
   }
 
   .contact-form__honeypot {
@@ -248,8 +201,8 @@ const { site, endpoint } = Astro.props;
   .contact-form__footer p,
   .contact-form__status {
     margin: 0;
-    color: var(--color-muted);
     font-size: var(--text-small);
+    font-weight: 500;
   }
 
   .contact-form__footer a {
@@ -259,10 +212,14 @@ const { site, endpoint } = Astro.props;
   .contact-form button {
     min-height: 2.75rem;
     padding: 0 1.5rem;
-    border: 1px solid var(--color-ink);
-    background: var(--color-ink);
-    color: var(--color-paper);
-    cursor: pointer;
+    border: 0;
+    background: var(--red);
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .contact-form button:hover {
+    background: var(--black);
   }
 
   .contact-form button:disabled {
@@ -270,8 +227,7 @@ const { site, endpoint } = Astro.props;
     opacity: 0.7;
   }
 
-  @media (max-width: 800px) {
-    .contact__grid,
+  @media (max-width: 760px) {
     .contact-form {
       grid-template-columns: 1fr;
     }

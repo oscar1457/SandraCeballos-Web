@@ -8,35 +8,32 @@ const { label = "Idioma" } = Astro.props;
 
 <div class="language-switch" role="group" aria-label={label} data-aria-label-en="Language">
   <button type="button" data-language-switch="es" aria-current="true" lang="es">ES</button>
+  <span aria-hidden="true">/</span>
   <button type="button" data-language-switch="en" lang="en">EN</button>
 </div>
 
 <style>
   .language-switch {
     display: flex;
-    gap: 0.15rem;
+    align-items: center;
+    gap: 0.2rem;
   }
 
   .language-switch button {
-    min-width: 2.5rem;
-    min-height: 2.5rem;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
     padding: 0;
     border: 0;
-    background: transparent;
-    color: var(--color-muted);
-    font-size: var(--text-small);
-    cursor: pointer;
-  }
-
-  .language-switch button:hover {
-    color: var(--color-ink);
+    background: none;
+    color: inherit;
+    font-size: inherit;
+    font-weight: 500;
+    opacity: 0.5;
   }
 
   .language-switch button[aria-current="true"] {
-    color: var(--color-ink);
-    font-weight: 600;
+    opacity: 1;
     text-decoration: underline;
-    text-underline-offset: 0.3em;
+    text-underline-offset: 0.2em;
   }
 </style>
-

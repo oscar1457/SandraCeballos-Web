@@ -10,6 +10,7 @@ const { site, endpoint } = Astro.props;
 ---
 
 <form
+  novalidate
   class="contact-form"
   action={endpoint || "#contacto"}
   method="POST"
@@ -206,7 +207,9 @@ const { site, endpoint } = Astro.props;
   }
 
   .contact-form__footer a {
+    display: inline-block;
     margin-left: 0.25em;
+    padding-block: 0.3rem;
   }
 
   .contact-form button {

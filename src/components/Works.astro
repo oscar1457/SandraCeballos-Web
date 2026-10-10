@@ -227,7 +227,7 @@ const pad = (n: number) => String(n);
     position: absolute;
     top: 6.5rem;
     left: var(--gutter);
-    z-index: 3;
+    z-index: 200;
     font-size: var(--text-small);
     font-weight: 500;
     color: var(--grey-text);
@@ -252,11 +252,20 @@ const pad = (n: number) => String(n);
     top: 8.5rem;
     left: var(--gutter);
     right: var(--gutter);
-    z-index: 2;
+    z-index: 200;
     display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr) minmax(0, 1fr);
     align-items: start;
     pointer-events: none;
+  }
+
+  /* El bloque de títulos tiene altura fija (2 líneas + la siguiente obra):
+     así nada de alrededor se mueve cuando cambia el título. */
+  .works__titles {
+    min-width: 0;
+    height: calc(3 * 1.05em + 0.4em);
+    font-size: clamp(2rem, 3.6vw, 4rem);
+    overflow: hidden;
   }
 
   .works__num,
@@ -276,13 +285,22 @@ const pad = (n: number) => String(n);
     margin: 0;
     font-size: clamp(2rem, 3.6vw, 4rem);
     font-weight: 500;
-    line-height: 1.02;
+    line-height: 1.05;
     letter-spacing: -0.035em;
+    overflow: hidden;
   }
 
+  .works__title {
+    max-height: calc(2 * 1.05em + 0.1em);
+  }
+
+  /* La siguiente obra, en gris justo debajo; si es larga se desvanece. */
   .works__next {
     margin-top: 0.15em;
     color: #5c5c5c;
+    white-space: nowrap;
+    -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent);
+    mask-image: linear-gradient(90deg, #000 80%, transparent);
   }
 
   .works[data-mode="list"] .works__next {
@@ -422,7 +440,8 @@ const pad = (n: number) => String(n);
     left: var(--gutter);
     right: var(--gutter);
     bottom: var(--gutter);
-    z-index: 2;
+    z-index: 200;
+    text-shadow: 0 0 0.6rem rgb(0 0 0 / 0.8);
     display: flex;
     justify-content: space-between;
     font-size: var(--text-label);
@@ -561,7 +580,7 @@ const pad = (n: number) => String(n);
 
     .works__now {
       top: 6.5rem;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto minmax(0, 1fr) auto;
       gap: 0.75rem;
     }
 
@@ -572,7 +591,16 @@ const pad = (n: number) => String(n);
 
     .works__title,
     .works__next {
-      font-size: 1.6rem;
+      font-size: 1.45rem;
+    }
+
+    .works__titles {
+      height: calc(4 * 1.05em + 0.4em);
+      font-size: 1.45rem;
+    }
+
+    .works__title {
+      max-height: calc(3 * 1.05em + 0.1em);
     }
 
     .wheel {

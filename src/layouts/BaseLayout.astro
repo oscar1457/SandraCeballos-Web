@@ -4,6 +4,8 @@ import "@fontsource-variable/inter-tight";
 import "@fontsource/dm-serif-display/latin.css";
 import "@fontsource/dm-serif-display/latin-ext.css";
 import "@/styles/global.css";
+import interTightUrl from "@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url";
+import dmSerifUrl from "@fontsource/dm-serif-display/files/dm-serif-display-latin-400-normal.woff2?url";
 
 type Props = {
   title?: string;
@@ -35,6 +37,8 @@ const structuredData = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={interTightUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={dmSerifUrl} as="font" type="font/woff2" crossorigin />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content={site.locale} />
     <meta property="og:title" content={title} />

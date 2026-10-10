@@ -64,21 +64,26 @@ forms.forEach((form) => {
     });
   };
 
+  // Revisa todos los campos y marca cada error; el foco va al primero.
   const validate = () => {
-    let valid = true;
+    let firstInvalid: HTMLInputElement | HTMLTextAreaElement | null = null;
     fields.forEach((field) => {
       if (field.name === "_gotcha") {
         return;
       }
+      let error = "";
       if (field.validity.valueMissing) {
-        setFieldError(field.name, message("required"));
-        valid = false;
+        error = message("required");
       } else if (field.validity.typeMismatch) {
-        setFieldError(field.name, message("email"));
-        valid = false;
+        error = message("email");
+      }
+      if (error) {
+        setFieldError(field.name, error);
+        firstInvalid ??= field;
       }
     });
-    return valid;
+    (firstInvalid as HTMLInputElement | HTMLTextAreaElement | null)?.focus();
+    return firstInvalid === null;
   };
 
   let invalidBatchQueued = false;

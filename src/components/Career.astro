@@ -171,7 +171,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     // 1b. La C crece y gira mientras se entra en la sección.
     gsap.fromTo(
       letter,
-      { scale: 0.6, rotate: -18, opacity: 0 },
+      { scale: 0.85, rotate: -8, opacity: 0 },
       {
         scale: 1,
         rotate: 0,
@@ -198,8 +198,8 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
       const moveY = gsap.quickTo(letter, "y", { duration: 1.2, ease: "power3.out" });
       section.addEventListener("pointermove", (event) => {
         const rect = section.getBoundingClientRect();
-        moveX(((event.clientX - rect.left) / rect.width - 0.5) * 80);
-        moveY(((event.clientY - rect.top) / rect.height - 0.5) * 50);
+        moveX(((event.clientX - rect.left) / rect.width - 0.5) * 50);
+        moveY(((event.clientY - rect.top) / rect.height - 0.5) * 30);
       });
       section.addEventListener("pointerleave", () => {
         moveX(0);
@@ -216,24 +216,32 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
       if (!summary || !content) {
         return;
       }
+      // "expanded" guarda lo que el usuario quiere (abierto o cerrado), aunque
+      // la animación anterior no haya terminado: así varios clics seguidos
+      // siempre acaban en un estado correcto.
+      let expanded = item.open;
+      const fullPadding = () => {
+        content.style.removeProperty("padding-bottom");
+        const value = getComputedStyle(content).paddingBottom;
+        return value;
+      };
       summary.addEventListener("click", (event) => {
         event.preventDefault();
+        expanded = !expanded;
         gsap.killTweensOf(content);
-        if (!item.open) {
+        if (expanded) {
+          const from = item.open ? content.getBoundingClientRect().height : 0;
+          const paddingBottom = fullPadding();
           item.open = true;
-          // Abrimos animando altura y margen inferior juntos (si no, se nota un salto).
-          const paddingBottom = getComputedStyle(content).paddingBottom;
           gsap.fromTo(
             content,
-            { height: 0, paddingBottom: 0, overflow: "hidden" },
+            { height: from, paddingBottom: from === 0 ? 0 : paddingBottom, overflow: "hidden" },
             {
               height: "auto",
               paddingBottom,
               duration: 0.7,
               ease: "power3.inOut",
-              onComplete: () => {
-                gsap.set(content, { clearProps: "height,paddingBottom,overflow" });
-              }
+              onComplete: () => gsap.set(content, { clearProps: "height,paddingBottom,overflow" })
             }
           );
         } else {
@@ -244,7 +252,9 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
             duration: 0.5,
             ease: "power3.inOut",
             onComplete: () => {
-              item.open = false;
+              if (!expanded) {
+                item.open = false;
+              }
               gsap.set(content, { clearProps: "height,paddingBottom,overflow" });
             }
           });
@@ -268,15 +278,17 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     color: var(--black);
   }
 
+  /* La C se coloca respecto a la parte de arriba de la sección (no al centro),
+     así no se mueve cuando se abren apartados, y cabe entera en pantalla. */
   .career__letter {
     position: absolute;
-    top: 50%;
+    top: 52svh;
     left: 50%;
     translate: -50% -50%;
     color: var(--stone);
     font-family: var(--font-serif);
-    font-size: min(150svh, 110vw);
-    line-height: 0.7;
+    font-size: min(108svh, 76vw);
+    line-height: 0.72;
     pointer-events: none;
   }
 
@@ -313,7 +325,6 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
 
   .career__item {
     border-bottom: 1px solid var(--black);
-    background: var(--white);
   }
 
   .career__item:first-of-type {
@@ -388,10 +399,13 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     content: "–";
   }
 
+  /* El contenido abierto lleva fondo blanco para que el texto gris se lea bien
+     aunque pase por encima de la C. Los títulos (1)–(6) son transparentes. */
   .rows {
     margin: 0;
     padding: 0 0 var(--space-2);
     list-style: none;
+    background: var(--white);
   }
 
   .row {
@@ -440,6 +454,9 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
   }
 
   .row a {
+    display: inline-block;
+    padding-block: 0.25rem;
+    margin-block: -0.25rem;
     text-decoration-color: transparent;
     transition: text-decoration-color 300ms var(--ease);
   }

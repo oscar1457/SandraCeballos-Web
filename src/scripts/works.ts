@@ -194,11 +194,17 @@ if (section && dataNode && sheet) {
     }
   });
 
-  const hash = window.location.hash.match(/^#obra\/(.+)$/);
-  if (hash) {
+  // Enlaces directos a una obra: #obra/<slug>, al cargar o sin recargar la página.
+  const openFromHash = () => {
+    const hash = window.location.hash.match(/^#obra\/(.+)$/);
+    if (!hash) {
+      return;
+    }
     const index = works.findIndex((work) => work.slug === decodeURIComponent(hash[1]!));
     if (index >= 0) {
       openSheet(index);
     }
-  }
+  };
+  openFromHash();
+  window.addEventListener("hashchange", openFromHash);
 }

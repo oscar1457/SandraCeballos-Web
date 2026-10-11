@@ -42,138 +42,30 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
 <script>
   import { gsap } from "gsap";
   import { ScrollTrigger } from "gsap/ScrollTrigger";
+  import { attachSources, createHalftone } from "@/scripts/halftone";
 
   gsap.registerPlugin(ScrollTrigger);
-
-  // Trama de imprenta: rejilla girada 45°, un punto por celda cuyo tamaño
-  // depende de lo oscuro que sea el vídeo en ese punto. Fondo rojo, tinta casi negra.
-  const VERTEX = `
-    attribute vec2 a_pos;
-    void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
-  `;
-  const FRAGMENT = `
-    #ifdef GL_FRAGMENT_PRECISION_HIGH
-    precision highp float;
-    #else
-    precision mediump float;
-    #endif
-    uniform sampler2D u_tex;
-    uniform vec2 u_res;
-    uniform vec2 u_src;
-    uniform float u_cell;
-    uniform float u_pan;
-    uniform vec3 u_paper;
-    uniform vec3 u_ink;
-
-    vec2 coverUV(vec2 p) {
-      float scale = max(u_res.x / u_src.x, u_res.y / u_src.y);
-      vec2 size = u_src * scale;
-      vec2 offset = vec2((u_res.x - size.x) * 0.5, (u_res.y - size.y) * (0.5 + 0.5 * u_pan));
-      return (p - offset) / size;
-    }
-
-    void main() {
-      vec2 p = vec2(gl_FragCoord.x, u_res.y - gl_FragCoord.y);
-      const float c = 0.70710678;
-      mat2 rot = mat2(c, -c, c, c);
-      vec2 q = rot * p;
-      vec2 center = (floor(q / u_cell) + 0.5) * u_cell;
-      vec2 sampleAt = center * rot; // vuelta al espacio de la pantalla
-      vec3 color = texture2D(u_tex, clamp(coverUV(sampleAt), 0.0, 1.0)).rgb;
-      float lum = dot(color, vec3(0.299, 0.587, 0.114));
-      lum = clamp((lum - 0.5) * 1.3 + 0.5, 0.0, 1.0);
-      // Incluso en los blancos queda un punto mínimo: la trama se ve en toda la superficie.
-      float radius = u_cell * 0.62 * sqrt(1.0 - lum * 0.88);
-      float dist = length(q - center);
-      float ink = 1.0 - smoothstep(radius - 0.8, radius + 0.8, dist);
-      gl_FragColor = vec4(mix(u_paper, u_ink, ink), 1.0);
-    }
-  `;
 
   const section = document.querySelector<HTMLElement>("[data-studio]");
   const canvas = section?.querySelector<HTMLCanvasElement>("[data-studio-canvas]");
   const video = section?.querySelector<HTMLVideoElement>("[data-studio-video]");
-  const posterSrc = section?.dataset.poster;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const gl = canvas?.getContext("webgl", { antialias: false, premultipliedAlpha: false });
 
-  const compile = (context: WebGLRenderingContext, type: number, source: string) => {
-    const shader = context.createShader(type);
-    if (!shader) return null;
-    context.shaderSource(shader, source);
-    context.compileShader(shader);
-    return context.getShaderParameter(shader, context.COMPILE_STATUS) ? shader : null;
-  };
+  // Fondo rojo y tinta casi negra; celdas de 6 px en móvil, algo mayores en pantallas anchas.
+  const halftone =
+    canvas &&
+    createHalftone(canvas, {
+      paper: [210, 43, 24],
+      ink: [26, 8, 6],
+      cell: (width) => Math.max(6, width / 190)
+    });
 
-  const setup = () => {
-    if (!section || !canvas || !video || !gl) return false;
-    const vs = compile(gl, gl.VERTEX_SHADER, VERTEX);
-    const fs = compile(gl, gl.FRAGMENT_SHADER, FRAGMENT);
-    const program = gl.createProgram();
-    if (!vs || !fs || !program) return false;
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
-    gl.useProgram(program);
-
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    const position = gl.getAttribLocation(program, "a_pos");
-    gl.enableVertexAttribArray(position);
-    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-
-    const texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-    const uniform = (name: string) => gl.getUniformLocation(program, name);
-    const uRes = uniform("u_res");
-    const uSrc = uniform("u_src");
-    const uCell = uniform("u_cell");
-    const uPan = uniform("u_pan");
-    gl.uniform3f(uniform("u_paper"), 210 / 255, 43 / 255, 24 / 255);
-    gl.uniform3f(uniform("u_ink"), 26 / 255, 8 / 255, 6 / 255);
-
-    let hasFrame = false;
-    let videoFrame = false;
-    let sourceSize: [number, number] = [360, 608];
-    let pan = 0;
+  if (section && canvas && video && halftone) {
+    section.classList.add("is-halftone");
     let visible = false;
     let frame = 0;
     let lastTime = -1;
-
-    const upload = (source: TexImageSource, width: number, height: number) => {
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, source);
-      sourceSize = [width, height];
-      hasFrame = true;
-    };
-
-    const resize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      const width = Math.round(canvas.clientWidth * ratio);
-      const height = Math.round(canvas.clientHeight * ratio);
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-      }
-      gl.viewport(0, 0, width, height);
-      // Celdas de 6 px en móvil y algo mayores en pantallas anchas.
-      const cssCell = Math.max(6, canvas.clientWidth / 190);
-      gl.uniform1f(uCell, cssCell * ratio);
-    };
-
-    const draw = () => {
-      if (!hasFrame) return;
-      gl.uniform2f(uRes, canvas.width, canvas.height);
-      gl.uniform2f(uSrc, sourceSize[0], sourceSize[1]);
-      gl.uniform1f(uPan, pan);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    };
+    let videoFrame = false;
 
     const loop = () => {
       frame = 0;
@@ -181,42 +73,30 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
       if (video.readyState >= 2 && video.currentTime !== lastTime) {
         lastTime = video.currentTime;
         videoFrame = true;
-        upload(video, video.videoWidth, video.videoHeight);
+        halftone.upload(video, video.videoWidth, video.videoHeight);
       }
-      draw();
+      halftone.draw();
       frame = requestAnimationFrame(loop);
     };
     const start = () => {
       if (!frame) frame = requestAnimationFrame(loop);
     };
 
-    // Primera imagen: el póster, para que la trama aparezca antes del vídeo.
+    // Primera imagen: el póster, para que la trama aparezca antes que el vídeo.
+    const posterSrc = section.dataset.poster;
     if (posterSrc) {
       const image = new Image();
       image.decoding = "async";
       image.onload = () => {
-        if (!videoFrame) upload(image, image.naturalWidth, image.naturalHeight);
-        draw();
+        if (!videoFrame) halftone.upload(image, image.naturalWidth, image.naturalHeight);
+        halftone.draw();
       };
       image.src = posterSrc;
     }
 
     // El vídeo (1 MB, sin sonido) solo se descarga cuando la sección se acerca.
-    let loaded = false;
     const load = () => {
-      if (loaded || reduced) return;
-      loaded = true;
-      const sources: { src: string; type: string }[] = [
-        { src: "/video/sandra-taller.webm", type: "video/webm" },
-        { src: "/video/sandra-taller.mp4", type: "video/mp4" }
-      ];
-      sources.forEach(({ src, type }) => {
-        const source = document.createElement("source");
-        source.src = src;
-        source.type = type;
-        video.append(source);
-      });
-      video.load();
+      if (!reduced) attachSources(video, "/video/sandra-taller");
     };
 
     new IntersectionObserver(
@@ -229,13 +109,13 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
     new IntersectionObserver((entries) => {
       visible = entries.some((entry) => entry.isIntersecting);
       if (visible) {
-        resize();
+        halftone.resize();
         if (!reduced) {
           load();
           video.play().catch(() => {});
           start();
         } else {
-          draw();
+          halftone.draw();
         }
       } else {
         video.pause();
@@ -243,8 +123,8 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
     }).observe(section);
 
     new ResizeObserver(() => {
-      resize();
-      draw();
+      halftone.resize();
+      halftone.draw();
     }).observe(canvas);
 
     // Al hacer scroll, la "cámara" recorre el vídeo vertical de arriba abajo.
@@ -253,18 +133,10 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
         trigger: section,
         start: "top bottom",
         end: "bottom top",
-        onUpdate: (self) => {
-          pan = self.progress * 1.6 - 0.8;
-        }
+        onUpdate: (self) => halftone.setPan(self.progress * 1.6 - 0.8)
       });
     }
-
-    resize();
-    section.classList.add("is-halftone");
-    return true;
-  };
-
-  setup();
+  }
 </script>
 
 <style>

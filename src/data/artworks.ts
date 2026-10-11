@@ -26,6 +26,8 @@ export type Artwork = {
   alt: string;
   description: string;
   descriptionEn: string;
+  // Vídeo corto del proceso (ruta sin extensión: .webm, .mp4 y .jpg de póster).
+  processVideo?: string;
 };
 
 export const artworks: Artwork[] = [
@@ -59,7 +61,8 @@ export const artworks: Artwork[] = [
     description:
       "Una monja que surge de un imaginario anecdótico, «de quién sabe cuándo y quién sabe qué». Sobre la tela, la artista escribe: «Sé quién eres, tu nombre también, pero tú no sabes quién soy, mi nombre tampoco».",
     descriptionEn:
-      "A nun emerging from an anecdotal imaginary, “from who knows when and who knows what.” Written on the canvas: “I know who you are, your name too, but you do not know who I am, nor my name.”"
+      "A nun emerging from an anecdotal imaginary, “from who knows when and who knows what.” Written on the canvas: “I know who you are, your name too, but you do not know who I am, nor my name.”",
+    processVideo: "/video/guia-espiritual-9-proceso"
   },
   {
     id: "obra-10",

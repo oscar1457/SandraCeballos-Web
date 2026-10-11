@@ -1,6 +1,7 @@
 // Obra: rueda que gira con el scroll, modo lista y ficha de cada obra.
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { attachSources, createHalftone, type Halftone } from "./halftone";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,6 +18,7 @@ type Work = {
   dimensions: string;
   description: string;
   descriptionEn: string;
+  process: string;
 };
 
 const section = document.querySelector<HTMLElement>("[data-works]");
@@ -137,6 +139,71 @@ if (section && dataNode && sheet) {
   let sheetIndex = 0;
   let opener: HTMLElement | null = null;
 
+  // ---------- Vídeo de proceso (solo algunas obras) ----------
+  // Detalle pequeño en trama de imprenta marrón, suave, sobre el blanco de la ficha.
+  const processFigure = sheet.querySelector<HTMLElement>("[data-sheet-process]");
+  const processCanvas = sheet.querySelector<HTMLCanvasElement>("[data-sheet-process-canvas]");
+  const processVideo = sheet.querySelector<HTMLVideoElement>("[data-sheet-process-video]");
+  const processPoster = sheet.querySelector<HTMLImageElement>("[data-sheet-process-poster]");
+  let processHalftone: Halftone | null = null;
+  let processFrame = 0;
+  let processLast = -1;
+  let processHasVideoFrame = false;
+
+  const processLoop = () => {
+    processFrame = 0;
+    if (!processHalftone || !processVideo || !sheet.open || processFigure?.hidden) return;
+    if (processVideo.readyState >= 2 && processVideo.currentTime !== processLast) {
+      processLast = processVideo.currentTime;
+      processHasVideoFrame = true;
+      processHalftone.upload(processVideo, processVideo.videoWidth, processVideo.videoHeight);
+    }
+    processHalftone.draw();
+    processFrame = requestAnimationFrame(processLoop);
+  };
+
+  const showProcess = (base: string) => {
+    if (!processFigure || !processCanvas || !processVideo || !processPoster) return;
+    if (!base) {
+      processFigure.hidden = true;
+      processVideo.pause();
+      return;
+    }
+    processFigure.hidden = false;
+    processPoster.src = `${base}.jpg`;
+    if (!processHalftone) {
+      processHalftone = createHalftone(processCanvas, {
+        paper: [255, 255, 255],
+        ink: [140, 92, 62],
+        cell: (width) => Math.max(3, width / 46),
+        dotScale: 0.56,
+        minDot: 0.06,
+        contrast: 1.05
+      });
+      if (processHalftone) processFigure.classList.add("is-halftone");
+    }
+    const halftone = processHalftone;
+    if (!halftone) return;
+    processLast = -1;
+    processHasVideoFrame = false;
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () => {
+      if (!processHasVideoFrame) halftone.upload(image, image.naturalWidth, image.naturalHeight);
+      halftone.resize();
+      halftone.draw();
+    };
+    image.src = `${base}.jpg`;
+    if (!reduced) {
+      attachSources(processVideo, base);
+      processVideo.play().catch(() => {});
+      requestAnimationFrame(() => {
+        halftone.resize();
+        if (!processFrame) processFrame = requestAnimationFrame(processLoop);
+      });
+    }
+  };
+
   const fillSheet = (index: number) => {
     sheetIndex = (index + total) % total;
     const work = works[sheetIndex]!;
@@ -150,6 +217,7 @@ if (section && dataNode && sheet) {
         sheetField(key).textContent = work[key as keyof Work];
       }
     );
+    showProcess(work.process);
     history.replaceState(null, "", `#obra/${work.slug}`);
   };
 
@@ -181,6 +249,7 @@ if (section && dataNode && sheet) {
     if (event.key === "ArrowRight") fillSheet(sheetIndex + 1);
   });
   sheet.addEventListener("close", () => {
+    processVideo?.pause();
     history.replaceState(null, "", "#obra");
     opener?.focus({ preventScroll: true });
     opener = null;

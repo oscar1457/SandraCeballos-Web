@@ -1,5 +1,7 @@
 ---
+import { Image } from "astro:assets";
 import { careerPanels, careerStages, essentialHighlights } from "@/data/exhibitions";
+import portrait from "@/assets/sandra-ceballos-retrato.jpg";
 
 const cvPanels = careerPanels.filter((panel) => panel.id !== "biografia");
 const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
@@ -18,6 +20,18 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
       Aglutinador since 1994.
     </span>
   </h2>
+
+  <!-- Retrato en blanco y negro; solo se conserva el rojo de la bolsa. -->
+  <figure class="career__portrait" data-career-portrait>
+    <Image
+      src={portrait}
+      alt="Retrato de Sandra Ceballos en una galería, con gafas de sol y una bolsa de tela con una cara y una raya roja."
+      widths={[420, 700, 1000]}
+      sizes="(max-width: 900px) 70vw, 26rem"
+      loading="lazy"
+    />
+    <figcaption>Sandra Ceballos</figcaption>
+  </figure>
 
   <div class="career__index">
     <p class="career__lead">
@@ -181,6 +195,22 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
       }
     );
 
+    // 1b'. El retrato se descubre de abajo arriba al llegar.
+    const portraitFigure = section.querySelector<HTMLElement>("[data-career-portrait]");
+    if (portraitFigure) {
+      gsap.fromTo(
+        portraitFigure,
+        { clipPath: "inset(100% 0% 0% 0%)" },
+        {
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: 1.2,
+          ease: "power3.inOut",
+          clearProps: "clipPath",
+          scrollTrigger: { trigger: portraitFigure, start: "top 85%" }
+        }
+      );
+    }
+
     // 1c. Texto de entrada y apartados, uno tras otro.
     const entries = section.querySelectorAll(".career__lead, .career__item");
     gsap.from(entries, {
@@ -311,7 +341,33 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
 
   .career__index {
     position: relative;
+    grid-row: 2;
     grid-column: 6 / span 6;
+  }
+
+  /* Retrato a la izquierda de los apartados, por delante de la C. */
+  .career__portrait {
+    position: relative;
+    grid-row: 2;
+    grid-column: 1 / span 4;
+    align-self: start;
+    max-width: 26rem;
+    margin: 0;
+  }
+
+  .career__portrait img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1366 / 2048;
+    object-fit: cover;
+  }
+
+  .career__portrait figcaption {
+    margin-top: var(--space-1);
+    color: var(--color-muted);
+    font-size: var(--text-label);
+    font-weight: 500;
   }
 
   .career__lead {
@@ -493,7 +549,14 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
 
   @media (max-width: 900px) {
     .career__index {
+      grid-row: auto;
       grid-column: 1 / -1;
+    }
+
+    .career__portrait {
+      grid-row: auto;
+      grid-column: 1 / span 9;
+      max-width: 24rem;
     }
 
     .career__item summary {

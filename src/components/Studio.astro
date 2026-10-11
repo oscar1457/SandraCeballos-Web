@@ -42,7 +42,7 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
 <script>
   import { gsap } from "gsap";
   import { ScrollTrigger } from "gsap/ScrollTrigger";
-  import { attachSources, createHalftone } from "@/scripts/halftone";
+  import { attachSources, createHalftone, type Halftone } from "@/scripts/halftone";
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -51,30 +51,26 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
   const video = section?.querySelector<HTMLVideoElement>("[data-studio-video]");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // Fondo rojo y tinta casi negra; celdas de 6 px en móvil, algo mayores en pantallas anchas.
-  const halftone =
-    canvas &&
-    createHalftone(canvas, {
-      paper: [210, 43, 24],
-      ink: [26, 8, 6],
-      cell: (width) => Math.max(6, width / 190)
-    });
-
-  if (section && canvas && video && halftone) {
-    section.classList.add("is-halftone");
+  if (section && canvas && video) {
+    // El WebGL solo se crea cuando la sección se acerca: quien no llega hasta
+    // aquí no paga su coste. Hasta entonces se ve el póster en duotono.
+    let halftone: Halftone | null = null;
+    let tried = false;
     let visible = false;
     let frame = 0;
     let lastTime = -1;
     let videoFrame = false;
+    let pan = 0;
 
     const loop = () => {
       frame = 0;
-      if (!visible) return;
+      if (!visible || !halftone) return;
       if (video.readyState >= 2 && video.currentTime !== lastTime) {
         lastTime = video.currentTime;
         videoFrame = true;
         halftone.upload(video, video.videoWidth, video.videoHeight);
       }
+      halftone.setPan(pan);
       halftone.draw();
       frame = requestAnimationFrame(loop);
     };
@@ -82,26 +78,43 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
       if (!frame) frame = requestAnimationFrame(loop);
     };
 
-    // Primera imagen: el póster, para que la trama aparezca antes que el vídeo.
-    const posterSrc = section.dataset.poster;
-    if (posterSrc) {
-      const image = new Image();
-      image.decoding = "async";
-      image.onload = () => {
-        if (!videoFrame) halftone.upload(image, image.naturalWidth, image.naturalHeight);
-        halftone.draw();
-      };
-      image.src = posterSrc;
-    }
+    const init = () => {
+      if (tried) return;
+      tried = true;
+      // Fondo rojo y tinta casi negra; celdas de 6 px en móvil, algo mayores en pantallas anchas.
+      halftone = createHalftone(canvas, {
+        paper: [210, 43, 24],
+        ink: [26, 8, 6],
+        cell: (width) => Math.max(6, width / 190)
+      });
+      const current = halftone;
+      if (!current) return;
+      section.classList.add("is-halftone");
 
-    // El vídeo (1 MB, sin sonido) solo se descarga cuando la sección se acerca.
-    const load = () => {
+      // Primera imagen: el póster, para que la trama aparezca antes que el vídeo.
+      const posterSrc = section.dataset.poster;
+      if (posterSrc) {
+        const image = new Image();
+        image.decoding = "async";
+        image.onload = () => {
+          if (!videoFrame) current.upload(image, image.naturalWidth, image.naturalHeight);
+          current.draw();
+        };
+        image.src = posterSrc;
+      }
+
+      new ResizeObserver(() => {
+        current.resize();
+        current.draw();
+      }).observe(canvas);
+
+      // El vídeo (1 MB, sin sonido) se descarga a la vez.
       if (!reduced) attachSources(video, "/video/sandra-taller");
     };
 
     new IntersectionObserver(
       (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) load();
+        if (entries.some((entry) => entry.isIntersecting)) init();
       },
       { rootMargin: "100% 0px" }
     ).observe(section);
@@ -109,9 +122,10 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
     new IntersectionObserver((entries) => {
       visible = entries.some((entry) => entry.isIntersecting);
       if (visible) {
+        init();
+        if (!halftone) return;
         halftone.resize();
         if (!reduced) {
-          load();
           video.play().catch(() => {});
           start();
         } else {
@@ -122,18 +136,15 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
       }
     }).observe(section);
 
-    new ResizeObserver(() => {
-      halftone.resize();
-      halftone.draw();
-    }).observe(canvas);
-
     // Al hacer scroll, la "cámara" recorre el vídeo vertical de arriba abajo.
     if (!reduced) {
       ScrollTrigger.create({
         trigger: section,
         start: "top bottom",
         end: "bottom top",
-        onUpdate: (self) => halftone.setPan(self.progress * 1.6 - 0.8)
+        onUpdate: (self) => {
+          pan = self.progress * 1.6 - 0.8;
+        }
       });
     }
   }

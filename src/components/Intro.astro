@@ -9,9 +9,11 @@ const { site } = Astro.props;
 ---
 
 <section class="intro" id="inicio" data-header="light" aria-labelledby="intro-title">
-  <!-- Letras gigantes de fondo: las iniciales S y C se alternan. -->
+  <!-- Formas gigantes de fondo: el rayo (en lugar de la S de Sandra) y la C se alternan. -->
   <div class="intro__letters" aria-hidden="true">
-    <span class="intro__letter is-active">S</span>
+    <svg class="intro__letter intro__bolt is-active" viewBox="0 0 664 1118" focusable="false">
+      <path d="M645 0 L232 232 L58 540 L390 645 L0 1117 L280 978 L540 863 L487 821 L663 599 L325 444 Z" fill="currentColor" />
+    </svg>
     <span class="intro__letter">C</span>
   </div>
 
@@ -53,7 +55,7 @@ const { site } = Astro.props;
 </section>
 
 <script>
-  // Alterna la S y la C cada pocos segundos (no lo hace con movimiento reducido).
+  // Alterna el rayo y la C cada pocos segundos (no lo hace con movimiento reducido).
   const letters = Array.from(document.querySelectorAll<HTMLElement>(".intro__letter"));
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (letters.length > 1 && !reduced) {
@@ -102,6 +104,14 @@ const { site } = Astro.props;
   .intro__letter.is-active {
     opacity: 0.55;
     transform: scale(1);
+  }
+
+  /* El rayo ocupa más o menos lo mismo que ocupaba la S. */
+  .intro__bolt {
+    display: block;
+    width: auto;
+    height: min(88svh, 72vw);
+    overflow: visible;
   }
 
   .intro__text {

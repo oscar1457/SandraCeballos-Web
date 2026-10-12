@@ -9,11 +9,9 @@ const { site } = Astro.props;
 ---
 
 <section class="intro" id="inicio" data-header="light" aria-labelledby="intro-title">
-  <!-- Formas gigantes de fondo: el rayo (en lugar de la S de Sandra) y la C se alternan. -->
+  <!-- Letras gigantes de fondo: las iniciales S y C se alternan. -->
   <div class="intro__letters" aria-hidden="true">
-    <svg class="intro__letter intro__bolt is-active" viewBox="0 0 664 1118" focusable="false">
-      <path d="M645 0 L232 232 L58 540 L390 645 L0 1117 L280 978 L540 863 L487 821 L663 599 L325 444 Z" fill="currentColor" />
-    </svg>
+    <span class="intro__letter is-active">S</span>
     <span class="intro__letter">C</span>
   </div>
 
@@ -24,7 +22,15 @@ const { site } = Astro.props;
   </p>
 
   <div class="intro__row">
-    <h1 id="intro-title" class="intro__name">{site.name}</h1>
+    <!-- La S de «Sandra» es un rayo. Los lectores de pantalla leen el nombre completo. -->
+    <h1 id="intro-title" class="intro__name">
+      <span class="sr-only">{site.name}</span>
+      <span aria-hidden="true"
+        ><svg class="intro__bolt" viewBox="0 0 664 1118" focusable="false"
+          ><path d="M645 0 L232 232 L58 540 L390 645 L0 1117 L280 978 L540 863 L487 821 L663 599 L325 444 Z" fill="currentColor" /></svg
+        >{site.name.slice(1)}</span
+      >
+    </h1>
     <p class="intro__role">
       <span data-lang="es">/{site.role}</span>
       <span data-lang="en">/{site.roleEn}</span>
@@ -55,7 +61,7 @@ const { site } = Astro.props;
 </section>
 
 <script>
-  // Alterna el rayo y la C cada pocos segundos (no lo hace con movimiento reducido).
+  // Alterna la S y la C cada pocos segundos (no lo hace con movimiento reducido).
   const letters = Array.from(document.querySelectorAll<HTMLElement>(".intro__letter"));
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (letters.length > 1 && !reduced) {
@@ -106,14 +112,6 @@ const { site } = Astro.props;
     transform: scale(1);
   }
 
-  /* El rayo ocupa más o menos lo mismo que ocupaba la S. */
-  .intro__bolt {
-    display: block;
-    width: auto;
-    height: min(88svh, 72vw);
-    overflow: visible;
-  }
-
   .intro__text {
     position: relative;
     max-width: 50rem;
@@ -160,6 +158,17 @@ const { site } = Astro.props;
     line-height: 0.9;
     letter-spacing: -0.02em;
     text-transform: uppercase;
+  }
+
+  /* El rayo tiene la altura de las mayúsculas y baja un poco de la línea,
+     como un rayo que cae. */
+  .intro__bolt {
+    display: inline-block;
+    width: auto;
+    height: 0.86em;
+    margin-right: 0.03em;
+    vertical-align: -0.1em;
+    overflow: visible;
   }
 
   .intro__role {

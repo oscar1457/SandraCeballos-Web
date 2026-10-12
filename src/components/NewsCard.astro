@@ -81,8 +81,8 @@ const items = await Promise.all(
   if (card && intro && !narrow) {
     const SHOWN = { xPercent: 0, rotate: -1.5 };
 
-    // ---- Varias noticias: se turnan cada 8 s (pausa con el ratón encima) ----
-    const READ_TIME = 8;
+    // ---- Varias noticias: se turnan cada 5 s, siempre (no se para con el ratón) ----
+    const READ_TIME = 5;
     const links = Array.from(card.querySelectorAll<HTMLElement>("[data-news-item]"));
     const dots = Array.from(card.querySelectorAll<HTMLElement>("[data-news-dot]"));
     let currentItem = 0;
@@ -126,17 +126,12 @@ const items = await Promise.all(
         { scaleX: 0 },
         { scaleX: 1, duration: READ_TIME, ease: "none", onComplete: () => showItem(currentItem + 1) }
       );
-      if (card.matches(":hover, :focus-within")) progress.pause();
     };
 
     links.forEach((link, index) => {
       if (index > 0) gsap.set(link, { autoAlpha: 0 });
     });
     dots.forEach((dot, index) => dot.addEventListener("click", () => showItem(index)));
-    card.addEventListener("mouseenter", () => progress?.pause());
-    card.addEventListener("mouseleave", () => progress?.resume());
-    card.addEventListener("focusin", () => progress?.pause());
-    card.addEventListener("focusout", () => progress?.resume());
     let onIntro = true;
     let closed = false; // cerrada o pulsada; se olvida al salir de la portada
     let timer = 0;

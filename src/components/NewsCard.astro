@@ -1,0 +1,245 @@
+---
+// Noticia de portada: aparece desde la derecha a los 2 s y lleva a la historia
+// correspondiente de «In the studio».
+import { getImage } from "astro:assets";
+import replica from "@/assets/taller/documenta-replica-1.jpg";
+
+const image = await getImage({ src: replica, width: 640, format: "webp" });
+---
+
+<aside class="news" data-news aria-labelledby="news-title" hidden>
+  <div class="news__mast">
+    <span class="news__label">News</span>
+    <span class="news__issue num">documenta fifteen · 2022</span>
+    <button type="button" class="news__close" data-news-close aria-label="Cerrar noticia" data-aria-label-en="Close news">×</button>
+  </div>
+  <a class="news__link" href="#taller/documenta-fifteen" data-news-link>
+    <img class="news__image" src={image.src} width="640" height="480" alt="" loading="lazy" decoding="async" />
+    <h2 class="news__title" id="news-title">
+      <span data-lang="es">Espacio Aglutinador, a tamaño real en documenta fifteen</span>
+      <span data-lang="en">Espacio Aglutinador, full scale at documenta fifteen</span>
+    </h2>
+    <p class="news__dek">
+      <span data-lang="es">La galería que Sandra Ceballos cofundó en La Habana, reconstruida en Kassel junto a su obra.</span>
+      <span data-lang="en">The gallery Sandra Ceballos co-founded in Havana, rebuilt in Kassel alongside her work.</span>
+    </p>
+    <span class="news__cta">
+      <span data-lang="es">Leer la historia</span><span data-lang="en">Read the story</span> →
+    </span>
+  </a>
+</aside>
+
+<script>
+  import { gsap } from "gsap";
+
+  const card = document.querySelector<HTMLElement>("[data-news]");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // De momento solo en escritorio: en el móvil tapa la portada (pendiente de decidir).
+  const narrow = window.matchMedia("(max-width: 760px)").matches;
+  let dismissed = narrow;
+  try {
+    dismissed = dismissed || sessionStorage.getItem("sc-news-closed") === "1";
+  } catch {
+    // sin almacenamiento: se muestra igualmente
+  }
+
+  if (card && !dismissed) {
+    let ready = false;
+    let closed = false; // cerrada o ya pulsada en esta visita
+    let onIntro = true;
+
+    const hide = (remember: boolean) => {
+      closed = true;
+      if (remember) {
+        try {
+          sessionStorage.setItem("sc-news-closed", "1");
+        } catch {
+          // sin almacenamiento: solo se oculta ahora
+        }
+      }
+      slideOut();
+    };
+
+    // Solo se ve mientras la portada está en pantalla: al bajar se retira hacia
+    // la derecha (para no tapar nada) y vuelve al subir, salvo si se cerró.
+    const intro = document.getElementById("inicio");
+    const slideIn = () => {
+      if (closed || !ready || !onIntro || !card.hidden) return;
+      card.hidden = false;
+      if (reduced) return;
+      gsap.fromTo(card, { xPercent: 115, rotate: 4 }, { xPercent: 0, rotate: -1.5, duration: 0.9, ease: "power3.out", overwrite: true });
+    };
+    const slideOut = () => {
+      if (card.hidden) return;
+      gsap.to(card, {
+        xPercent: 115,
+        duration: reduced ? 0 : 0.45,
+        ease: "power3.in",
+        overwrite: true,
+        onComplete: () => {
+          card.hidden = true;
+          slideIn();
+        }
+      });
+    };
+
+    if (intro) {
+      new IntersectionObserver(
+        (entries) => {
+          onIntro = entries.some((entry) => entry.intersectionRatio >= 0.8);
+          if (onIntro) slideIn();
+          else slideOut();
+        },
+        { threshold: 0.8 }
+      ).observe(intro);
+    }
+
+    window.setTimeout(() => {
+      ready = true;
+      slideIn();
+    }, 2000);
+
+    // Con el teclado: si el foco va a otra parte de la página, se quita al momento.
+    document.addEventListener("focusin", (event) => {
+      const target = event.target as Node;
+      if (card.hidden || card.contains(target) || intro?.contains(target)) return;
+      gsap.killTweensOf(card);
+      gsap.set(card, { xPercent: 115 });
+      card.hidden = true;
+    });
+
+    card.querySelector("[data-news-close]")?.addEventListener("click", () => hide(true));
+    card.querySelector("[data-news-link]")?.addEventListener("click", () => hide(false));
+  }
+</script>
+
+<style>
+  /* Recorte de periódico pegado en el borde derecho de la portada. */
+  .news {
+    position: fixed;
+    right: var(--gutter);
+    bottom: calc(var(--gutter) + 4rem);
+    z-index: 90;
+    width: min(21rem, calc(100vw - 2 * var(--gutter)));
+    padding: 0.9rem;
+    background: #fbfaf7;
+    color: var(--black);
+    box-shadow: 0 1.2rem 2.5rem rgb(0 0 0 / 0.28);
+    transform-origin: 50% 50%;
+  }
+
+  .news[hidden] {
+    display: none;
+  }
+
+  .news__mast {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 3px double var(--black);
+  }
+
+  .news__label {
+    font-family: var(--font-serif);
+    font-size: 1.9rem;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .news__issue {
+    flex: 1;
+    color: var(--red);
+    font-size: var(--text-label);
+    font-weight: 600;
+  }
+
+  .news__close {
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--black);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .news__link {
+    display: block;
+    margin-top: 0.7rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .news__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .news__title {
+    margin: 0.7rem 0 0;
+    font-family: var(--font-serif);
+    font-size: 1.45rem;
+    font-weight: 400;
+    line-height: 1.05;
+  }
+
+  .news__dek {
+    margin: 0.45rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .news__cta {
+    display: inline-block;
+    margin-top: 0.7rem;
+    color: var(--red);
+    font-size: var(--text-small);
+    font-weight: 600;
+  }
+
+  .news__link:hover .news__cta,
+  .news__link:focus-visible .news__cta {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* En móvil: más compacto, la foto al lado del texto. */
+  @media (max-width: 760px) {
+    .news {
+      bottom: var(--gutter);
+      padding: 0.7rem;
+    }
+
+    .news__label {
+      font-size: 1.5rem;
+    }
+
+    .news__link {
+      display: grid;
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+      grid-template-rows: auto auto auto;
+      column-gap: 0.7rem;
+    }
+
+    .news__image {
+      grid-row: 1 / span 3;
+      aspect-ratio: 3 / 4;
+    }
+
+    .news__title {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+
+    .news__dek {
+      font-size: 0.78rem;
+    }
+  }
+</style>

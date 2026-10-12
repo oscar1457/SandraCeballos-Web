@@ -456,12 +456,13 @@ const pad = (n: number) => String(n).padStart(2, "0");
   }
 
   /* Todas las historias ocupan la misma celda; solo se ve la activa. */
+  /* Foto y texto pegados, como una publicación: el texto va en un panel
+     blanco a la derecha de la foto, con su misma altura. */
   .story {
     display: grid;
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
     grid-area: 1 / 1;
-    gap: var(--space-3);
-    align-items: end;
+    align-items: stretch;
   }
 
   .story:not(:first-child) {
@@ -477,25 +478,34 @@ const pad = (n: number) => String(n).padStart(2, "0");
     object-fit: cover;
   }
 
+  .story__text {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1rem, 1.6vw, 1.6rem);
+    background: var(--white);
+    color: var(--black);
+  }
+
   .story__year {
     margin: 0;
-    font-size: 1rem;
+    color: var(--red);
+    font-size: 0.95rem;
     font-weight: 600;
   }
 
   .story__title {
-    margin: 0.3rem 0 0;
-    font-size: clamp(1.4rem, 2vw, 2.1rem);
+    margin: 0.4rem 0 0;
+    font-size: clamp(1.35rem, 1.9vw, 2rem);
     font-weight: 600;
     line-height: 1.05;
     letter-spacing: -0.02em;
   }
 
   .story__body {
-    margin: 0.8rem 0 0;
-    font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+    margin: 0.9rem 0 0;
+    font-size: clamp(0.92rem, 1.05vw, 1.05rem);
     font-weight: 500;
-    line-height: 1.35;
+    line-height: 1.38;
   }
 
   @media (max-width: 760px) {
@@ -525,7 +535,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
     /* En móvil la foto va arriba y el texto debajo, a todo el ancho. */
     .story {
       grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-2);
     }
 
     .story__photo {

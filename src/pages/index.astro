@@ -7,6 +7,7 @@ import Publications from "@/components/Publications.astro";
 import Studio from "@/components/Studio.astro";
 import SiteHeader from "@/components/SiteHeader.astro";
 import Works from "@/components/Works.astro";
+import NewsCard from "@/components/NewsCard.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { artworks } from "@/data/artworks";
 import { site } from "@/data/site";
@@ -25,6 +26,7 @@ const formEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? "";
     <Contact site={site} endpoint={formEndpoint} />
   </main>
   <Footer site={site} />
+  <NewsCard />
   <script>
     import "@/scripts/language.ts";
     import "@/scripts/smooth.ts";

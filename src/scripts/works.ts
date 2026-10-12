@@ -71,15 +71,15 @@ if (section && dataNode && sheet) {
         write();
         return;
       }
-      // Como un contador mecánico: sale rápido y el nuevo entra con un pequeño rebote.
+      // El texto anterior sale hacia arriba y el nuevo entra desde abajo.
       gsap.killTweensOf(node);
       gsap.to(node, {
         yPercent: -105 * direction,
-        duration: 0.12,
+        duration: 0.18,
         ease: "power2.in",
         onComplete: () => {
           write();
-          gsap.fromTo(node, { yPercent: 105 * direction }, { yPercent: 0, duration: 0.38, ease: "back.out(2)" });
+          gsap.fromTo(node, { yPercent: 105 * direction }, { yPercent: 0, duration: 0.45, ease: "power3.out" });
         }
       });
     });
@@ -90,33 +90,35 @@ if (section && dataNode && sheet) {
   };
 
   // ---------- Galería en línea recta ----------
-  // Cada tramo de scroll corresponde a una obra. Al cruzar de un tramo al
-  // siguiente todo se mueve de golpe, se pasa un poco y vuelve a encajar: el
-  // "clic" de la rueda de modos de una cámara.
+  // Desplazamiento continuo: las obras se mueven a la par que el scroll. La
+  // central va grande y a color; al alejarse se hacen pequeñas, grises y
+  // transparentes.
   let current = 0;
+  let position = 0;
   const gap = () => (window.innerWidth < 760 ? window.innerWidth * 0.8 : window.innerWidth * 0.42);
 
-  const placeGallery = (index: number, animate: boolean) => {
+  const placeGallery = (value: number, animateText = true) => {
+    position = value;
     items.forEach((item, itemIndex) => {
-      const offset = itemIndex - index;
+      const offset = itemIndex - value;
       const distance = Math.abs(offset);
-      const props = {
-        x: Math.sign(offset) * Math.min(distance, 2) * gap(),
-        scale: offset === 0 ? 1 : 0.62,
-        autoAlpha: distance > 1 ? 0 : offset === 0 ? 1 : 0.35,
-        filter: offset === 0 ? "grayscale(0)" : "grayscale(1)"
-      };
-      if (animate && !reduced) {
-        gsap.to(item, { ...props, duration: 0.46, ease: "back.out(1.9)", overwrite: "auto" });
-      } else {
-        gsap.set(item, props);
-      }
-      const card = item.firstElementChild as HTMLElement | null;
-      if (card) {
-        card.tabIndex = offset === 0 ? 0 : -1;
-      }
+      const near = Math.min(distance, 1);
+      gsap.set(item, {
+        x: offset * gap(),
+        scale: 1 - near * 0.38,
+        autoAlpha: distance <= 1 ? 1 - near * 0.65 : Math.max(0, 0.35 - (distance - 1) * 0.6),
+        filter: `grayscale(${near})`
+      });
     });
-    setNow(index, animate);
+    const index = Math.min(total - 1, Math.max(0, Math.round(value)));
+    if (index !== current || !animateText) {
+      current = index;
+      items.forEach((item, itemIndex) => {
+        const card = item.firstElementChild as HTMLElement | null;
+        if (card) card.tabIndex = itemIndex === index ? 0 : -1;
+      });
+      setNow(index, animateText);
+    }
   };
 
   let trigger: ScrollTrigger | null = null;
@@ -126,16 +128,9 @@ if (section && dataNode && sheet) {
       trigger: section,
       start: "top top",
       end: "bottom bottom",
-      onUpdate: (self) => {
-        const index = Math.min(total - 1, Math.max(0, Math.round(self.progress * (total - 1))));
-        if (index !== current) {
-          current = index;
-          placeGallery(index, true);
-        }
-      }
+      onUpdate: (self) => placeGallery(self.progress * (total - 1))
     });
-    current = Math.min(total - 1, Math.max(0, Math.round(trigger.progress * (total - 1))));
-    placeGallery(current, false);
+    placeGallery(trigger.progress * (total - 1), false);
   };
 
   // ---------- Cambio de modo ----------
@@ -295,7 +290,7 @@ if (section && dataNode && sheet) {
   setMode(reduced ? "list" : "wheel");
   window.addEventListener("resize", () => {
     if (section.dataset.mode === "wheel") {
-      placeGallery(current, false);
+      placeGallery(position, false);
     }
   });
 

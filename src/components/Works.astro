@@ -70,11 +70,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
     <!-- Pie de foto editorial de la obra que está en el centro. -->
     <div class="works__caption" aria-live="polite">
-      <p class="works__fig num">
-        Fig. <span class="mask"><span data-now="num">{pad(1)}</span></span>
-      </p>
       <p class="works__title"><span class="mask"><span data-now="title">{first.title}</span></span></p>
       <p class="works__data">
+        <span class="works__fig num">Fig. <span class="mask"><span data-now="num">{pad(1)}</span></span></span>
         <span class="mask"
           ><span data-now="data"
             >{first.year} · <span data-lang="es">{first.technique}</span><span data-lang="en"
@@ -203,8 +201,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 <style>
   /* Galería editorial: fondo blanco, una obra protagonista en el centro y sus
-     vecinas lejos, pequeñas y en gris. Al hacer scroll se pasa de una en una con
-     un "clic" (ver works.ts). */
+     vecinas lejos, pequeñas y en gris. Se desplazan a la par que el scroll
+     (ver works.ts). */
   .works {
     position: relative;
     height: calc(var(--count) * 42svh + 100svh);
@@ -280,9 +278,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
     max-width: min(46rem, 62vw);
   }
 
+  /* "Fig. 03" va al principio de la línea de datos, en negro y con el número en rojo. */
   .works__fig {
-    margin: 0;
-    font-size: var(--text-small);
+    margin-right: 0.6em;
+    color: var(--black);
     font-weight: 600;
     letter-spacing: 0.02em;
   }
@@ -298,7 +297,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
     flex-direction: column;
     justify-content: flex-end;
     min-height: calc(2 * 1.02em + 0.7rem + 3px);
-    margin: 0.35rem 0 0;
+    margin: 0;
     font-family: var(--font-serif);
     font-size: clamp(1.9rem, 3.2vw, 3.4rem);
     font-weight: 400;

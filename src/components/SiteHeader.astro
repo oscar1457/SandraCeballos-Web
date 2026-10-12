@@ -95,9 +95,9 @@ const { site, workCount } = Astro.props;
     font-size: var(--text-small);
     font-weight: 500;
     line-height: 1.1;
-    transition:
-      color 300ms var(--ease),
-      background-color 300ms var(--ease);
+    /* Sin transición: el color cambia en el mismo fotograma en que la
+       sección de debajo cruza el centro de la cabecera (ver smooth.ts). Un
+       fundido iba por detrás del scroll y se veía como un parpadeo. */
   }
 
   /* Sobre rojo o negro, el idioma no elegido casi no se atenúa: así se lee

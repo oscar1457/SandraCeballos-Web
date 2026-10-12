@@ -147,11 +147,16 @@ html[data-current-lang="en"] [data-lang="es"] {
   display: none !important;
 }
 
+/* Movimiento reducido: sin transiciones y animaciones instantáneas.
+   Ojo: no usar "transition-duration: 1ms" para todo. Como transition-property
+   vale "all" por defecto, cualquier cambio (incluso el tamaño de letra al
+   cambiar la ventana) pasaba a animarse 1 ms y el código que mide justo
+   después leía el valor anterior (la C de Trayectoria se quedaba grande). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    transition-duration: 1ms !important;
+    transition: none !important;
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
   }

@@ -112,21 +112,48 @@ const header = document.querySelector<HTMLElement>("[data-site-header]");
 const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-header]"));
 
 if (header && sections.length > 0) {
+  // La cabecera toma el tono y el color de fondo de la sección que tiene debajo
+  // de su centro. El cambio es instantáneo y en el mismo fotograma que el
+  // scroll: antes el fondo se fundía en 300 ms y, mientras, la cabecera seguía
+  // del color anterior sobre la sección nueva (eso era el parpadeo).
+  const colors = new Map<HTMLElement, string>();
+  const colorOf = (section: HTMLElement) => {
+    let color = colors.get(section);
+    if (!color) {
+      color = getComputedStyle(section).backgroundColor;
+      colors.set(section, color);
+    }
+    return color;
+  };
+
+  let lastSection: HTMLElement | undefined;
+  let first = true;
   const updateTone = () => {
-    // La sección que está justo debajo de la cabecera decide el color.
     const probe = header.offsetHeight / 2;
     const current = sections.find((section) => {
       const rect = section.getBoundingClientRect();
       return rect.top <= probe && rect.bottom > probe;
     });
+    if (current === lastSection && !first) return;
+    first = false;
+    lastSection = current;
     header.dataset.tone = current?.dataset.header === "dark" ? "dark" : "light";
-    // La cabecera toma el color de fondo de la sección para que el texto de la
-    // página no se mezcle con el menú al pasar por debajo.
-    const background = current ? getComputedStyle(current).backgroundColor : "transparent";
-    header.style.setProperty("--header-bg", background);
+    header.style.setProperty("--header-bg", current ? colorOf(current) : "transparent");
   };
+
   updateTone();
+  // Con el desplazamiento suave, Lenis mueve la página dentro de su fotograma:
+  // la cabecera se actualiza en ese mismo fotograma (el evento "scroll" del
+  // navegador llega un fotograma después). Sin Lenis, con el evento normal.
+  lenis?.on("scroll", updateTone);
   window.addEventListener("scroll", updateTone, { passive: true });
-  window.addEventListener("resize", updateTone);
-  ScrollTrigger.addEventListener("refresh", updateTone);
+  window.addEventListener("resize", () => {
+    colors.clear();
+    first = true;
+    updateTone();
+  });
+  ScrollTrigger.addEventListener("refresh", () => {
+    first = true;
+    updateTone();
+  });
 }

@@ -20,6 +20,10 @@ type Frame = {
   targetBg: RGB;
   news: "on" | "off" | "none";
   menu: boolean; // menú del teléfono abierto (la cabecera pasa a blanco sobre negro a propósito)
+  // Fondo de la cabecera frente a la página de debajo, en su borde de arriba,
+  // su centro y su borde de abajo: [color de la cabecera, color de la sección].
+  // La comprobación usa el centro (la cabecera es de un solo color).
+  rows: [RGB, RGB][];
   y: number;
   phase: string;
 };
@@ -45,6 +49,11 @@ const startRecorder = (page: Page) =>
           return rect.top <= probe && rect.bottom > probe;
         });
         const expected = under?.dataset.header === "dark" ? "dark" : "light";
+        const sectionAt = (y: number) =>
+          Array.from(document.querySelectorAll<HTMLElement>("[data-header]")).find((section) => {
+            const rect = section.getBoundingClientRect();
+            return rect.top <= y && rect.bottom > y;
+          });
         const parse = (value: string) => (value.match(/[\d.]+/g) ?? ["0", "0", "0"]).map(Number);
         const rgb = (value: string) => parse(value).slice(0, 3);
         const style = getComputedStyle(header);
@@ -52,6 +61,22 @@ const startRecorder = (page: Page) =>
         // Fondo con transparencia: lo que se ve es la mezcla con la sección de debajo.
         const [r = 0, g = 0, b = 0, alpha = 1] = parse(style.backgroundColor);
         const seenBg = [r, g, b].map((c, k) => c * alpha + sectionBg[k]! * (1 - alpha));
+        // Color del fondo de la cabecera a una altura y: degradado con corte
+        // (linear-gradient(colorA Npx, colorB Npx)) o color liso con transparencia.
+        const image = style.backgroundImage;
+        const headerAt = (y: number, below: number[]) => {
+          const colors = image.match(/rgba?\([^)]*\)/g);
+          if (image !== "none" && colors && colors.length >= 2) {
+            const stop = Number((image.match(/\)\s*([\d.]+)px/) ?? [])[1] ?? Infinity);
+            return rgb(y < stop ? colors[0]! : colors[1]!);
+          }
+          return [r, g, b].map((c, k) => c * alpha + below[k]! * (1 - alpha));
+        };
+        const rowsAt = [1, probe, header.offsetHeight - 1].map((y) => {
+          const section = sectionAt(y);
+          const below = section ? rgb(getComputedStyle(section).backgroundColor) : [0, 0, 0];
+          return [headerAt(y, below), below];
+        });
         w.__frames.push({
           t: performance.now(),
           tone: header.dataset.tone ?? "",
@@ -62,6 +87,7 @@ const startRecorder = (page: Page) =>
           targetBg: sectionBg,
           news,
           menu: header.classList.contains("is-open"),
+          rows: rowsAt,
           y: window.scrollY,
           phase: w.__phase
         });
@@ -99,7 +125,7 @@ const changes = <K extends "tone" | "news">(list: Frame[], key: K) => {
 
 // Color que se ve: distancia (0–441) entre el color de la cabecera y el que le toca.
 const distance = (a: RGB, b: RGB) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
-const TRANSITION_MS = 300;
+const TRANSITION_MS = 0; // el color de la cabecera cambia sin transición
 
 // Lo que ve el usuario: tras cruzar una frontera, el color de texto y de fondo
 // de la cabecera solo puede acercarse al de la nueva sección (nunca alejarse:
@@ -116,14 +142,32 @@ const perceivedProblems = (list: Frame[]) => {
       crossingAt = frame.t;
       continue;
     }
-    for (const [key, target] of [["color", "targetColor"], ["bg", "targetBg"]] as const) {
-      const before = distance(prev[key], frame[target]);
-      const now = distance(frame[key], frame[target]);
-      if (now > before + 6) out.push(`${frame.phase} y=${Math.round(frame.y)}: el ${key === "bg" ? "fondo" : "texto"} de la cabecera se aleja del color de la sección (${Math.round(before)}→${Math.round(now)})`);
-      if (frame.t - crossingAt > TRANSITION_MS + 120 && now > 8) out.push(`${frame.phase} y=${Math.round(frame.y)}: el ${key === "bg" ? "fondo" : "texto"} de la cabecera no es el de la sección (distancia ${Math.round(now)})`);
-    }
+    // Texto de la cabecera (el fondo lo comprueba seamProblems).
+    const before = distance(prev.color, frame.targetColor);
+    const now = distance(frame.color, frame.targetColor);
+    if (now > before + 6) out.push(`${frame.phase} y=${Math.round(frame.y)}: el texto de la cabecera se aleja del color que le toca (${Math.round(before)}→${Math.round(now)})`);
+    if (frame.t - crossingAt > TRANSITION_MS + 120 && now > 8) out.push(`${frame.phase} y=${Math.round(frame.y)}: el texto de la cabecera no es el que le toca (distancia ${Math.round(now)})`);
   }
   return [...new Set(out)].slice(0, 5);
+};
+
+// Lo que se ve: en cada fotograma el fondo de la cabecera es exactamente el de
+// la sección que tiene bajo su centro (la que decide el tono). Se permite 1
+// fotograma de retraso al cruzar. Un fundido que va por detrás del scroll deja
+// la cabecera de otro color sobre la sección nueva: eso se ve como un destello.
+const seamProblems = (list: Frame[]) => {
+  const out: string[] = [];
+  for (let i = 1; i < list.length; i++) {
+    const frame = list[i]!;
+    const prev = list[i - 1]!;
+    if (frame.menu || prev.menu) continue;
+    const [seen, page] = frame.rows[1]!;
+    if (distance(seen, page) <= 20) continue;
+    const [, before] = prev.rows[1]!;
+    if (distance(seen, before) <= 20) continue; // 1 fotograma de retraso
+    out.push(`${frame.phase} y=${Math.round(frame.y)}: cabecera rgb(${seen.map(Math.round)}) sobre sección rgb(${page})`);
+  }
+  return [...new Set(out)].slice(0, 6);
 };
 
 // Fotogramas en los que la cabecera no coincide con la sección de debajo,
@@ -171,6 +215,7 @@ test("cabecera y noticia sin parpadeos durante el scroll", async ({ page }, test
   const tone = changes(all, "tone");
   expect(headerMismatches(all), "cabecera con un tono distinto de la sección de debajo").toEqual([]);
   expect(perceivedProblems(all), "color visible de la cabecera").toEqual([]);
+  expect(seamProblems(all), "el fondo de la cabecera es el de la sección de debajo").toEqual([]);
   expect(tone.length, "la cabecera cambia de tono al pasar por las secciones").toBeGreaterThan(2);
 
   // Resumen adjunto al informe (y en consola con DEBUG_MOTION=1).
@@ -212,4 +257,5 @@ test("cabecera sin parpadeos al usar los enlaces del menú", async ({ page }, te
   const all = (await frames(page)).filter((f) => f.phase.startsWith("menu-"));
   expect(headerMismatches(all), "cabecera con un tono distinto de la sección de debajo").toEqual([]);
   expect(perceivedProblems(all), "color visible de la cabecera").toEqual([]);
+  expect(seamProblems(all), "el fondo de la cabecera es el de la sección de debajo").toEqual([]);
 });

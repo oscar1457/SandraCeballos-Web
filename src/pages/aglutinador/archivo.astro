@@ -31,7 +31,7 @@ const viewerData = photos.map(({ full, srcset, caption, captionEn }) => ({ full,
           <button type="button" class="grid__item" data-photo={index} aria-haspopup="dialog">
             <Image
               src={photo.image}
-              alt={photo.caption}
+              alt=""
               widths={[400, 700, 1000]}
               sizes="(max-width: 620px) 50vw, 25vw"
               loading={index < 8 ? "eager" : "lazy"}

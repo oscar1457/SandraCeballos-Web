@@ -45,7 +45,7 @@ const shots = [
         <span data-lang="es">Desliza para ver los catálogos →</span>
         <span data-lang="en">Swipe to see the catalogues →</span>
       </p>
-      <div class="pubs__shots">
+      <div class="pubs__shots" data-pubs-shots aria-label="Catálogos" data-aria-label-en="Catalogues">
       {
         shots.map((shot) => (
           <figure class="pubs__panel pubs__shot">
@@ -79,6 +79,23 @@ const shots = [
   const section = document.querySelector<HTMLElement>("[data-pubs]");
   const track = document.querySelector<HTMLElement>("[data-pubs-track]");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // En el teléfono las portadas son un carrusel: se puede mover también con el teclado.
+  const shotsRow = document.querySelector<HTMLElement>("[data-pubs-shots]");
+  if (shotsRow) {
+    const phone = window.matchMedia("(max-width: 760px)");
+    const sync = () => {
+      if (phone.matches) {
+        shotsRow.tabIndex = 0;
+        shotsRow.setAttribute("role", "region");
+      } else {
+        shotsRow.removeAttribute("tabindex");
+        shotsRow.removeAttribute("role");
+      }
+    };
+    sync();
+    phone.addEventListener("change", sync);
+  }
 
   if (section && track && !reduced) {
     const mm = gsap.matchMedia();
@@ -243,29 +260,14 @@ const shots = [
       font-size: clamp(2.2rem, 11vw, 3rem);
     }
 
+    /* En el teléfono solo se ven las portadas; cada una lleva su título debajo. */
     .pubs__list {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0;
-    }
-
-    .pubs__list li {
-      gap: 0.1rem;
-      padding: 0.55rem 0 0.6rem;
-    }
-
-    .pubs__name {
-      font-size: 1.2rem;
-      line-height: 1.05;
-    }
-
-    .pubs__meta {
-      font-size: 0.82rem;
-      line-height: 1.3;
+      display: none;
     }
 
     .pubs__hint {
       display: block;
-      margin: var(--space-3) var(--gutter) var(--space-1);
+      margin: var(--space-1) var(--gutter) var(--space-2);
     }
 
     .pubs__shots {

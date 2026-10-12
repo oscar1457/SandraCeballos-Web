@@ -100,6 +100,12 @@ const { site, workCount } = Astro.props;
       background-color 300ms var(--ease);
   }
 
+  /* Sobre rojo o negro, el idioma no elegido casi no se atenúa: así se lee
+     bien (contraste suficiente); el subrayado marca el idioma activo. */
+  .site-header[data-tone="light"] :global(.language-switch button) {
+    opacity: 0.95;
+  }
+
   .site-header[data-tone="dark"] {
     color: var(--black);
   }

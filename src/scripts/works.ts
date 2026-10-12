@@ -305,3 +305,25 @@ if (section && dataNode && sheet) {
     }
   });
 }
+
+// Miniaturas de la rueda que esperan: se cargan en cuanto la galería entra en pantalla.
+{
+  const gallery = document.getElementById("obra");
+  const waiting = Array.from(document.querySelectorAll<HTMLImageElement>("img[data-src]"));
+  if (gallery && waiting.length) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        waiting.forEach((img) => {
+          if (img.dataset.srcset) img.srcset = img.dataset.srcset;
+          img.src = img.dataset.src ?? "";
+          delete img.dataset.src;
+          delete img.dataset.srcset;
+        });
+      },
+      { rootMargin: "0px 0px -10% 0px" }
+    );
+    observer.observe(gallery);
+  }
+}

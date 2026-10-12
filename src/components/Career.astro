@@ -8,7 +8,12 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
 ---
 
 <section class="career" id="trayectoria" data-header="dark" aria-labelledby="career-title">
-  <div class="career__letter" aria-hidden="true" data-career-letter>C<canvas class="career__letter-video" data-career-letter-video></canvas></div>
+  <!-- El div coloca la C; el span de dentro es el que se anima (crece, gira,
+       sigue al ratón), así las animaciones no pisan la colocación al cambiar
+       el tamaño de la ventana. -->
+  <div class="career__letter" aria-hidden="true">
+    <span class="career__glyph" data-career-letter>C<canvas class="career__letter-video" data-career-letter-video></canvas></span>
+  </div>
 
   <h2 class="career__statement" id="career-title">
     <span data-lang="es">
@@ -397,12 +402,18 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
         letter.classList.add("has-video");
       };
       poster.src = `${BASE}.jpg`;
-      let width = window.innerWidth;
-      new ResizeObserver(() => {
-        if (window.innerWidth !== width) {
-          width = window.innerWidth;
+      // Si cambia el tamaño de la ventana (o se gira el teléfono), la C cambia
+      // de tamaño: se vuelve a medir y a recortar para que coincida con ella.
+      let pending = 0;
+      window.addEventListener("resize", () => {
+        cancelAnimationFrame(pending);
+        pending = requestAnimationFrame(() => {
           fit();
-        }
+          current.resize();
+          current.draw();
+        });
+      });
+      new ResizeObserver(() => {
         current.resize();
         current.draw();
       }).observe(canvas);
@@ -439,7 +450,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     align-content: start;
     gap: var(--space-5) var(--gutter);
     min-height: 100svh;
-    padding: 9rem var(--gutter) var(--space-5);
+    padding: 9rem var(--gutter) var(--space-3);
     overflow: hidden;
     background: var(--white);
     color: var(--black);
@@ -459,6 +470,12 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     pointer-events: none;
   }
 
+  .career__glyph {
+    position: relative;
+    display: block;
+    transition: color 900ms var(--ease);
+  }
+
   /* Lienzo con el vídeo en trama, recortado con la forma de la C. Aparece
      cuando ya tiene imagen; debajo sigue la C de texto. */
   .career__letter-video {
@@ -472,8 +489,13 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     -webkit-mask-repeat: no-repeat;
   }
 
-  .career__letter.has-video .career__letter-video {
+  .career__glyph.has-video .career__letter-video {
     opacity: 1;
+  }
+
+  /* Con el vídeo ya dentro, la C de texto no se pinta: así nunca se ven dos C. */
+  .career__glyph.has-video {
+    color: transparent;
   }
 
   .career__statement {

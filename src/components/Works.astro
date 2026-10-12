@@ -12,6 +12,8 @@ const { artworks } = Astro.props;
 const works = await Promise.all(
   artworks.map(async (artwork) => {
     const thumb = await getImage({ src: artwork.thumbnail, width: 1000, format: "webp" });
+    // Varios tamaños para la rueda: el teléfono descarga el que necesita.
+    const thumbSet = await getImage({ src: artwork.thumbnail, widths: [480, 720, 1000], format: "webp" });
     const full = await getImage({
       src: artwork.image,
       widths: [1000, 1600, 2200],
@@ -20,6 +22,7 @@ const works = await Promise.all(
     return {
       slug: artwork.slug,
       thumb: thumb.src,
+      thumbSrcset: thumbSet.srcSet.attribute,
       thumbW: thumb.attributes.width as number,
       thumbH: thumb.attributes.height as number,
       full: full.src,
@@ -98,12 +101,18 @@ const pad = (n: number) => String(n).padStart(2, "0");
               aria-haspopup="dialog"
               aria-label={work.title}
             >
+              {/* Las tres primeras se cargan ya; el resto, cuando la galería se acerca
+                  (todas están en el mismo sitio de la pantalla, así que
+                  loading="lazy" no serviría). */}
               <img
-                src={work.thumb}
+                src={index < 3 ? work.thumb : undefined}
+                srcset={index < 3 ? work.thumbSrcset : undefined}
+                data-src={index < 3 ? undefined : work.thumb}
+                data-srcset={index < 3 ? undefined : work.thumbSrcset}
+                sizes="(max-width: 760px) 80vw, 46vw"
                 width={work.thumbW}
                 height={work.thumbH}
                 alt=""
-                loading={index < 5 ? "eager" : "lazy"}
                 decoding="async"
               />
             </button>
@@ -340,7 +349,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
   }
 
   .works__total {
-    color: #9a9a9a;
+    color: #707070;
     font-size: 0.45em;
   }
 

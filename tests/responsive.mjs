@@ -25,7 +25,15 @@ const SHOTS = process.argv.includes("shots");
 
 const audit = () => {
   const vw = innerWidth;
-  const out = { hscroll: document.documentElement.scrollWidth - vw, outside: [], clipped: [], tiny: [], small: [], covered: [] };
+  // El recorte "overflow-x: clip" de html/body esconde el problema en Chrome,
+  // pero Safari del iPhone puede dejar mover la página de lado: se mide sin él.
+  const root = document.documentElement;
+  root.style.overflowX = "visible";
+  document.body.style.overflowX = "visible";
+  const wide = root.scrollWidth - root.clientWidth;
+  root.style.overflowX = "";
+  document.body.style.overflowX = "";
+  const out = { hscroll: wide, outside: [], clipped: [], tiny: [], small: [], covered: [] };
   const name = (el) => {
     const cls = typeof el.className === "string" ? el.className.trim().split(/\s+/).slice(0, 2).join(".") : "";
     const txt = (el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 30);

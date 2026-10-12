@@ -52,6 +52,9 @@
 
 html {
   min-width: 320px;
+  /* Nada puede crear desplazamiento lateral (Safari del iPhone no siempre
+     respeta el recorte solo en el body). "clip" no rompe position: sticky. */
+  overflow-x: clip;
   background: var(--black);
   color: var(--black);
   font-family: var(--font-sans);

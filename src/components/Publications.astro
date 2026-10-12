@@ -40,12 +40,8 @@ const shots = [
         </ul>
       </div>
 
-      <!-- En móvil: aviso + carrusel propio de portadas, debajo de la lista. -->
-      <p class="pubs__hint" aria-hidden="true">
-        <span data-lang="es">Desliza para ver los catálogos →</span>
-        <span data-lang="en">Swipe to see the catalogues →</span>
-      </p>
-      <div class="pubs__shots" data-pubs-shots aria-label="Catálogos" data-aria-label-en="Catalogues">
+      <!-- En el teléfono las portadas van en una cuadrícula de dos columnas. -->
+      <div class="pubs__shots">
       {
         shots.map((shot) => (
           <figure class="pubs__panel pubs__shot">
@@ -53,7 +49,7 @@ const shots = [
               src={shot.image}
               alt={shot.alt}
               widths={[900, 1300, 1536]}
-              sizes="(max-width: 760px) 75vw, 120svh"
+              sizes="(max-width: 760px) 46vw, 120svh"
               loading="lazy"
             />
             <figcaption>
@@ -79,23 +75,6 @@ const shots = [
   const section = document.querySelector<HTMLElement>("[data-pubs]");
   const track = document.querySelector<HTMLElement>("[data-pubs-track]");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  // En el teléfono las portadas son un carrusel: se puede mover también con el teclado.
-  const shotsRow = document.querySelector<HTMLElement>("[data-pubs-shots]");
-  if (shotsRow) {
-    const phone = window.matchMedia("(max-width: 760px)");
-    const sync = () => {
-      if (phone.matches) {
-        shotsRow.tabIndex = 0;
-        shotsRow.setAttribute("role", "region");
-      } else {
-        shotsRow.removeAttribute("tabindex");
-        shotsRow.removeAttribute("role");
-      }
-    };
-    sync();
-    phone.addEventListener("change", sync);
-  }
 
   if (section && track && !reduced) {
     const mm = gsap.matchMedia();
@@ -141,9 +120,11 @@ const shots = [
     overflow: hidden;
   }
 
+  /* Lista y fotos empiezan arriba (antes iban centradas en la pantalla y
+     dejaban un hueco grande al llegar desde Trayectoria). */
   .pubs__track {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-4);
     width: max-content;
     height: 100%;
@@ -157,7 +138,7 @@ const shots = [
 
   .pubs__panel--text {
     display: grid;
-    align-content: center;
+    align-content: start;
     gap: var(--space-3);
     width: min(50rem, 85vw);
   }
@@ -175,13 +156,6 @@ const shots = [
     font-weight: 400;
     line-height: 0.9;
     text-transform: uppercase;
-  }
-
-  .pubs__hint {
-    display: none;
-    margin: 0;
-    font-size: var(--text-small);
-    font-weight: 500;
   }
 
   /* Con varios catálogos, la lista va en dos columnas para caber en pantalla. */
@@ -234,8 +208,8 @@ const shots = [
     font-weight: 500;
   }
 
-  /* Móvil: título, lista compacta y debajo un carrusel de portadas que se
-     desliza con el dedo (se ve un trozo de la siguiente para invitar a pasar). */
+  /* Teléfono: título y debajo las portadas en dos columnas, cada una con su
+     título. Sin lista de textos y sin desplazamiento lateral. */
   @media (max-width: 760px) {
     .pubs__sticky {
       position: static;
@@ -247,62 +221,40 @@ const shots = [
       display: block;
       width: auto;
       height: auto;
-      padding: 5rem 0 var(--space-4);
+      padding: 5rem var(--gutter) var(--space-4);
     }
 
     .pubs__panel--text {
       width: auto;
-      gap: var(--space-2);
-      padding: 0 var(--gutter);
+      margin-bottom: var(--space-3);
     }
 
     .pubs__title {
       font-size: clamp(2.2rem, 11vw, 3rem);
     }
 
-    /* En el teléfono solo se ven las portadas; cada una lleva su título debajo. */
     .pubs__list {
       display: none;
     }
 
-    .pubs__hint {
-      display: block;
-      margin: var(--space-1) var(--gutter) var(--space-2);
-    }
-
     .pubs__shots {
-      display: flex;
-      align-items: flex-start;
-      gap: var(--space-2);
-      padding: 0 var(--gutter);
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      scroll-snap-type: x mandatory;
-      scroll-padding-inline: var(--gutter);
-      scrollbar-width: none;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-3) var(--space-2);
+      align-items: start;
     }
 
-    .pubs__shots::-webkit-scrollbar {
-      display: none;
-    }
-
-    .pubs__shot {
-      flex: none;
-      scroll-snap-align: start;
-    }
-
-    /* La foto mantiene su proporción y no pasa de 78 % del ancho ni de media pantalla. */
     .pubs__shot img {
       display: block;
-      width: auto;
+      width: 100%;
       height: auto;
-      max-width: 78vw;
-      max-height: min(56svh, 24rem);
+      max-width: 100%;
     }
 
     .pubs__shot figcaption {
-      max-width: 70vw;
-      font-size: 0.82rem;
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      line-height: 1.25;
     }
   }
 

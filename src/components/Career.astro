@@ -32,7 +32,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
       src={portrait}
       alt="Retrato de Sandra Ceballos en una galería, con gafas de sol y una bolsa de tela con una cara y una raya roja."
       widths={[420, 700, 1000]}
-      sizes="(max-width: 900px) 70vw, 22rem"
+      sizes="(max-width: 900px) 50vw, 19rem"
       loading="lazy"
     />
     <figcaption>Sandra Ceballos</figcaption>
@@ -448,9 +448,9 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     align-content: start;
-    gap: var(--space-5) var(--gutter);
+    gap: var(--space-4) var(--gutter);
     min-height: 100svh;
-    padding: 9rem var(--gutter) var(--space-3);
+    padding: 6.5rem var(--gutter) calc(var(--space-3) + 1.5rem);
     overflow: hidden;
     background: var(--white);
     color: var(--black);
@@ -515,10 +515,19 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     text-indent: 0;
   }
 
+  /* Columna de la derecha a la altura de la foto: el texto de entrada arriba,
+     alineado con el borde de arriba de la foto, y los apartados abajo,
+     alineados con su borde de abajo. Así el bloque queda cerrado, sin hueco. */
   .career__index {
     position: relative;
     grid-row: 2;
     grid-column: 7 / span 6;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .career__index > .career__item:first-of-type {
+    margin-top: auto;
   }
 
   /* En pantallas anchas los apartados dejan margen a la derecha. */
@@ -534,7 +543,8 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     grid-row: 2;
     grid-column: 1 / span 4;
     align-self: start;
-    max-width: 22rem;
+    /* En pantallas bajas la foto se achica para que todo quepa al pulsar «Trayectoria». */
+    max-width: min(19rem, 34svh);
     margin: 0;
   }
 
@@ -546,7 +556,12 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     object-fit: cover;
   }
 
+  /* El pie cuelga debajo de la foto sin ocupar sitio: la columna mide lo
+     mismo que la foto. */
   .career__portrait figcaption {
+    position: absolute;
+    top: 100%;
+    left: 0;
     margin-top: var(--space-1);
     color: var(--color-muted);
     font-size: var(--text-label);

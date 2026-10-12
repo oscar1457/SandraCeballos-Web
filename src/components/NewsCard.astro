@@ -136,6 +136,22 @@ const items = await Promise.all(
     let closed = false; // cerrada o pulsada; se olvida al salir de la portada
     let timer = 0;
 
+    // Qué parte de la portada se ve ahora mismo (0–1). Se mide en el momento,
+    // sin fiarse de avisos anteriores.
+    const introRatio = () => {
+      const rect = intro.getBoundingClientRect();
+      const visible = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0));
+      return visible / Math.max(1, Math.min(rect.height, window.innerHeight));
+    };
+
+    // Si se entra con un enlace a otra sección (/#trayectoria…), la noticia no
+    // llega a salir: la página no se abre en la portada.
+    if (window.location.hash && !/^#(inicio)?$/.test(window.location.hash)) {
+      card.classList.remove("news--intro");
+      card.hidden = true;
+      onIntro = false;
+    }
+
     // Cuando termina la entrada por CSS, GSAP toma el control de la posición.
     const takeOver = () => {
       if (!card.classList.contains("news--intro")) return;
@@ -151,7 +167,7 @@ const items = await Promise.all(
     if (reduced) window.setTimeout(() => showItem(0, false), 1000);
 
     const slideIn = () => {
-      if (closed || !onIntro || !card.hidden) return;
+      if (closed || !onIntro || !card.hidden || introRatio() < 0.8) return;
       card.hidden = false;
       showItem(0, false);
       if (reduced) {
@@ -177,21 +193,32 @@ const items = await Promise.all(
       });
     };
 
-    new IntersectionObserver(
-      (entries) => {
-        const nowOnIntro = entries.some((entry) => entry.intersectionRatio >= 0.8);
-        if (nowOnIntro === onIntro) return;
-        onIntro = nowOnIntro;
-        window.clearTimeout(timer);
-        if (onIntro) {
-          timer = window.setTimeout(slideIn, 500);
-        } else {
-          closed = false;
-          slideOut();
-        }
-      },
-      { threshold: 0.8 }
-    ).observe(intro);
+    // Se comprueba en cada movimiento de scroll (una vez por fotograma) y al
+    // cambiar el tamaño: visible solo con la portada en pantalla (80 % o más).
+    const check = () => {
+      const nowOnIntro = introRatio() >= 0.8;
+      if (nowOnIntro === onIntro) return;
+      onIntro = nowOnIntro;
+      window.clearTimeout(timer);
+      if (onIntro) {
+        timer = window.setTimeout(slideIn, 500);
+      } else {
+        closed = false;
+        slideOut();
+      }
+    };
+    let queued = false;
+    const queueCheck = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        check();
+      });
+    };
+    window.addEventListener("scroll", queueCheck, { passive: true });
+    window.addEventListener("resize", queueCheck);
+    queueCheck();
 
     // Con el teclado: si el foco va a otra parte de la página, se quita al momento.
     document.addEventListener("focusin", (event) => {

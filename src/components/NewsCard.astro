@@ -30,86 +30,83 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
 </aside>
 
 <script>
+  // La noticia entra desde la derecha cada vez que se está en la portada: a los
+  // 2 s al cargar y, al volver a la portada desde más abajo, de nuevo al poco.
+  // Al bajar (o al cerrarla con la ×) se retira para no tapar nada.
   import { gsap } from "gsap";
 
   const card = document.querySelector<HTMLElement>("[data-news]");
+  const intro = document.getElementById("inicio");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   // De momento solo en escritorio: en el móvil tapa la portada (pendiente de decidir).
   const narrow = window.matchMedia("(max-width: 760px)").matches;
-  let dismissed = narrow;
-  try {
-    dismissed = dismissed || sessionStorage.getItem("sc-news-closed") === "1";
-  } catch {
-    // sin almacenamiento: se muestra igualmente
-  }
 
-  if (card && !dismissed) {
-    let ready = false;
-    let closed = false; // cerrada o ya pulsada en esta visita
+  if (card && intro && !narrow) {
     let onIntro = true;
+    let closed = false; // cerrada o pulsada; se olvida al salir de la portada
+    let timer = 0;
 
-    const hide = (remember: boolean) => {
-      closed = true;
-      if (remember) {
-        try {
-          sessionStorage.setItem("sc-news-closed", "1");
-        } catch {
-          // sin almacenamiento: solo se oculta ahora
-        }
-      }
-      slideOut();
-    };
-
-    // Solo se ve mientras la portada está en pantalla: al bajar se retira hacia
-    // la derecha (para no tapar nada) y vuelve al subir, salvo si se cerró.
-    const intro = document.getElementById("inicio");
     const slideIn = () => {
-      if (closed || !ready || !onIntro || !card.hidden) return;
+      if (closed || !onIntro || !card.hidden) return;
       card.hidden = false;
       if (reduced) return;
-      gsap.fromTo(card, { xPercent: 115, rotate: 4 }, { xPercent: 0, rotate: -1.5, duration: 0.9, ease: "power3.out", overwrite: true });
+      gsap.fromTo(
+        card,
+        { xPercent: 115, rotate: 4 },
+        { xPercent: 0, rotate: -1.5, duration: 0.9, ease: "power3.out", overwrite: true }
+      );
     };
-    const slideOut = () => {
+
+    const slideOut = (instant = false) => {
       if (card.hidden) return;
       gsap.to(card, {
         xPercent: 115,
-        duration: reduced ? 0 : 0.45,
+        duration: reduced || instant ? 0 : 0.45,
         ease: "power3.in",
         overwrite: true,
         onComplete: () => {
           card.hidden = true;
-          slideIn();
         }
       });
     };
 
-    if (intro) {
-      new IntersectionObserver(
-        (entries) => {
-          onIntro = entries.some((entry) => entry.intersectionRatio >= 0.8);
-          if (onIntro) slideIn();
-          else slideOut();
-        },
-        { threshold: 0.8 }
-      ).observe(intro);
-    }
+    const schedule = (delay: number) => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(slideIn, delay);
+    };
 
-    window.setTimeout(() => {
-      ready = true;
-      slideIn();
-    }, 2000);
+    new IntersectionObserver(
+      (entries) => {
+        const nowOnIntro = entries.some((entry) => entry.intersectionRatio >= 0.8);
+        if (nowOnIntro === onIntro) return;
+        onIntro = nowOnIntro;
+        if (onIntro) {
+          schedule(900);
+        } else {
+          closed = false;
+          window.clearTimeout(timer);
+          slideOut();
+        }
+      },
+      { threshold: 0.8 }
+    ).observe(intro);
+
+    schedule(2000);
 
     // Con el teclado: si el foco va a otra parte de la página, se quita al momento.
     document.addEventListener("focusin", (event) => {
       const target = event.target as Node;
-      if (card.hidden || card.contains(target) || intro?.contains(target)) return;
-      gsap.killTweensOf(card);
-      gsap.set(card, { xPercent: 115 });
-      card.hidden = true;
+      if (card.hidden || card.contains(target) || intro.contains(target)) return;
+      slideOut(true);
     });
 
-    card.querySelector("[data-news-close]")?.addEventListener("click", () => hide(true));
-    card.querySelector("[data-news-link]")?.addEventListener("click", () => hide(false));
+    const dismiss = () => {
+      closed = true;
+      window.clearTimeout(timer);
+      slideOut();
+    };
+    card.querySelector("[data-news-close]")?.addEventListener("click", dismiss);
+    card.querySelector("[data-news-link]")?.addEventListener("click", dismiss);
   }
 </script>
 

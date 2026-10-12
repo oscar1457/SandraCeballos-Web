@@ -1,32 +1,69 @@
 ---
-// Noticia de portada: aparece desde la derecha a los 2 s y lleva a la historia
-// correspondiente de «In the studio».
+// Noticias de portada: entran desde la derecha al segundo de llegar y cada una
+// lleva a su historia de «In the studio». Si hay varias, se turnan solas
+// (con tiempo para leer) y se pueden pasar a mano.
 import { getImage } from "astro:assets";
-import replica from "@/assets/taller/documenta-replica-1.jpg";
+import { stories } from "@/data/studio";
 
-const image = await getImage({ src: replica, width: 640, format: "webp" });
+const items = await Promise.all(
+  stories
+    .filter((story) => story.news)
+    .map(async (story) => ({
+      slug: story.slug,
+      news: story.news!,
+      image: await getImage({ src: story.news!.image, width: 640, format: "webp" })
+    }))
+);
 ---
 
-<aside class="news news--intro" data-news aria-labelledby="news-title">
+<aside class="news news--intro" data-news aria-label="Noticias" data-aria-label-en="News" style={`--news-count:${items.length}`}>
   <div class="news__mast">
     <span class="news__label">News</span>
-    <span class="news__issue num">documenta fifteen · 2022</span>
+    {
+      items.length > 1 && (
+        <span class="news__dots">
+          {items.map((_, index) => (
+            <button
+              type="button"
+              class="news__dot"
+              data-news-dot={index}
+              aria-label={`Noticia ${index + 1}`}
+              aria-current={index === 0 ? "true" : undefined}
+            >
+              <i />
+            </button>
+          ))}
+        </span>
+      )
+    }
     <button type="button" class="news__close" data-news-close aria-label="Cerrar noticia" data-aria-label-en="Close news">×</button>
   </div>
-  <a class="news__link" href="#taller/documenta-fifteen" data-news-link>
-    <img class="news__image" src={image.src} width="640" height="480" alt="" decoding="async" />
-    <h2 class="news__title" id="news-title">
-      <span data-lang="es">Espacio Aglutinador, a tamaño real en documenta fifteen</span>
-      <span data-lang="en">Espacio Aglutinador, full scale at documenta fifteen</span>
-    </h2>
-    <p class="news__dek">
-      <span data-lang="es">La galería que Sandra Ceballos cofundó en La Habana, reconstruida en Kassel junto a su obra.</span>
-      <span data-lang="en">The gallery Sandra Ceballos co-founded in Havana, rebuilt in Kassel alongside her work.</span>
-    </p>
-    <span class="news__cta">
-      <span data-lang="es">Leer la historia</span><span data-lang="en">Read the story</span> →
-    </span>
-  </a>
+
+  <div class="news__items">
+    {
+      items.map((item, index) => (
+        <a
+          class="news__link"
+          href={`#taller/${item.slug}`}
+          data-news-link
+          data-news-item={index}
+          aria-hidden={index === 0 ? undefined : "true"}
+          tabindex={index === 0 ? undefined : -1}
+        >
+          <img class="news__image" src={item.image.src} width="640" height="480" alt="" decoding="async" />
+          <p class="news__kicker">{item.news.kicker}</p>
+          <p class="news__meta num">{item.news.meta}</p>
+          <h2 class="news__title">
+            <span data-lang="es">{item.news.headline}</span>
+            <span data-lang="en">{item.news.headlineEn}</span>
+          </h2>
+          <span class="news__cta">
+            <span data-lang="es">Leer la historia</span><span data-lang="en">Read the story</span> →
+          </span>
+        </a>
+      ))
+    }
+  </div>
 </aside>
 
 <script>
@@ -43,6 +80,63 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
 
   if (card && intro && !narrow) {
     const SHOWN = { xPercent: 0, rotate: -1.5 };
+
+    // ---- Varias noticias: se turnan cada 8 s (pausa con el ratón encima) ----
+    const READ_TIME = 8;
+    const links = Array.from(card.querySelectorAll<HTMLElement>("[data-news-item]"));
+    const dots = Array.from(card.querySelectorAll<HTMLElement>("[data-news-dot]"));
+    let currentItem = 0;
+    let progress: gsap.core.Tween | null = null;
+
+    const showItem = (index: number, animate = true) => {
+      const next = (index + links.length) % links.length;
+      const from = links[currentItem];
+      const to = links[next];
+      if (!to) return;
+      if (from && from !== to) {
+        from.setAttribute("aria-hidden", "true");
+        from.tabIndex = -1;
+        if (animate && !reduced) gsap.to(from, { autoAlpha: 0, x: -16, duration: 0.3, overwrite: true });
+        else gsap.set(from, { autoAlpha: 0 });
+      }
+      to.removeAttribute("aria-hidden");
+      to.removeAttribute("tabindex");
+      if (animate && !reduced && from !== to) {
+        gsap.fromTo(to, { autoAlpha: 0, x: 16 }, { autoAlpha: 1, x: 0, duration: 0.45, delay: 0.15, overwrite: true });
+      } else {
+        gsap.set(to, { autoAlpha: 1, x: 0 });
+      }
+      currentItem = next;
+      dots.forEach((dot, dotIndex) => {
+        dot.toggleAttribute("aria-current", dotIndex === next);
+        const fill = dot.firstElementChild as HTMLElement | null;
+        if (fill) gsap.set(fill, { scaleX: dotIndex < next ? 1 : 0 });
+      });
+      startTimer();
+    };
+
+    const startTimer = () => {
+      progress?.kill();
+      progress = null;
+      if (links.length < 2) return;
+      const fill = dots[currentItem]?.firstElementChild as HTMLElement | null;
+      if (!fill) return;
+      progress = gsap.fromTo(
+        fill,
+        { scaleX: 0 },
+        { scaleX: 1, duration: READ_TIME, ease: "none", onComplete: () => showItem(currentItem + 1) }
+      );
+      if (card.matches(":hover, :focus-within")) progress.pause();
+    };
+
+    links.forEach((link, index) => {
+      if (index > 0) gsap.set(link, { autoAlpha: 0 });
+    });
+    dots.forEach((dot, index) => dot.addEventListener("click", () => showItem(index)));
+    card.addEventListener("mouseenter", () => progress?.pause());
+    card.addEventListener("mouseleave", () => progress?.resume());
+    card.addEventListener("focusin", () => progress?.pause());
+    card.addEventListener("focusout", () => progress?.resume());
     let onIntro = true;
     let closed = false; // cerrada o pulsada; se olvida al salir de la portada
     let timer = 0;
@@ -53,11 +147,18 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
       card.classList.remove("news--intro");
       gsap.set(card, SHOWN);
     };
-    card.addEventListener("animationend", takeOver, { once: true });
+    card.addEventListener("animationend", (event) => {
+      if (event.target !== card) return;
+      takeOver();
+      showItem(0, false);
+    });
+    // Sin animación de entrada (movimiento reducido) el turno empieza ya.
+    if (reduced) window.setTimeout(() => showItem(0, false), 1000);
 
     const slideIn = () => {
       if (closed || !onIntro || !card.hidden) return;
       card.hidden = false;
+      showItem(0, false);
       if (reduced) {
         gsap.set(card, SHOWN);
         return;
@@ -76,6 +177,7 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
         overwrite: true,
         onComplete: () => {
           card.hidden = true;
+          progress?.kill();
         }
       });
     };
@@ -169,11 +271,50 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
     text-transform: uppercase;
   }
 
-  .news__issue {
+  /* Una rayita por noticia, como las historias: se llena mientras se lee. */
+  .news__dots {
+    display: flex;
     flex: 1;
-    color: var(--red);
-    font-size: var(--text-label);
-    font-weight: 600;
+    gap: 0.3rem;
+    align-self: center;
+  }
+
+  .news__dot {
+    flex: 1;
+    height: 1rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  /* Fondo gris y relleno rojo que crece de izquierda a derecha. */
+  .news__dot {
+    position: relative;
+  }
+
+  .news__dot::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 3px;
+    margin-top: -1.5px;
+    background: rgb(0 0 0 / 0.15);
+  }
+
+  .news__dot i {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    z-index: 1;
+    height: 3px;
+    margin-top: -1.5px;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: left;
   }
 
   .news__close {
@@ -188,11 +329,35 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
     cursor: pointer;
   }
 
+  /* Todas las noticias ocupan el mismo hueco; se ve una cada vez. */
+  .news__items {
+    display: grid;
+    margin-top: 0.7rem;
+  }
+
   .news__link {
     display: block;
-    margin-top: 0.7rem;
+    grid-area: 1 / 1;
     color: inherit;
     text-decoration: none;
+  }
+
+  /* Lo que se tiene que ver de un vistazo: "DOCUMENTA FIFTEEN". */
+  .news__kicker {
+    margin: 0.75rem 0 0;
+    color: var(--red);
+    font-family: var(--font-serif);
+    font-size: 1.85rem;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  .news__meta {
+    margin: 0.3rem 0 0;
+    font-size: var(--text-label);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
   }
 
   .news__image {
@@ -201,14 +366,15 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
     height: auto;
     aspect-ratio: 4 / 3;
     object-fit: cover;
+    object-position: 50% 20%;
   }
 
   .news__title {
-    margin: 0.7rem 0 0;
-    font-family: var(--font-serif);
-    font-size: 1.45rem;
-    font-weight: 400;
-    line-height: 1.05;
+    margin: 0.55rem 0 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
   }
 
   .news__dek {

@@ -281,7 +281,8 @@ if (section && dataNode && sheet) {
   });
   sheet.addEventListener("close", () => {
     processVideo?.pause();
-    history.replaceState(null, "", "#obra");
+    // Al cerrar, la URL vuelve a quedar limpia (sin #obra).
+    history.replaceState(history.state, "", window.location.pathname + window.location.search);
     opener?.focus({ preventScroll: true });
     opener = null;
   });
@@ -294,17 +295,13 @@ if (section && dataNode && sheet) {
     }
   });
 
-  // Enlaces directos a una obra: #obra/<slug>, al cargar o sin recargar la página.
-  const openFromHash = () => {
-    const hash = window.location.hash.match(/^#obra\/(.+)$/);
-    if (!hash) {
-      return;
-    }
-    const index = works.findIndex((work) => work.slug === decodeURIComponent(hash[1]!));
+  // Enlaces directos a una obra (#obra/<slug>): smooth.ts avisa y aquí se abre la ficha.
+  document.addEventListener("sc:navigate", (event) => {
+    const { section: target, slug } = (event as CustomEvent<{ section: string; slug: string }>).detail;
+    if (target !== "obra") return;
+    const index = works.findIndex((work) => work.slug === slug);
     if (index >= 0) {
       openSheet(index);
     }
-  };
-  openFromHash();
-  window.addEventListener("hashchange", openFromHash);
+  });
 }

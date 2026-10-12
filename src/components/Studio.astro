@@ -284,20 +284,16 @@ const pad = (n: number) => String(n).padStart(2, "0");
       }
     }, { passive: true });
 
-    // Enlace directo: #taller/<slug>.
-    const openFromHash = () => {
-      const match = window.location.hash.match(/^#taller\/(.+)$/);
-      if (!match) return;
-      const index = frames.findIndex((frame) => frame.dataset.slug === decodeURIComponent(match[1]!));
-      if (index >= 0) {
-        show(index);
-        section.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
-      }
-    };
+    // La noticia o un enlace directo (#taller/<slug>) piden una historia concreta;
+    // el desplazamiento hasta la sección lo hace smooth.ts.
+    document.addEventListener("sc:navigate", (event) => {
+      const { section: target, slug } = (event as CustomEvent<{ section: string; slug: string }>).detail;
+      if (target !== "taller") return;
+      const index = frames.findIndex((frame) => frame.dataset.slug === slug);
+      if (index >= 0) show(index);
+    });
 
     render();
-    window.addEventListener("hashchange", openFromHash);
-    window.addEventListener("load", openFromHash);
   }
 </script>
 

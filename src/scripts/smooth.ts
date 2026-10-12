@@ -10,7 +10,8 @@ const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 let lenis: Lenis | null = null;
 if (!reduced) {
-  lenis = new Lenis({ lerp: 0.1, anchors: { offset: 0 } });
+  // Los enlaces internos (#obra…) los gestiona navigate() más abajo, no Lenis.
+  lenis = new Lenis({ lerp: 0.1 });
   lenis.on("scroll", ScrollTrigger.update);
   gsap.ticker.add((time) => lenis?.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
@@ -40,20 +41,68 @@ new ResizeObserver(() => {
   }
 }).observe(document.body);
 
-// Si se entra con un enlace a una sección (#trayectoria…), vamos a ella cuando
-// la página ya tiene su altura definitiva.
-window.addEventListener("load", () => {
-  const id = window.location.hash.slice(1);
-  const target = id && !id.includes("/") ? document.getElementById(id) : null;
-  if (target) {
-    ScrollTrigger.refresh();
-    if (lenis) {
-      lenis.scrollTo(target, { immediate: true, force: true });
-    } else {
-      target.scrollIntoView();
-    }
+// ---------- Navegación interna ----------
+// Un solo sitio decide qué pasa con los enlaces "#…": desplaza con suavidad
+// hasta la sección y, si el enlace lleva algo más (#taller/<historia>,
+// #obra/<obra>), avisa a esa sección para que muestre la historia o abra la
+// ficha. La URL no se queda con "#obra" ni similares: así recargar la página
+// no te lleva a otro sitio. Solo la ficha abierta escribe #obra/<obra> (para
+// poder compartirla) y lo borra al cerrarse.
+export type NavigateDetail = { section: string; slug: string };
+
+const cleanUrl = () => {
+  if (window.location.hash) {
+    history.replaceState(history.state, "", window.location.pathname + window.location.search);
+  }
+};
+
+const navigate = (hash: string, immediate = false) => {
+  let raw = "";
+  try {
+    raw = decodeURIComponent(hash.replace(/^#/, ""));
+  } catch {
+    return false;
+  }
+  const [id = "", slug = ""] = raw.split("/");
+  const section = id ? document.getElementById(id) : null;
+  if (!section) return false;
+
+  if (slug) {
+    document.dispatchEvent(new CustomEvent<NavigateDetail>("sc:navigate", { detail: { section: id, slug } }));
+  }
+  const top = id === "inicio" ? 0 : section;
+  if (lenis) {
+    lenis.scrollTo(top, { immediate, force: true });
+  } else if (top === 0) {
+    window.scrollTo({ top: 0 });
+  } else {
+    section.scrollIntoView();
+  }
+  return true;
+};
+
+document.addEventListener("click", (event) => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
+  const link = (event.target as Element | null)?.closest?.<HTMLAnchorElement>('a[href^="#"]');
+  // El enlace "Saltar al contenido" mantiene su comportamiento normal (mueve el foco).
+  if (!link || link.classList.contains("skip-link")) return;
+  if (navigate(link.getAttribute("href") ?? "")) {
+    event.preventDefault();
   }
 });
+
+// Entrar con un enlace directo (o cambiar el "#…" a mano en la barra de direcciones).
+const navigateFromUrl = (immediate: boolean) => {
+  const hash = window.location.hash;
+  if (!hash) return;
+  cleanUrl();
+  ScrollTrigger.refresh();
+  navigate(hash, immediate);
+};
+window.addEventListener("load", () => navigateFromUrl(true));
+window.addEventListener("hashchange", () => navigateFromUrl(false));
 
 const header = document.querySelector<HTMLElement>("[data-site-header]");
 const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-header]"));

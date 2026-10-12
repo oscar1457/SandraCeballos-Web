@@ -30,8 +30,8 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
 </aside>
 
 <script>
-  // La noticia entra desde la derecha cada vez que se está en la portada: a los
-  // 2 s al cargar y, al volver a la portada desde más abajo, de nuevo al poco.
+  // La noticia entra desde la derecha cada vez que se está en la portada: a 1 s
+  // de cargar y, al volver a la portada desde más abajo, de nuevo al poco.
   // Al bajar (o al cerrarla con la ×) se retira para no tapar nada.
   import { gsap } from "gsap";
 
@@ -81,7 +81,7 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
         if (nowOnIntro === onIntro) return;
         onIntro = nowOnIntro;
         if (onIntro) {
-          schedule(900);
+          schedule(700);
         } else {
           closed = false;
           window.clearTimeout(timer);
@@ -91,7 +91,7 @@ const image = await getImage({ src: replica, width: 640, format: "webp" });
       { threshold: 0.8 }
     ).observe(intro);
 
-    schedule(2000);
+    schedule(1000);
 
     // Con el teclado: si el foco va a otra parte de la página, se quita al momento.
     document.addEventListener("focusin", (event) => {

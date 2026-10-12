@@ -45,7 +45,7 @@ const pad = (n: number) => String(n);
 <section
   class="works"
   id="obra"
-  data-header="light"
+  data-header="dark"
   data-works
   data-mode="wheel"
   style={`--count:${works.length}`}
@@ -201,8 +201,8 @@ const pad = (n: number) => String(n);
   .works {
     position: relative;
     height: calc(var(--count) * 38svh + 100svh);
-    background: var(--black);
-    color: var(--white);
+    background: var(--stone);
+    color: var(--black);
   }
 
   .works[data-mode="list"] {
@@ -229,7 +229,7 @@ const pad = (n: number) => String(n);
     align-items: center;
     justify-content: center;
     gap: 2vw;
-    color: var(--grey-dark);
+    color: rgb(0 0 0 / 0.07);
     font-family: var(--font-serif);
     font-size: min(110svh, 60vw);
     line-height: 0.75;
@@ -243,7 +243,7 @@ const pad = (n: number) => String(n);
     z-index: 200;
     font-size: var(--text-small);
     font-weight: 500;
-    color: var(--grey-text);
+    color: rgb(0 0 0 / 0.62);
   }
 
   .works__switch button {
@@ -255,7 +255,7 @@ const pad = (n: number) => String(n);
   }
 
   .works__switch button[aria-pressed="true"] {
-    color: var(--white);
+    color: var(--black);
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
@@ -310,7 +310,7 @@ const pad = (n: number) => String(n);
   /* La siguiente obra, en gris justo debajo; si es larga se desvanece. */
   .works__next {
     margin-top: 0.15em;
-    color: #5c5c5c;
+    color: rgb(0 0 0 / 0.38);
     white-space: nowrap;
     -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent);
     mask-image: linear-gradient(90deg, #000 80%, transparent);
@@ -361,7 +361,7 @@ const pad = (n: number) => String(n);
     padding: 0;
     border: 0;
     background: none;
-    box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.6);
+    box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.28);
     cursor: pointer;
     transform: translateY(-50%);
   }
@@ -408,7 +408,7 @@ const pad = (n: number) => String(n);
     padding: 0.12rem 0;
     border: 0;
     background: none;
-    color: var(--grey-text);
+    color: rgb(0 0 0 / 0.66);
     font-size: var(--text-small);
     font-weight: 500;
     text-align: left;
@@ -417,7 +417,7 @@ const pad = (n: number) => String(n);
   .list__row:hover,
   .list__row:focus-visible,
   .list__row.is-current {
-    color: var(--white);
+    color: var(--black);
   }
 
   .list__title {
@@ -454,7 +454,7 @@ const pad = (n: number) => String(n);
     right: var(--gutter);
     bottom: var(--gutter);
     z-index: 200;
-    text-shadow: 0 0 0.6rem rgb(0 0 0 / 0.8);
+    text-shadow: 0 0 0.6rem rgb(161 159 151 / 0.9);
     display: flex;
     justify-content: space-between;
     font-size: var(--text-label);

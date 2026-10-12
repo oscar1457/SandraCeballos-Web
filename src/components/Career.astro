@@ -8,7 +8,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
 ---
 
 <section class="career" id="trayectoria" data-header="dark" aria-labelledby="career-title">
-  <div class="career__letter" aria-hidden="true" data-career-letter>C</div>
+  <div class="career__letter" aria-hidden="true" data-career-letter>C<canvas class="career__letter-video" data-career-letter-video></canvas></div>
 
   <h2 class="career__statement" id="career-title">
     <span data-lang="es">
@@ -300,6 +300,137 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
   }
 </script>
 
+<script>
+  // Dentro de la C: el vídeo de Sandra pintando, en trama de imprenta y con
+  // el color de la letra. El WebGL y el vídeo solo se cargan al acercarse;
+  // la C de texto sigue debajo, así que sin WebGL todo se ve igual que antes.
+  import { attachSources, createHalftone, type Halftone } from "@/scripts/halftone";
+
+  const letter = document.querySelector<HTMLElement>("[data-career-letter]");
+  const canvas = letter?.querySelector<HTMLCanvasElement>("[data-career-letter-video]");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const BASE = "/video/guia-espiritual-9-proceso";
+
+  if (letter && canvas) {
+    let halftone: Halftone | null = null;
+    let tried = false;
+    let visible = false;
+    let frame = 0;
+    let lastTime = -1;
+    let gotVideo = false;
+    const video = document.createElement("video");
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = "auto";
+
+    // Coloca el lienzo justo sobre el dibujo de la letra y lo recorta con su
+    // forma (una máscara hecha con la misma fuente).
+    const fit = () => {
+      const style = getComputedStyle(letter);
+      const size = parseFloat(style.fontSize);
+      const lineHeight = parseFloat(style.lineHeight);
+      const ctx = document.createElement("canvas").getContext("2d");
+      if (!ctx || !size) return false;
+      const font = `${style.fontStyle} ${style.fontWeight} ${size}px ${style.fontFamily}`;
+      ctx.font = font;
+      const m = ctx.measureText("C");
+      const baseline = (lineHeight - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 + m.fontBoundingBoxAscent;
+      const pad = 2;
+      const left = -m.actualBoundingBoxLeft - pad;
+      const top = baseline - m.actualBoundingBoxAscent - pad;
+      const width = m.actualBoundingBoxLeft + m.actualBoundingBoxRight + pad * 2;
+      const height = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent + pad * 2;
+      Object.assign(canvas.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` });
+
+      const mask = document.createElement("canvas");
+      const scale = Math.min(window.devicePixelRatio || 1, 2);
+      mask.width = Math.ceil(width * scale);
+      mask.height = Math.ceil(height * scale);
+      const mctx = mask.getContext("2d");
+      if (!mctx) return false;
+      mctx.scale(scale, scale);
+      mctx.font = font;
+      mctx.fillStyle = "#000";
+      mctx.textBaseline = "alphabetic";
+      mctx.fillText("C", -left, baseline - top);
+      const url = `url(${mask.toDataURL("image/png")})`;
+      canvas.style.setProperty("mask-image", url);
+      canvas.style.setProperty("-webkit-mask-image", url);
+      return true;
+    };
+
+    const loop = () => {
+      frame = 0;
+      if (!visible || !halftone) return;
+      if (video.readyState >= 2 && video.currentTime !== lastTime) {
+        lastTime = video.currentTime;
+        gotVideo = true;
+        halftone.upload(video, video.videoWidth, video.videoHeight);
+        halftone.draw();
+      }
+      frame = requestAnimationFrame(loop);
+    };
+
+    const init = async () => {
+      if (tried) return;
+      tried = true;
+      await document.fonts.ready;
+      if (!fit()) return;
+      // Papel del color de la C y puntos un poco más oscuros: se lee como la
+      // misma letra, con la imagen grabada dentro.
+      halftone = createHalftone(canvas, {
+        paper: [161, 159, 151],
+        ink: [112, 109, 101],
+        cell: (width) => Math.max(5, width / 90),
+        dotScale: 0.6,
+        minDot: 0.04,
+        contrast: 1.25
+      });
+      const current = halftone;
+      if (!current) return;
+      const poster = new Image();
+      poster.onload = () => {
+        if (!gotVideo) current.upload(poster, poster.naturalWidth, poster.naturalHeight);
+        current.resize();
+        current.draw();
+        letter.classList.add("has-video");
+      };
+      poster.src = `${BASE}.jpg`;
+      let width = window.innerWidth;
+      new ResizeObserver(() => {
+        if (window.innerWidth !== width) {
+          width = window.innerWidth;
+          fit();
+        }
+        current.resize();
+        current.draw();
+      }).observe(canvas);
+      if (!reduced) attachSources(video, BASE);
+      if (visible) play();
+    };
+
+    const play = () => {
+      if (!halftone || reduced) return;
+      video.play().catch(() => {});
+      if (!frame) frame = requestAnimationFrame(loop);
+    };
+
+    new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) void init();
+      },
+      { rootMargin: "100% 0px" }
+    ).observe(letter);
+
+    new IntersectionObserver((entries) => {
+      visible = entries.some((entry) => entry.isIntersecting);
+      if (visible) play();
+      else video.pause();
+    }).observe(letter);
+  }
+</script>
+
 <style>
   .career {
     position: relative;
@@ -326,6 +457,23 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     font-size: min(108svh, 76vw);
     line-height: 0.72;
     pointer-events: none;
+  }
+
+  /* Lienzo con el vídeo en trama, recortado con la forma de la C. Aparece
+     cuando ya tiene imagen; debajo sigue la C de texto. */
+  .career__letter-video {
+    position: absolute;
+    display: block;
+    opacity: 0;
+    transition: opacity 900ms var(--ease);
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+  }
+
+  .career__letter.has-video .career__letter-video {
+    opacity: 1;
   }
 
   .career__statement {
@@ -560,16 +708,44 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     color: var(--color-muted);
   }
 
+  /* Móvil y tableta: frase, luego la C (con el vídeo) y el retrato lado a lado,
+     y debajo los apartados. Al pulsar «Trayectoria» cabe casi todo en pantalla. */
   @media (max-width: 900px) {
+    .career {
+      min-height: 0;
+      padding-top: 5.5rem;
+      padding-bottom: var(--space-4);
+      row-gap: var(--space-4);
+    }
+
+    .career__statement {
+      grid-row: 1;
+      font-size: clamp(1.7rem, 7vw, 2.8rem);
+    }
+
+    .career__letter {
+      position: relative;
+      top: auto;
+      left: auto;
+      translate: none;
+      grid-row: 2;
+      grid-column: 1 / span 7;
+      align-self: center;
+      justify-self: start;
+      font-size: min(78vw, 36rem);
+    }
+
     .career__index {
-      grid-row: auto;
+      grid-row: 3;
       grid-column: 1 / -1;
     }
 
     .career__portrait {
-      grid-row: auto;
-      grid-column: 1 / span 9;
-      max-width: 24rem;
+      grid-row: 2;
+      grid-column: 6 / -1;
+      justify-self: end;
+      width: 100%;
+      max-width: 22rem;
     }
 
     .career__item summary {

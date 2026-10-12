@@ -20,10 +20,6 @@ const shots = [
           <span data-lang="es">Publicaciones</span>
           <span data-lang="en">Publications</span>
         </h2>
-        <p class="pubs__hint" aria-hidden="true">
-          <span data-lang="es">Desliza para ver los catálogos →</span>
-          <span data-lang="en">Swipe to see the catalogues →</span>
-        </p>
         <ul class="pubs__list">
           {
             publications.map((publication) => (
@@ -44,6 +40,12 @@ const shots = [
         </ul>
       </div>
 
+      <!-- En móvil: aviso + carrusel propio de portadas, debajo de la lista. -->
+      <p class="pubs__hint" aria-hidden="true">
+        <span data-lang="es">Desliza para ver los catálogos →</span>
+        <span data-lang="en">Swipe to see the catalogues →</span>
+      </p>
+      <div class="pubs__shots">
       {
         shots.map((shot) => (
           <figure class="pubs__panel pubs__shot">
@@ -51,7 +53,7 @@ const shots = [
               src={shot.image}
               alt={shot.alt}
               widths={[900, 1300, 1536]}
-              sizes="(max-width: 760px) 90vw, 120svh"
+              sizes="(max-width: 760px) 75vw, 120svh"
               loading="lazy"
             />
             <figcaption>
@@ -61,6 +63,7 @@ const shots = [
           </figure>
         ))
       }
+      </div>
     </div>
   </div>
 </section>
@@ -193,6 +196,11 @@ const shots = [
     font-weight: 500;
   }
 
+  /* En escritorio el envoltorio no cuenta: las fotos siguen en la misma fila. */
+  .pubs__shots {
+    display: contents;
+  }
+
   .pubs__shot {
     margin: 0;
   }
@@ -209,35 +217,90 @@ const shots = [
     font-weight: 500;
   }
 
+  /* Móvil: título, lista compacta y debajo un carrusel de portadas que se
+     desliza con el dedo (se ve un trozo de la siguiente para invitar a pasar). */
   @media (max-width: 760px) {
-    .pubs__list {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
     .pubs__sticky {
       position: static;
       height: auto;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      overflow: visible;
     }
 
     .pubs__track {
+      display: block;
+      width: auto;
       height: auto;
-      padding: 5rem var(--gutter) var(--space-4);
-      gap: var(--space-3);
+      padding: 5rem 0 var(--space-4);
+    }
+
+    .pubs__panel--text {
+      width: auto;
+      gap: var(--space-2);
+      padding: 0 var(--gutter);
+    }
+
+    .pubs__title {
+      font-size: clamp(2.2rem, 11vw, 3rem);
+    }
+
+    .pubs__list {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+    }
+
+    .pubs__list li {
+      gap: 0.1rem;
+      padding: 0.55rem 0 0.6rem;
+    }
+
+    .pubs__name {
+      font-size: 1.2rem;
+      line-height: 1.05;
+    }
+
+    .pubs__meta {
+      font-size: 0.82rem;
+      line-height: 1.3;
     }
 
     .pubs__hint {
       display: block;
+      margin: var(--space-3) var(--gutter) var(--space-1);
     }
 
-    .pubs__panel {
+    .pubs__shots {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-2);
+      padding: 0 var(--gutter);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+
+    .pubs__shots::-webkit-scrollbar {
+      display: none;
+    }
+
+    .pubs__shot {
+      flex: none;
       scroll-snap-align: start;
     }
 
+    /* La foto mantiene su proporción y no pasa de 78 % del ancho ni de media pantalla. */
     .pubs__shot img {
-      width: 88vw;
+      display: block;
+      width: auto;
       height: auto;
+      max-width: 78vw;
+      max-height: min(56svh, 24rem);
+    }
+
+    .pubs__shot figcaption {
+      max-width: 70vw;
+      font-size: 0.82rem;
     }
   }
 

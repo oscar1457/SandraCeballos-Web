@@ -72,6 +72,10 @@ const navigate = (hash: string, immediate = false) => {
   }
   const top = id === "inicio" ? 0 : section;
   if (lenis) {
+    // Lenis guarda la altura de la página y la actualiza con retraso: si la
+    // página ha crecido (imágenes, secciones que se montan al cargar), sin esto
+    // el destino se recorta y el enlace no lleva a ninguna parte.
+    lenis.resize();
     lenis.scrollTo(top, { immediate, force: true });
   } else if (top === 0) {
     window.scrollTo({ top: 0 });

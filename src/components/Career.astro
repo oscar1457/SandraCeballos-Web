@@ -27,7 +27,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
       src={portrait}
       alt="Retrato de Sandra Ceballos en una galería, con gafas de sol y una bolsa de tela con una cara y una raya roja."
       widths={[420, 700, 1000]}
-      sizes="(max-width: 900px) 70vw, 26rem"
+      sizes="(max-width: 900px) 70vw, 22rem"
       loading="lazy"
     />
     <figcaption>Sandra Ceballos</figcaption>
@@ -155,7 +155,13 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
       inner.textContent = word;
       element.append(inner);
       if (index < words.length - 1) {
-        element.append(" ");
+        // El espacio va en su propio <span>: GSAP, al medir la frase del idioma
+        // oculto, recoloca cada palabra antes del siguiente elemento y movía los
+        // espacios sueltos (salía «since1994»).
+        const space = document.createElement("span");
+        space.className = "space";
+        space.textContent = " ";
+        element.append(space);
       }
       return inner;
     });
@@ -300,7 +306,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     align-content: start;
-    gap: var(--space-4) var(--gutter);
+    gap: var(--space-5) var(--gutter);
     min-height: 100svh;
     padding: 9rem var(--gutter) var(--space-5);
     overflow: hidden;
@@ -342,7 +348,14 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
   .career__index {
     position: relative;
     grid-row: 2;
-    grid-column: 6 / span 6;
+    grid-column: 7 / span 6;
+  }
+
+  /* En pantallas anchas los apartados dejan margen a la derecha. */
+  @media (min-width: 1200px) {
+    .career__index {
+      grid-column: 7 / span 5;
+    }
   }
 
   /* Retrato a la izquierda de los apartados, por delante de la C. */
@@ -351,7 +364,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
     grid-row: 2;
     grid-column: 1 / span 4;
     align-self: start;
-    max-width: 26rem;
+    max-width: 22rem;
     margin: 0;
   }
 
@@ -371,7 +384,7 @@ const place = (...parts: string[]) => parts.filter(Boolean).join(", ");
   }
 
   .career__lead {
-    margin: 0 0 var(--space-3);
+    margin: 0 0 var(--space-4);
     max-width: 28rem;
     font-size: clamp(1.1rem, 1.5vw, 1.4rem);
     font-weight: 500;

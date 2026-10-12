@@ -2,7 +2,14 @@
 import { Image } from "astro:assets";
 import { publicationImages, publications } from "@/data/publications";
 
-const shots = [publicationImages.covers, publicationImages.spread];
+const shots = [
+  publicationImages.covers,
+  publicationImages.spread,
+  publicationImages.bestiaEspana,
+  publicationImages.bellaCastillo,
+  publicationImages.bestiaGaleriaHabana,
+  publicationImages.bellaNaranja
+];
 ---
 
 <section class="pubs" id="publicaciones" data-header="dark" data-pubs aria-labelledby="pubs-title">
@@ -157,9 +164,11 @@ const shots = [publicationImages.covers, publicationImages.spread];
     font-weight: 500;
   }
 
+  /* Con varios catálogos, la lista va en dos columnas para caber en pantalla. */
   .pubs__list {
     display: grid;
-    gap: var(--space-2);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2) var(--space-3);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -201,6 +210,10 @@ const shots = [publicationImages.covers, publicationImages.spread];
   }
 
   @media (max-width: 760px) {
+    .pubs__list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
     .pubs__sticky {
       position: static;
       height: auto;

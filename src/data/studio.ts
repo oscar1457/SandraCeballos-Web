@@ -1,14 +1,17 @@
-// Historias de «In the studio». PROVISIONALES: salen de los catálogos y de la
-// cronología de Aglutinador; Sandra tiene que revisarlas o sustituirlas por las
-// suyas (año, titular, dos líneas y una foto).
+// Historias de «In the studio». La primera (documenta) es la de la noticia de
+// la portada y su texto viene de Sandra; las demás son PROVISIONALES: salen de
+// los catálogos y de la cronología de Aglutinador.
 import type { ImageMetadata } from "astro";
 import bellaCastillo from "@/assets/publicaciones/la-bella-y-la-bestia-castillo-1989.jpg";
 import bestiaEspana from "@/assets/publicaciones/la-bestia-y-la-bestia-espana-1992.jpg";
 import aglutinador from "@/assets/aglutinador/vista-general.jpg";
 import guiaProceso from "@/assets/taller/guia-espiritual-9-proceso.jpg";
+import documentaVentana from "@/assets/taller/documenta-ventana.jpg";
 
 export type Story = {
+  slug: string; // para enlazar directamente: #taller/<slug>
   year: string;
+  place?: string;
   title: string;
   titleEn: string;
   text: string;
@@ -20,6 +23,19 @@ export type Story = {
 
 export const stories: Story[] = [
   {
+    slug: "documenta-fifteen",
+    year: "2022",
+    place: "Kassel",
+    title: "Espacio Aglutinador en documenta fifteen",
+    titleEn: "Espacio Aglutinador at documenta fifteen",
+    text: "En documenta fifteen, dentro del proyecto de INSTAR y la artista Tania Bruguera, se levantó a tamaño real una réplica de Espacio Aglutinador, la primera galería de arte independiente y democrática de Cuba (1994–2023), cofundada por Sandra Ceballos en su casa de La Habana. Entre sus muros se expuso también la obra de Sandra.",
+    textEn: "At documenta fifteen, as part of the project by INSTAR and the artist Tania Bruguera, a full-scale replica was built of Espacio Aglutinador, Cuba's first independent and democratic art gallery (1994–2023), co-founded by Sandra Ceballos in her Havana home. Sandra's own work was shown within its walls.",
+    image: documentaVentana,
+    alt: "Ventana de la réplica de Espacio Aglutinador en documenta fifteen; a través de ella se ve un cuadro de Sandra Ceballos.",
+    altEn: "Window of the Espacio Aglutinador replica at documenta fifteen; a painting by Sandra Ceballos is seen through it."
+  },
+  {
+    slug: "la-bella-y-la-bestia",
     year: "1989",
     title: "La Bella y la Bestia",
     titleEn: "La Bella y la Bestia",
@@ -30,6 +46,7 @@ export const stories: Story[] = [
     altEn: "Catalogue of La Bella y la Bestia, Castillo de la Fuerza project, 1989."
   },
   {
+    slug: "sandra-ceballos-en-espana",
     year: "1992",
     title: "Sandra Ceballos en España",
     titleEn: "Sandra Ceballos in Spain",
@@ -40,6 +57,7 @@ export const stories: Story[] = [
     altEn: "Red cover of the catalogue La Bestia y la Bestia, Sandra Ceballos in Spain, 1992."
   },
   {
+    slug: "nace-espacio-aglutinador",
     year: "1994",
     title: "Nace Espacio Aglutinador",
     titleEn: "Espacio Aglutinador is born",
@@ -50,6 +68,7 @@ export const stories: Story[] = [
     altEn: "View of Espacio Aglutinador with works on the walls."
   },
   {
+    slug: "guia-espiritual-9",
     year: "2026",
     title: "Guía espiritual #9",
     titleEn: "Guía espiritual #9",

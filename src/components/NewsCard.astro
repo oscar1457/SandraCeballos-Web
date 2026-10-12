@@ -220,6 +220,18 @@ const items = await Promise.all(
     window.addEventListener("resize", queueCheck);
     queueCheck();
 
+    // Atrás/Adelante: el navegador puede devolver la página tal como se dejó
+    // (sin volver a ejecutar nada). Volver a la portada cuenta como "volver":
+    // se olvida el cierre y se decide de nuevo si la noticia debe verse.
+    window.addEventListener("pageshow", (event) => {
+      if (!event.persisted) return;
+      closed = false;
+      onIntro = false;
+      window.clearTimeout(timer);
+      if (!card.hidden) slideOut(true);
+      queueCheck();
+    });
+
     // Con el teclado: si el foco va a otra parte de la página, se quita al momento.
     document.addEventListener("focusin", (event) => {
       const target = event.target as Node;
@@ -356,6 +368,12 @@ const items = await Promise.all(
   .news__items {
     display: grid;
     margin-top: 0.7rem;
+  }
+
+  /* Solo se ve la noticia activa, también antes de que cargue el JavaScript
+     (con red lenta las dos quedaban superpuestas). */
+  .news__link[aria-hidden="true"] {
+    visibility: hidden;
   }
 
   .news__link {

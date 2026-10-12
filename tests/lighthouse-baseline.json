@@ -1,0 +1,62 @@
+{
+  "/": {
+    "performance": 80,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 5440,
+    "tbt": 38,
+    "cls": 0,
+    "bytes": 873
+  },
+  "/aglutinador/": {
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 1514,
+    "tbt": 0,
+    "cls": 0,
+    "bytes": 77
+  },
+  "/aglutinador/historia/": {
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 1583,
+    "tbt": 0,
+    "cls": 0,
+    "bytes": 95
+  },
+  "/aglutinador/archivo/": {
+    "performance": 98,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 2290,
+    "tbt": 0,
+    "cls": 0,
+    "bytes": 382
+  },
+  "/aviso-legal/": {
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 1505,
+    "tbt": 0,
+    "cls": 0,
+    "bytes": 86
+  },
+  "/privacidad/": {
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 1508,
+    "tbt": 0,
+    "cls": 0,
+    "bytes": 86
+  }
+}

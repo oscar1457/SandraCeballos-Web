@@ -76,6 +76,26 @@ const shots = [
   const track = document.querySelector<HTMLElement>("[data-pubs-track]");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // Con movimiento reducido, en pantallas anchas los catálogos se desplazan de
+  // lado dentro de la sección: se puede llegar y moverlos con el teclado.
+  const sticky = section?.querySelector<HTMLElement>(".pubs__sticky");
+  if (sticky && reduced) {
+    const wide = window.matchMedia("(min-width: 761px)");
+    const sync = () => {
+      if (wide.matches) {
+        sticky.tabIndex = 0;
+        sticky.setAttribute("role", "region");
+        sticky.setAttribute("aria-label", document.documentElement.lang === "en" ? "Catalogues" : "Catálogos");
+      } else {
+        sticky.removeAttribute("tabindex");
+        sticky.removeAttribute("role");
+        sticky.removeAttribute("aria-label");
+      }
+    };
+    sync();
+    wide.addEventListener("change", sync);
+  }
+
   if (section && track && !reduced) {
     const mm = gsap.matchMedia();
     mm.add("(min-width: 761px)", () => {

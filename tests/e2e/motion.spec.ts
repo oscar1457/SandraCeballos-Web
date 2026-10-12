@@ -5,7 +5,24 @@ import type { Page } from "@playwright/test";
 // el tono de la cabecera y si la noticia está en pantalla, mientras se hace
 // scroll de verdad. Así se ven los parpadeos que una captura final no detecta.
 
-type Frame = { t: number; tone: string; news: "on" | "off" | "none"; y: number; phase: string };
+// tone: tono de la cabecera; expected: tono de la sección que tiene debajo en
+// ese mismo fotograma (lo que debería mostrar).
+// color/bg: color de texto y de fondo que tiene la cabecera en pantalla en ese
+// fotograma (con la transición de 300 ms incluida); target*: los que le tocan.
+type RGB = [number, number, number];
+type Frame = {
+  t: number;
+  tone: string;
+  expected: string;
+  color: RGB;
+  bg: RGB;
+  targetColor: RGB;
+  targetBg: RGB;
+  news: "on" | "off" | "none";
+  menu: boolean; // menú del teléfono abierto (la cabecera pasa a blanco sobre negro a propósito)
+  y: number;
+  phase: string;
+};
 
 const startRecorder = (page: Page) =>
   page.addInitScript(() => {
@@ -22,7 +39,32 @@ const startRecorder = (page: Page) =>
           const style = getComputedStyle(card);
           news = !card.hidden && style.display !== "none" && rect.left < window.innerWidth - 20 && rect.right > 20 ? "on" : "off";
         }
-        w.__frames.push({ t: performance.now(), tone: header.dataset.tone ?? "", news, y: window.scrollY, phase: w.__phase });
+        const probe = header.offsetHeight / 2;
+        const under = Array.from(document.querySelectorAll<HTMLElement>("[data-header]")).find((section) => {
+          const rect = section.getBoundingClientRect();
+          return rect.top <= probe && rect.bottom > probe;
+        });
+        const expected = under?.dataset.header === "dark" ? "dark" : "light";
+        const parse = (value: string) => (value.match(/[\d.]+/g) ?? ["0", "0", "0"]).map(Number);
+        const rgb = (value: string) => parse(value).slice(0, 3);
+        const style = getComputedStyle(header);
+        const sectionBg = under ? rgb(getComputedStyle(under).backgroundColor) : [0, 0, 0];
+        // Fondo con transparencia: lo que se ve es la mezcla con la sección de debajo.
+        const [r = 0, g = 0, b = 0, alpha = 1] = parse(style.backgroundColor);
+        const seenBg = [r, g, b].map((c, k) => c * alpha + sectionBg[k]! * (1 - alpha));
+        w.__frames.push({
+          t: performance.now(),
+          tone: header.dataset.tone ?? "",
+          expected,
+          color: rgb(style.color),
+          bg: seenBg,
+          targetColor: expected === "dark" ? [0, 0, 0] : [255, 255, 255],
+          targetBg: sectionBg,
+          news,
+          menu: header.classList.contains("is-open"),
+          y: window.scrollY,
+          phase: w.__phase
+        });
       }
       requestAnimationFrame(tick);
     };
@@ -55,6 +97,51 @@ const changes = <K extends "tone" | "news">(list: Frame[], key: K) => {
   return out;
 };
 
+// Color que se ve: distancia (0–441) entre el color de la cabecera y el que le toca.
+const distance = (a: RGB, b: RGB) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+const TRANSITION_MS = 300;
+
+// Lo que ve el usuario: tras cruzar una frontera, el color de texto y de fondo
+// de la cabecera solo puede acercarse al de la nueva sección (nunca alejarse:
+// eso sería un destello), y pasada la transición tiene que ser exactamente ése.
+const perceivedProblems = (list: Frame[]) => {
+  const out: string[] = [];
+  let crossingAt = -Infinity;
+  for (let i = 1; i < list.length; i++) {
+    const prev = list[i - 1]!;
+    const frame = list[i]!;
+    // Con el menú abierto (y mientras se cierra) los colores cambian a propósito.
+    const crossed = frame.expected !== prev.expected || distance(frame.targetBg, prev.targetBg) > 1 || frame.menu || prev.menu;
+    if (crossed) {
+      crossingAt = frame.t;
+      continue;
+    }
+    for (const [key, target] of [["color", "targetColor"], ["bg", "targetBg"]] as const) {
+      const before = distance(prev[key], frame[target]);
+      const now = distance(frame[key], frame[target]);
+      if (now > before + 6) out.push(`${frame.phase} y=${Math.round(frame.y)}: el ${key === "bg" ? "fondo" : "texto"} de la cabecera se aleja del color de la sección (${Math.round(before)}→${Math.round(now)})`);
+      if (frame.t - crossingAt > TRANSITION_MS + 120 && now > 8) out.push(`${frame.phase} y=${Math.round(frame.y)}: el ${key === "bg" ? "fondo" : "texto"} de la cabecera no es el de la sección (distancia ${Math.round(now)})`);
+    }
+  }
+  return [...new Set(out)].slice(0, 5);
+};
+
+// Fotogramas en los que la cabecera no coincide con la sección de debajo,
+// salvo los 2 primeros fotogramas después de cruzar una frontera.
+const LAG_FRAMES = 2;
+const headerMismatches = (list: Frame[]) => {
+  const out: string[] = [];
+  let sinceCrossing = LAG_FRAMES + 1;
+  for (let i = 0; i < list.length; i++) {
+    sinceCrossing = i > 0 && list[i]!.expected !== list[i - 1]!.expected ? 0 : sinceCrossing + 1;
+    const frame = list[i]!;
+    if (frame.tone !== frame.expected && sinceCrossing > LAG_FRAMES) {
+      out.push(`${frame.phase} y=${Math.round(frame.y)}: cabecera ${frame.tone}, sección ${frame.expected}`);
+    }
+  }
+  return out.slice(0, 5);
+};
+
 test("cabecera y noticia sin parpadeos durante el scroll", async ({ page }, testInfo) => {
   test.setTimeout(120_000);
   const mobile = isMobile(testInfo);
@@ -77,14 +164,13 @@ test("cabecera y noticia sin parpadeos durante el scroll", async ({ page }, test
   const all = await frames(page);
   expect(all.length, "se grabaron fotogramas").toBeGreaterThan(200);
 
-  // 1. Cabecera: un cruce entre secciones cambia el tono una sola vez.
-  //    Parpadeo = vuelve al tono anterior en menos de 300 ms.
+  // 1. Cabecera: en cada fotograma tiene el tono de la sección que hay debajo
+  //    (con como mucho 2 fotogramas de retraso tras cruzar una frontera), y
+  //    entre dos cruces cambia como mucho una vez. Así un parpadeo falla
+  //    siempre, aunque el scroll sea muy rápido.
   const tone = changes(all, "tone");
-  const flickers = tone.filter((change, i) => {
-    const next = tone[i + 1];
-    return next && next.to === change.from && next.t - change.t < 300;
-  });
-  expect(flickers, `parpadeos de la cabecera: ${JSON.stringify(flickers.slice(0, 3))}`).toEqual([]);
+  expect(headerMismatches(all), "cabecera con un tono distinto de la sección de debajo").toEqual([]);
+  expect(perceivedProblems(all), "color visible de la cabecera").toEqual([]);
   expect(tone.length, "la cabecera cambia de tono al pasar por las secciones").toBeGreaterThan(2);
 
   // Resumen adjunto al informe (y en consola con DEBUG_MOTION=1).
@@ -124,10 +210,6 @@ test("cabecera sin parpadeos al usar los enlaces del menú", async ({ page }, te
     await waitScrollStill(page);
   }
   const all = (await frames(page)).filter((f) => f.phase.startsWith("menu-"));
-  const tone = changes(all, "tone");
-  const flickers = tone.filter((change, i) => {
-    const next = tone[i + 1];
-    return next && next.to === change.from && next.t - change.t < 300;
-  });
-  expect(flickers, `parpadeos: ${JSON.stringify(flickers.slice(0, 3))}`).toEqual([]);
+  expect(headerMismatches(all), "cabecera con un tono distinto de la sección de debajo").toEqual([]);
+  expect(perceivedProblems(all), "color visible de la cabecera").toEqual([]);
 });

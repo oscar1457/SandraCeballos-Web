@@ -39,9 +39,10 @@ construida. `npm run verify:full` añade Lighthouse.
 | Rutas, recarga, enlaces internos, Atrás/Adelante | `tests/e2e/routes.spec.ts` | `npm test` |
 | Menú, idioma, galería, diálogos, historias, formulario (Formspree simulado) | `tests/e2e/ui.spec.ts` | `npm test` |
 | Tarjeta de noticias (News) | `tests/e2e/news.spec.ts` | `npm test` |
-| Movimiento: cabecera y News fotograma a fotograma | `tests/e2e/motion.spec.ts` | `npm test` |
+| Movimiento: cabecera (tono y color visible) y News fotograma a fotograma | `tests/e2e/motion.spec.ts` | `npm test` |
+| Vídeos y trama WebGL: se dibujan, con sus colores y la forma de la C | `tests/e2e/media.spec.ts` | `npm test` |
 | Accesibilidad (axe) en todas las rutas, idiomas y estados | `tests/e2e/a11y.spec.ts` | `npm test` |
-| Responsive (360–768 px) | `tests/e2e/responsive.spec.ts` | `npm test` |
+| Responsive (360–768 px), incluidos textos o imágenes que se pisan | `tests/e2e/responsive.spec.ts` | `npm test` |
 | Regresión visual (360, 390, 768, 1440 px) | `tests/e2e/visual.spec.ts` | `npm test` (solo Linux/CI) |
 | WebKit (motor de Safari) | mismos tests | `npm run test:webkit` |
 | Lighthouse con referencia | `tests/lighthouse.mjs` | `npm run test:lighthouse` |

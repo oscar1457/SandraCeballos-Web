@@ -11,7 +11,7 @@ const { artworks } = Astro.props;
 // Dos tamaños por obra: miniatura para la rueda/lista y grande para la ficha.
 const works = await Promise.all(
   artworks.map(async (artwork) => {
-    const thumb = await getImage({ src: artwork.thumbnail, width: 640, format: "webp" });
+    const thumb = await getImage({ src: artwork.thumbnail, width: 1000, format: "webp" });
     const full = await getImage({
       src: artwork.image,
       widths: [1000, 1600, 2200],
@@ -38,8 +38,7 @@ const works = await Promise.all(
 );
 
 const first = works[0]!;
-const second = works[1] ?? first;
-const pad = (n: number) => String(n);
+const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
 <section
@@ -56,27 +55,39 @@ const pad = (n: number) => String(n);
   </h2>
 
   <div class="works__stage">
-    <div class="works__letters" aria-hidden="true">
-      <span>S</span><span>C</span>
-    </div>
-
     <div class="works__switch" role="group" aria-label="Modo de vista" data-aria-label-en="View mode">
       <button type="button" data-mode-button="wheel" aria-pressed="true">
-        <span data-lang="es">Rueda</span><span data-lang="en">Wheel</span></button
+        <span data-lang="es">Galería</span><span data-lang="en">Gallery</span></button
       >,
       <button type="button" data-mode-button="list" aria-pressed="false">
         <span data-lang="es">Lista</span><span data-lang="en">List</span>
       </button>
     </div>
 
-    <div class="works__now">
-      <span class="works__num num"><span class="mask"><span data-now="num">{pad(1)}</span></span></span>
-      <div class="works__titles">
-        <p class="works__title"><span class="mask"><span data-now="title">{first.title}</span></span></p>
-        <p class="works__next" aria-hidden="true"><span class="mask"><span data-now="next">{second.title}</span></span></p>
-      </div>
-      <span class="works__year num"><span class="mask"><span data-now="year">{first.year}</span></span></span>
+    <button type="button" class="works__open" data-open-current aria-haspopup="dialog">
+      <span data-lang="es">Ver ficha</span><span data-lang="en">View details</span> →
+    </button>
+
+    <!-- Pie de foto editorial de la obra que está en el centro. -->
+    <div class="works__caption" aria-live="polite">
+      <p class="works__fig num">
+        Fig. <span class="mask"><span data-now="num">{pad(1)}</span></span>
+      </p>
+      <p class="works__title"><span class="mask"><span data-now="title">{first.title}</span></span></p>
+      <p class="works__data">
+        <span class="mask"
+          ><span data-now="data"
+            >{first.year} · <span data-lang="es">{first.technique}</span><span data-lang="en"
+              >{first.techniqueEn}</span
+            > · {first.dimensions}</span
+          ></span
+        >
+      </p>
     </div>
+
+    <p class="works__counter num" aria-hidden="true">
+      <span class="mask"><span data-now="count">{pad(1)}</span></span><span class="works__total">/{pad(works.length)}</span>
+    </p>
 
     <ul class="wheel" data-wheel>
       {
@@ -127,13 +138,6 @@ const pad = (n: number) => String(n);
       </figure>
     </div>
 
-    <div class="works__foot">
-      <span class="num">{works.length} <span data-lang="es">obras</span><span data-lang="en">works</span></span>
-      <span class="works__hint">
-        <span data-lang="es">Desliza para girar · pulsa una obra</span>
-        <span data-lang="en">Scroll to turn · select a work</span>
-      </span>
-    </div>
   </div>
 </section>
 
@@ -198,10 +202,13 @@ const pad = (n: number) => String(n);
 </script>
 
 <style>
+  /* Galería editorial: fondo blanco, una obra protagonista en el centro y sus
+     vecinas lejos, pequeñas y en gris. Al hacer scroll se pasa de una en una con
+     un "clic" (ver works.ts). */
   .works {
     position: relative;
-    height: calc(var(--count) * 38svh + 100svh);
-    background: var(--stone);
+    height: calc(var(--count) * 42svh + 100svh);
+    background: var(--white);
     color: var(--black);
   }
 
@@ -222,28 +229,14 @@ const pad = (n: number) => String(n);
     min-height: 40rem;
   }
 
-  .works__letters {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2vw;
-    color: rgb(0 0 0 / 0.07);
-    font-family: var(--font-serif);
-    font-size: min(110svh, 60vw);
-    line-height: 0.75;
-    pointer-events: none;
-  }
-
   .works__switch {
     position: absolute;
-    top: 6.5rem;
+    top: 5rem;
     left: var(--gutter);
     z-index: 200;
     font-size: var(--text-small);
     font-weight: 500;
-    color: rgb(0 0 0 / 0.62);
+    color: rgb(0 0 0 / 0.55);
   }
 
   .works__switch button {
@@ -260,64 +253,100 @@ const pad = (n: number) => String(n);
     text-underline-offset: 0.2em;
   }
 
-  .works__now {
+  .works__open {
     position: absolute;
-    top: 8.5rem;
-    left: var(--gutter);
+    top: 5rem;
     right: var(--gutter);
     z-index: 200;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr) minmax(0, 1fr);
-    align-items: start;
-    pointer-events: none;
+    padding: 0.25rem 0;
+    border: 0;
+    background: none;
+    color: var(--red);
+    font-size: var(--text-small);
+    font-weight: 600;
   }
 
-  /* El bloque de títulos tiene altura fija (2 líneas + la siguiente obra):
-     así nada de alrededor se mueve cuando cambia el título. */
-  .works__titles {
-    min-width: 0;
-    height: calc(3 * 1.05em + 0.4em);
-    font-size: clamp(2rem, 3.6vw, 4rem);
-    overflow: hidden;
+  .works__open:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
-  .works__num,
-  .works__year {
-    font-size: clamp(2rem, 3.4vw, 3.6rem);
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: -0.03em;
+  /* Pie de foto: "Fig. 03", título en serif, rayita roja y datos. */
+  .works__caption {
+    position: absolute;
+    left: var(--gutter);
+    bottom: var(--gutter);
+    z-index: 200;
+    max-width: min(46rem, 62vw);
   }
 
-  .works__year {
-    justify-self: end;
-  }
-
-  .works__title,
-  .works__next {
+  .works__fig {
     margin: 0;
-    font-size: clamp(2rem, 3.6vw, 4rem);
-    font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: -0.035em;
-    overflow: hidden;
+    font-size: var(--text-small);
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
+  .works__fig [data-now="num"] {
+    color: var(--red);
+  }
+
+  /* Alto fijo para dos líneas: el título se apoya abajo y "Fig." no se mueve
+     al cambiar entre títulos cortos y largos. */
   .works__title {
-    max-height: calc(2 * 1.05em + 0.1em);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: calc(2 * 1.02em + 0.7rem + 3px);
+    margin: 0.35rem 0 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.9rem, 3.2vw, 3.4rem);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.01em;
   }
 
-  /* La siguiente obra, en gris justo debajo; si es larga se desvanece. */
-  .works__next {
-    margin-top: 0.15em;
-    color: rgb(0 0 0 / 0.38);
+  .works__title::after {
+    content: "";
+    display: block;
+    width: 2.2rem;
+    height: 3px;
+    margin-top: 0.7rem;
+    background: var(--red);
+  }
+
+  /* Una sola línea (las técnicas largas se cortan con "…"; están completas en la ficha). */
+  .works__data {
+    overflow: hidden;
+    margin: 0.6rem 0 0;
     white-space: nowrap;
-    -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent);
-    mask-image: linear-gradient(90deg, #000 80%, transparent);
+    color: #555;
+    font-size: var(--text-small);
+    font-weight: 500;
   }
 
-  .works[data-mode="list"] .works__next {
-    visibility: hidden;
+  .works__counter {
+    position: absolute;
+    right: var(--gutter);
+    bottom: var(--gutter);
+    z-index: 200;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 3.4vw, 3.6rem);
+    line-height: 1;
+  }
+
+  .works__counter [data-now="count"] {
+    color: var(--red);
+  }
+
+  .works__total {
+    color: #9a9a9a;
+    font-size: 0.45em;
+  }
+
+  .works[data-mode="list"] :is(.works__caption, .works__counter, .works__open) {
+    display: none;
   }
 
   .mask {
@@ -331,12 +360,22 @@ const pad = (n: number) => String(n);
     display: inline-block;
   }
 
-  /* --- Rueda --- */
+  .works__data .mask {
+    max-width: 100%;
+  }
+
+  .works__data [data-now="data"] {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+  }
+
+  /* --- Galería: obras en línea recta --- */
   .wheel {
-    --radius: clamp(34rem, 62vw, 80rem);
-    --card-h: clamp(13rem, 36svh, 26rem);
+    --strip-h: calc(max(100svh, 34rem) - 19rem - var(--gutter));
     position: absolute;
-    inset: 0;
+    inset: 9.5rem 0 calc(var(--gutter) + 9.5rem);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -348,11 +387,11 @@ const pad = (n: number) => String(n);
 
   .wheel__item {
     position: absolute;
-    left: 50%;
-    top: calc(64% + var(--radius));
-    width: max-content;
-    transform-origin: 50% 0;
-    transform: translateX(-50%) rotate(calc(var(--i) * 26deg)) translateY(calc(-1 * var(--radius)));
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
     will-change: transform, opacity;
   }
 
@@ -361,17 +400,19 @@ const pad = (n: number) => String(n);
     padding: 0;
     border: 0;
     background: none;
-    box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.28);
     cursor: pointer;
-    transform: translateY(-50%);
+    pointer-events: auto;
   }
 
-  /* La obra entera, con sus proporciones reales: misma altura para todas. */
+  /* La obra entera, con sus proporciones reales. */
   .wheel__card img {
+    display: block;
     width: auto;
-    height: var(--card-h);
-    max-width: min(34vw, 30rem);
+    height: auto;
+    max-width: 46vw;
+    max-height: var(--strip-h);
     object-fit: contain;
+    box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.08);
   }
 
   .wheel__card:focus-visible {
@@ -446,23 +487,6 @@ const pad = (n: number) => String(n);
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-  }
-
-  .works__foot {
-    position: absolute;
-    left: var(--gutter);
-    right: var(--gutter);
-    bottom: var(--gutter);
-    z-index: 200;
-    text-shadow: 0 0 0.6rem rgb(161 159 151 / 0.9);
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--text-label);
-    font-weight: 500;
-  }
-
-  .works[data-mode="list"] .works__hint {
-    visibility: hidden;
   }
 
   /* --- Ficha (dialog) --- */
@@ -639,46 +663,31 @@ const pad = (n: number) => String(n);
   }
 
   @media (max-width: 760px) {
-    .works__switch {
-      top: 4.75rem;
-    }
-
-    .works__now {
-      top: 6.5rem;
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      gap: 0.75rem;
-    }
-
-    .works__num,
-    .works__year {
-      font-size: 1.25rem;
-    }
-
-    .works__title,
-    .works__next {
-      font-size: 1.45rem;
-    }
-
-    .works__titles {
-      height: calc(4 * 1.05em + 0.4em);
-      font-size: 1.45rem;
-    }
-
-    .works__title {
-      max-height: calc(3 * 1.05em + 0.1em);
+    .works__switch,
+    .works__open {
+      top: 4.5rem;
     }
 
     .wheel {
-      --radius: 40rem;
-      --card-h: 30svh;
+      --strip-h: calc(max(100svh, 34rem) - 16.5rem - var(--gutter));
+      inset: 7.5rem 0 calc(var(--gutter) + 9rem);
     }
 
     .wheel__card img {
-      max-width: 62vw;
+      max-width: 78vw;
     }
 
-    .wheel__item {
-      top: calc(66% + var(--radius));
+    .works__caption {
+      max-width: 72vw;
+    }
+
+    .works__title {
+      min-height: calc(3 * 1.02em + 0.7rem + 3px);
+      font-size: 1.7rem;
+    }
+
+    .works__counter {
+      font-size: 1.8rem;
     }
 
     .works[data-mode="list"] .list {

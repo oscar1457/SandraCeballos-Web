@@ -5,37 +5,91 @@
 // cualquier tamaño, así la baja resolución del vídeo no se nota.
 import { getImage } from "astro:assets";
 import posterImage from "@/assets/sandra-taller-poster.jpg";
+import { stories } from "@/data/studio";
 
 const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
+const storyImages = await Promise.all(
+  stories.map((story) => getImage({ src: story.image, width: 720, format: "webp" }))
+);
+const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
-<section class="studio" id="taller" data-header="light" aria-labelledby="studio-title" data-studio data-poster={poster.src}>
-  <div class="studio__media" aria-hidden="true">
-    <!-- Respaldo sin WebGL: el póster en duotono. -->
-    <img class="studio__fallback" src={poster.src} alt="" width="576" height="972" loading="lazy" decoding="async" />
-    <canvas class="studio__canvas" data-studio-canvas></canvas>
-    <video
-      class="studio__source"
-      data-studio-video
-      width="360"
-      height="608"
-      muted
-      loop
-      playsinline
-      preload="none"
-      tabindex="-1"
-    ></video>
-  </div>
+<section
+  class="studio"
+  id="taller"
+  data-header="light"
+  aria-labelledby="studio-title"
+  data-studio
+  data-poster={poster.src}
+  style={`--stories:${stories.length}`}
+>
+  <div class="studio__sticky">
+    <div class="studio__media" aria-hidden="true">
+      <!-- Respaldo sin WebGL: el póster en duotono. -->
+      <img class="studio__fallback" src={poster.src} alt="" width="576" height="972" loading="lazy" decoding="async" />
+      <canvas class="studio__canvas" data-studio-canvas></canvas>
+      <video
+        class="studio__source"
+        data-studio-video
+        width="360"
+        height="608"
+        muted
+        loop
+        playsinline
+        preload="none"
+        tabindex="-1"
+      ></video>
+    </div>
 
-  <div class="studio__content">
-    <h2 class="studio__title" id="studio-title">
-      <span data-lang="es">En el taller</span>
-      <span data-lang="en">In the studio</span>
-    </h2>
+    <!-- El título va siempre en inglés, también con la web en español. -->
+    <h2 class="studio__title" id="studio-title" lang="en">In the studio</h2>
     <p class="studio__lead">
       <span data-lang="es">Dibujo, color y escritura a mano sobre papel, trazo a trazo.</span>
       <span data-lang="en">Drawing, colour and handwriting on paper, stroke by stroke.</span>
     </p>
+
+    <!-- Historias: como las de Instagram, pero se pasan con el scroll (sin tiempo). -->
+    <div class="stories" data-stories aria-roledescription="carrusel" aria-label="Historias" data-aria-label-en="Stories">
+      <div class="stories__bars" aria-hidden="true">
+        {stories.map(() => <span class="stories__bar"><i data-story-bar></i></span>)}
+      </div>
+      <div class="stories__nav">
+        <span class="stories__count num" data-story-count>01 / {pad(stories.length)}</span>
+        <span class="stories__arrows">
+          <button type="button" data-story-prev aria-label="Historia anterior" data-aria-label-en="Previous story">←</button>
+          <button type="button" data-story-next aria-label="Historia siguiente" data-aria-label-en="Next story">→</button>
+        </span>
+      </div>
+      <div class="stories__frames">
+        {
+          stories.map((story, index) => (
+            <article class="story" data-story={index} aria-hidden={index === 0 ? undefined : "true"}>
+              <img
+                class="story__photo"
+                src={storyImages[index]!.src}
+                width="720"
+                height="900"
+                alt={story.alt}
+                data-alt-en={story.altEn}
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="story__text">
+                <p class="story__year num">{story.year}</p>
+                <h3 class="story__title">
+                  <span data-lang="es">{story.title}</span>
+                  <span data-lang="en">{story.titleEn}</span>
+                </h3>
+                <p class="story__body">
+                  <span data-lang="es">{story.text}</span>
+                  <span data-lang="en">{story.textEn}</span>
+                </p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
   </div>
 </section>
 
@@ -150,17 +204,115 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
   }
 </script>
 
+<script>
+  // Historias: el scroll dentro de la sección elige cuál se ve; las barras de
+  // arriba se van llenando con el scroll (no con el tiempo). Las flechas llevan
+  // a la anterior o la siguiente.
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section = document.querySelector<HTMLElement>("[data-studio]");
+  const root = section?.querySelector<HTMLElement>("[data-stories]");
+  const frames = Array.from(root?.querySelectorAll<HTMLElement>("[data-story]") ?? []);
+  const bars = Array.from(root?.querySelectorAll<HTMLElement>("[data-story-bar]") ?? []);
+  const count = root?.querySelector<HTMLElement>("[data-story-count]");
+  const prev = root?.querySelector<HTMLButtonElement>("[data-story-prev]");
+  const next = root?.querySelector<HTMLButtonElement>("[data-story-next]");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (section && root && frames.length && count && prev && next) {
+    const total = frames.length;
+    const pad = (n: number) => String(n).padStart(2, "0");
+    let active = 0;
+    let trigger: ScrollTrigger | null = null;
+
+    const fillBars = (position: number) => {
+      bars.forEach((bar, index) => {
+        bar.style.transform = `scaleX(${Math.min(1, Math.max(0, position - index))})`;
+      });
+    };
+
+    const show = (index: number) => {
+      if (index === active) return;
+      const direction = index > active ? 1 : -1;
+      const from = frames[active]!;
+      const to = frames[index]!;
+      active = index;
+      from.setAttribute("aria-hidden", "true");
+      to.removeAttribute("aria-hidden");
+      count.textContent = `${pad(index + 1)} / ${pad(total)}`;
+      prev.disabled = index === 0;
+      next.disabled = index === total - 1;
+      if (reduced) {
+        gsap.set(from, { autoAlpha: 0 });
+        gsap.set(to, { autoAlpha: 1 });
+        return;
+      }
+      gsap.to(from, { autoAlpha: 0, y: -24 * direction, duration: 0.35, ease: "power2.in", overwrite: true });
+      gsap.fromTo(
+        to,
+        { autoAlpha: 0, y: 24 * direction },
+        { autoAlpha: 1, y: 0, duration: 0.55, delay: 0.15, ease: "power3.out", overwrite: true }
+      );
+    };
+
+    const goTo = (index: number) => {
+      const target = Math.min(total - 1, Math.max(0, index));
+      if (trigger) {
+        // Lleva el scroll al tramo de esa historia; el resto lo hace onUpdate.
+        const y = trigger.start + ((target + 0.5) / total) * (trigger.end - trigger.start);
+        window.scrollTo({ top: y, behavior: "smooth" });
+      } else {
+        show(target);
+        fillBars(target + 1);
+      }
+    };
+
+    prev.addEventListener("click", () => goTo(active - 1));
+    next.addEventListener("click", () => goTo(active + 1));
+    prev.disabled = true;
+
+    if (reduced) {
+      fillBars(1);
+    } else {
+      trigger = ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        onUpdate: (self) => {
+          const position = self.progress * total;
+          fillBars(position);
+          show(Math.min(total - 1, Math.floor(position)));
+        }
+      });
+    }
+  }
+</script>
+
 <style>
+  /* La sección es más alta que la pantalla: el contenido se queda fijo y el
+     scroll va pasando las historias, una por tramo. */
   .studio {
     position: relative;
+    height: calc(var(--stories) * 70svh + 100svh);
+    background: var(--red);
+    color: var(--white);
+  }
+
+  .studio__sticky {
+    position: sticky;
+    top: 0;
     display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: auto 1fr auto;
-    min-height: 100svh;
+    gap: var(--gutter) var(--space-4);
+    height: 100svh;
+    min-height: 36rem;
     padding: calc(4rem + var(--gutter)) var(--gutter) var(--gutter);
     overflow: hidden;
     isolation: isolate;
-    background: var(--red);
-    color: var(--white);
   }
 
   .studio__media {
@@ -202,11 +354,8 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
     opacity: 0;
   }
 
-  .studio__content {
-    display: contents;
-  }
-
   .studio__title {
+    grid-column: 1 / -1;
     margin: 0;
     font-family: var(--font-serif);
     font-size: clamp(3.2rem, 13vw, 15rem);
@@ -217,6 +366,7 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
 
   .studio__lead {
     grid-row: 3;
+    align-self: end;
     max-width: 22ch;
     margin: 0;
     font-size: clamp(1.15rem, 2vw, 2.2rem);
@@ -225,13 +375,167 @@ const poster = await getImage({ src: posterImage, width: 576, format: "webp" });
     letter-spacing: -0.02em;
   }
 
+  /* --- Historias --- */
+  .stories {
+    grid-row: 3;
+    grid-column: 2;
+    align-self: end;
+    width: min(46rem, 56vw);
+  }
+
+  .stories__bars {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .stories__bar {
+    flex: 1;
+    height: 3px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: rgb(255 255 255 / 0.35);
+  }
+
+  .stories__bar i {
+    display: block;
+    height: 100%;
+    background: var(--white);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .stories__nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.6rem 0 0.9rem;
+    font-size: var(--text-small);
+    font-weight: 600;
+  }
+
+  .stories__arrows {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .stories__arrows button {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 0.7);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+    transition:
+      background-color 200ms var(--ease),
+      color 200ms var(--ease);
+  }
+
+  .stories__arrows button:hover,
+  .stories__arrows button:focus-visible {
+    background: var(--white);
+    color: var(--red);
+  }
+
+  .stories__arrows button:disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .stories__frames {
+    display: grid;
+  }
+
+  /* Todas las historias ocupan la misma celda; solo se ve la activa. */
+  .story {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    grid-area: 1 / 1;
+    gap: var(--space-3);
+    align-items: end;
+  }
+
+  .story:not(:first-child) {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  .story__photo {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.05);
+  }
+
+  .story__year {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .story__title {
+    margin: 0.3rem 0 0;
+    font-size: clamp(1.4rem, 2vw, 2.1rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .story__body {
+    margin: 0.8rem 0 0;
+    font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
   @media (max-width: 760px) {
-    .studio {
-      min-height: 90svh;
+    .studio__sticky {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr;
+      gap: var(--space-2);
+      min-height: 0;
     }
 
     .studio__title {
       font-size: clamp(3rem, 17vw, 6rem);
+    }
+
+    .studio__lead {
+      grid-row: 2;
+      align-self: start;
+      font-size: 1.05rem;
+    }
+
+    .stories {
+      grid-row: 3;
+      grid-column: 1;
+      width: 100%;
+    }
+
+    .story {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+      gap: var(--space-2);
+    }
+
+    .story__title {
+      font-size: 1.25rem;
+    }
+
+    .story__body {
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Con movimiento reducido no se fija la sección: las flechas cambian de historia. */
+  @media (prefers-reduced-motion: reduce) {
+    .studio {
+      height: auto;
     }
   }
 </style>

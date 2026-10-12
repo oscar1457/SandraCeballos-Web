@@ -36,36 +36,50 @@ if (section && dataNode && sheet) {
   const modeButtons = Array.from(section.querySelectorAll<HTMLButtonElement>("[data-mode-button]"));
   const nowField = (name: string) => section.querySelector<HTMLElement>(`[data-now="${name}"]`)!;
 
-  // ---------- Texto grande: número, título, año ----------
+  // ---------- Pie de foto: número, título y datos ----------
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const escapeHtml = (value: string) =>
+    value.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+  const dataHtml = (work: Work) =>
+    `${escapeHtml(work.year)} · <span data-lang="es">${escapeHtml(work.technique)}</span>` +
+    `<span data-lang="en">${escapeHtml(work.techniqueEn)}</span> · ${escapeHtml(work.dimensions)}`;
+
   let shown = 0;
-  const setNow = (index: number) => {
-    if (index === shown) {
+  const setNow = (index: number, animate = true) => {
+    if (index === shown && animate) {
       return;
     }
-    const direction = index > shown ? 1 : -1;
+    const direction = index >= shown ? 1 : -1;
     shown = index;
     const work = works[index]!;
-    const next = works[(index + 1) % total]!;
     const values: Record<string, string> = {
-      num: String(index + 1),
+      num: pad(index + 1),
+      count: pad(index + 1),
       title: work.title,
-      next: next.title,
-      year: work.year
+      data: dataHtml(work)
     };
     Object.entries(values).forEach(([name, value]) => {
       const node = nowField(name);
-      if (reduced) {
-        node.textContent = value;
+      const write = () => {
+        if (name === "data") {
+          node.innerHTML = value;
+        } else {
+          node.textContent = value;
+        }
+      };
+      if (reduced || !animate) {
+        write();
         return;
       }
+      // Como un contador mecánico: sale rápido y el nuevo entra con un pequeño rebote.
       gsap.killTweensOf(node);
       gsap.to(node, {
         yPercent: -105 * direction,
-        duration: 0.18,
+        duration: 0.12,
         ease: "power2.in",
         onComplete: () => {
-          node.textContent = value;
-          gsap.fromTo(node, { yPercent: 105 * direction }, { yPercent: 0, duration: 0.45, ease: "power3.out" });
+          write();
+          gsap.fromTo(node, { yPercent: 105 * direction }, { yPercent: 0, duration: 0.38, ease: "back.out(2)" });
         }
       });
     });
@@ -75,25 +89,34 @@ if (section && dataNode && sheet) {
     }
   };
 
-  // ---------- Rueda ----------
-  const placeWheel = (position: number) => {
-    const narrow = window.innerWidth < 760;
-    // Grados entre obras: el abanico se abre más cuanto más ancha es la pantalla.
-    const step = narrow ? 30 : 26;
-    items.forEach((item, index) => {
-      const angle = (index - position) * step;
-      const distance = Math.abs(angle);
-      item.style.transform = `translateX(-50%) rotate(${angle}deg) translateY(calc(-1 * var(--radius)))`;
-      item.style.opacity = distance > 85 ? "0" : String(1 - Math.max(0, distance - 40) / 60);
-      item.style.zIndex = String(100 - Math.round(distance));
-      item.style.visibility = distance > 90 ? "hidden" : "visible";
+  // ---------- Galería en línea recta ----------
+  // Cada tramo de scroll corresponde a una obra. Al cruzar de un tramo al
+  // siguiente todo se mueve de golpe, se pasa un poco y vuelve a encajar: el
+  // "clic" de la rueda de modos de una cámara.
+  let current = 0;
+  const gap = () => (window.innerWidth < 760 ? window.innerWidth * 0.8 : window.innerWidth * 0.42);
+
+  const placeGallery = (index: number, animate: boolean) => {
+    items.forEach((item, itemIndex) => {
+      const offset = itemIndex - index;
+      const distance = Math.abs(offset);
+      const props = {
+        x: Math.sign(offset) * Math.min(distance, 2) * gap(),
+        scale: offset === 0 ? 1 : 0.62,
+        autoAlpha: distance > 1 ? 0 : offset === 0 ? 1 : 0.35,
+        filter: offset === 0 ? "grayscale(0)" : "grayscale(1)"
+      };
+      if (animate && !reduced) {
+        gsap.to(item, { ...props, duration: 0.46, ease: "back.out(1.9)", overwrite: "auto" });
+      } else {
+        gsap.set(item, props);
+      }
       const card = item.firstElementChild as HTMLElement | null;
       if (card) {
-        card.style.filter = distance < 6 ? "none" : `grayscale(${Math.min(distance / 40, 0.85)})`;
-        card.tabIndex = distance > 90 ? -1 : 0;
+        card.tabIndex = offset === 0 ? 0 : -1;
       }
     });
-    setNow(Math.min(total - 1, Math.max(0, Math.round(position))));
+    setNow(index, animate);
   };
 
   let trigger: ScrollTrigger | null = null;
@@ -103,9 +126,16 @@ if (section && dataNode && sheet) {
       trigger: section,
       start: "top top",
       end: "bottom bottom",
-      onUpdate: (self) => placeWheel(self.progress * (total - 1))
+      onUpdate: (self) => {
+        const index = Math.min(total - 1, Math.max(0, Math.round(self.progress * (total - 1))));
+        if (index !== current) {
+          current = index;
+          placeGallery(index, true);
+        }
+      }
     });
-    placeWheel(0);
+    current = Math.min(total - 1, Math.max(0, Math.round(trigger.progress * (total - 1))));
+    placeGallery(current, false);
   };
 
   // ---------- Cambio de modo ----------
@@ -235,6 +265,12 @@ if (section && dataNode && sheet) {
     });
   });
 
+  // "Ver ficha" abre la obra que está en el centro.
+  section.querySelector<HTMLButtonElement>("[data-open-current]")?.addEventListener("click", (event) => {
+    opener = event.currentTarget as HTMLElement;
+    openSheet(current);
+  });
+
   sheet.querySelector("[data-sheet-close]")?.addEventListener("click", () => sheet.close());
   sheet.querySelector("[data-sheet-prev]")?.addEventListener("click", () => fillSheet(sheetIndex - 1));
   sheet.querySelector("[data-sheet-next]")?.addEventListener("click", () => fillSheet(sheetIndex + 1));
@@ -258,8 +294,8 @@ if (section && dataNode && sheet) {
   // ---------- Inicio ----------
   setMode(reduced ? "list" : "wheel");
   window.addEventListener("resize", () => {
-    if (section.dataset.mode === "wheel" && trigger) {
-      placeWheel(trigger.progress * (total - 1));
+    if (section.dataset.mode === "wheel") {
+      placeGallery(current, false);
     }
   });
 

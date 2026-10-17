@@ -7,13 +7,14 @@ export const site = {
   roleEn: "Artist and curator",
   lang: "es",
   locale: "es_ES",
-  url: "https://sandra-ceballos.vercel.app",
-  title: "Sandra Ceballos | Portafolio",
-  titleEn: "Sandra Ceballos | Portfolio",
+  url: "https://sandraceballos.com",
+  // Lo que se ve en los resultados de Google: quién es y por qué se la busca.
+  title: "Sandra Ceballos · Artista visual y curadora cubana",
+  titleEn: "Sandra Ceballos · Cuban visual artist and curator",
   description:
-    "Portafolio visual de Sandra Ceballos: obras recientes, trayectoria y contacto.",
+    "Sandra Ceballos, artista visual y curadora cubana, cofundadora de Espacio Aglutinador (La Habana, 1994). Obra, trayectoria, publicaciones, charlas y contacto.",
   descriptionEn:
-    "Visual portfolio of Sandra Ceballos: recent works, career and contact.",
+    "Sandra Ceballos, Cuban visual artist and curator, co-founder of Espacio Aglutinador (Havana, 1994). Works, career, publications, talks and contact.",
   email: "aglutinadorsandra@gmail.com",
   portfolioPdf: "/files/sandra-ceballos-portfolio.pdf",
   instagram: {
@@ -121,9 +122,13 @@ export const site = {
       url: "https://www.ipscuba.net/sin-categoria/sandra-ceballos-asi-en-la-paz-como-en-la-posguerra/"
     }
   ],
+  // Perfiles de Sandra en otras webs (para Google, «la misma persona que…»).
   socialProfiles: [
     "https://www.instagram.com/art_sandraceballos_photos/",
-    "https://www.espacioaglutinador.com/"
+    "https://www.macba.cat/en/actor/sandra-ceballos/",
+    "https://www.cubanartresources.org/sandra-ceballos",
+    "https://www.elarbolrojoart.com/es/artistas/producer/61-sandra-ceballos",
+    "https://rialta.org/author/sandra-ceballos/"
   ]
 } as const;
 

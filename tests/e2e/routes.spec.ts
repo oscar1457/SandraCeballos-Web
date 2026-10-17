@@ -24,6 +24,13 @@ for (const route of ROUTES) {
     );
     expect(withoutEnglish, "textos sin versión en inglés").toEqual([]);
 
+    // Buscadores: dirección oficial correcta y datos estructurados válidos.
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
+    expect(canonical, "dirección oficial").toBe(`https://sandraceballos.com${route}`);
+    const jsonLd = await page.$$eval('script[type="application/ld+json"]', (nodes) => nodes.map((n) => n.textContent ?? ""));
+    expect(jsonLd.length, "hay datos estructurados").toBeGreaterThan(0);
+    for (const block of jsonLd) expect(() => JSON.parse(block), "JSON-LD válido").not.toThrow();
+
     expect(issues, "errores de consola, JavaScript o recursos").toEqual([]);
   });
 }

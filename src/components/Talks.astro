@@ -2,11 +2,36 @@
 // Charlas: vídeos de YouTube con su fotograma y sus créditos. El vídeo no se
 // carga hasta que se pulsa: así la página no llama a YouTube (ni deja sus
 // cookies) a quien no lo ve. Al pulsar se usa youtube-nocookie.com.
-import { Image } from "astro:assets";
+import { Image, getImage } from "astro:assets";
 import { talks } from "@/data/talks";
+import { site } from "@/data/site";
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+// Datos de vídeo para buscadores (Google puede mostrarlos como vídeos).
+const thumbs = await Promise.all(talks.map((talk) => getImage({ src: talk.image, width: 1200, format: "jpg" })));
+const videoData = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Charlas de Sandra Ceballos",
+  itemListElement: talks.map((talk, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    item: {
+      "@type": "VideoObject",
+      name: talk.title,
+      description: talk.text,
+      uploadDate: talk.uploadDate,
+      thumbnailUrl: new URL(thumbs[index]!.src, site.url).toString(),
+      embedUrl: `https://www.youtube-nocookie.com/embed/${talk.id}`,
+      url: `https://www.youtube.com/watch?v=${talk.id}`,
+      about: { "@id": `${site.url}/#sandra-ceballos` }
+    }
+  }))
+};
 ---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(videoData)} />
 
 <section class="talks" id="charlas" data-header="light" aria-labelledby="talks-title">
   <div class="talks__head">

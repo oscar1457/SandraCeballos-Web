@@ -16,6 +16,7 @@ export type Talk = {
   text: string;
   textEn: string;
   credits: Credit[];
+  uploadDate: string; // fecha de publicación en YouTube
   image: ImageMetadata; // fotograma del propio vídeo
 };
 
@@ -23,6 +24,7 @@ export const talks: Talk[] = [
   {
     // Fuente: descripción del vídeo (canal de Janet Batet) y dialoguesincubanart.org.
     id: "4MWkFFcz6CY",
+    uploadDate: "2016-05-01",
     year: "2016",
     place: "Pérez Art Museum Miami",
     title: "Sandra Ceballos en el PAMM",
@@ -33,11 +35,12 @@ export const talks: Talk[] = [
       { role: "Idea del proyecto", roleEn: "Project conceived by", names: "Elizabeth Cerejido" },
       { role: "Publicado por", roleEn: "Published by", names: "Janet Batet" }
     ],
-    image: pamm,
+    image: pamm
   },
   {
     // Fuente: descripción del vídeo (canal de Coco Fusco) y su presentación en pantalla.
     id: "F2mhXy8q7rM",
+    uploadDate: "2017-09-14",
     year: "2017",
     place: "La Habana",
     title: "Aglutinador: Then and Now",
@@ -46,11 +49,12 @@ export const talks: Talk[] = [
     credits: [
       { role: "Publicado por", roleEn: "Published by", names: "Coco Fusco" }
     ],
-    image: aglutinador,
+    image: aglutinador
   },
   {
     // Fuente: descripción del vídeo (canal Forma Foco) y cartel del evento.
     id: "1tWOPKU8ujk",
+    uploadDate: "2025-01-22",
     year: "2025",
     place: "Librería Arenales, Madrid",
     title: "Lecturas al Fin III · My Classroom #2",
@@ -61,6 +65,6 @@ export const talks: Talk[] = [
       { role: "Organiza", roleEn: "Organised by", names: "Colectivo Forma Foco" },
       { role: "Vídeo", roleEn: "Video", names: "Fernando Fraguela (Palenque Films)" }
     ],
-    image: lecturas,
+    image: lecturas
   }
 ];

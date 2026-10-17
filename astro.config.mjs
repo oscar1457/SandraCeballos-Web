@@ -2,7 +2,7 @@ import { defineConfig } from "astro/config";
 
 export default defineConfig({
   output: "static",
-  site: "https://sandra-ceballos.vercel.app",
+  site: "https://sandraceballos.com",
   build: {
     format: "directory"
   },

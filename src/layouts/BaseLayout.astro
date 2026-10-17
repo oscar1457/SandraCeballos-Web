@@ -16,14 +16,47 @@ const title = Astro.props.title ?? site.title;
 const description = Astro.props.description ?? site.description;
 const canonical = new URL(Astro.url.pathname, site.url).toString();
 const ogImage = new URL(site.ogImage.src, site.url).toString();
+// Datos para buscadores (schema.org): quién es Sandra, el espacio que fundó y
+// la web. Solo datos públicos y comprobados (sin dirección exacta).
+const sandraId = `${site.url}/#sandra-ceballos`;
+const aglutinadorId = `${site.url}/aglutinador/#espacio-aglutinador`;
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "Person",
-  name: site.name,
-  jobTitle: site.role,
-  url: site.url,
-  image: ogImage,
-  sameAs: site.socialProfiles
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": sandraId,
+      name: site.name,
+      jobTitle: ["Artista visual", "Curadora"],
+      description: site.biography,
+      nationality: { "@type": "Country", name: "Cuba" },
+      alumniOf: { "@type": "EducationalOrganization", name: "Academia Nacional de Bellas Artes San Alejandro" },
+      award: "Beca CINTAS en artes visuales, 2022",
+      url: site.url,
+      image: ogImage,
+      sameAs: site.socialProfiles,
+      founder: { "@id": aglutinadorId }
+    },
+    {
+      "@type": "ArtGallery",
+      "@id": aglutinadorId,
+      name: "Espacio Aglutinador",
+      description: "Galería de arte independiente fundada en La Habana en 1994.",
+      foundingDate: "1994",
+      founder: [{ "@id": sandraId }, { "@type": "Person", name: "Ezequiel Suárez" }],
+      address: { "@type": "PostalAddress", addressLocality: "La Habana", addressCountry: "CU" },
+      url: `${site.url}/aglutinador/`,
+      sameAs: ["https://www.espacioaglutinador.com/"]
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${site.url}/#web`,
+      name: site.name,
+      url: site.url,
+      inLanguage: ["es", "en"],
+      about: { "@id": sandraId }
+    }
+  ]
 };
 ---
 

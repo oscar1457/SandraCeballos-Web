@@ -110,6 +110,15 @@ test("Charlas: el vídeo de YouTube solo se carga al pulsar", async ({ page, iss
   const frame = media.locator("iframe");
   await expect(frame).toHaveAttribute("src", /^https:\/\/www\.youtube-nocookie\.com\/embed\/4MWkFFcz6CY\?/);
   await expect(frame).toHaveAttribute("title", /Sandra Ceballos en el PAMM/);
+  // El reproductor ocupa todo el recuadro del vídeo, sin borde.
+  const [outer, inner, border] = await Promise.all([
+    media.boundingBox(),
+    frame.boundingBox(),
+    frame.evaluate((el) => getComputedStyle(el).borderTopWidth)
+  ]);
+  expect(Math.abs(inner!.width - outer!.width), "ancho del reproductor").toBeLessThanOrEqual(1);
+  expect(Math.abs(inner!.height - outer!.height), "alto del reproductor").toBeLessThanOrEqual(1);
+  expect(border, "sin borde").toBe("0px");
   expect(issues).toEqual([]);
 });
 

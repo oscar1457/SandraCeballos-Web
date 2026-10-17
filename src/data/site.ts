@@ -124,6 +124,7 @@ export const site = {
   ],
   // Perfiles de Sandra en otras webs (para Google, «la misma persona que…»).
   socialProfiles: [
+    "https://en.wikipedia.org/wiki/Sandra_Amelia_Ceballos_Obaya",
     "https://www.instagram.com/art_sandraceballos_photos/",
     "https://www.macba.cat/en/actor/sandra-ceballos/",
     "https://www.cubanartresources.org/sandra-ceballos",

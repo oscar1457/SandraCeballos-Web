@@ -5,6 +5,7 @@ import documentaVentana from "@/assets/taller/documenta-ventana.jpg";
 import documentaReplica from "@/assets/taller/documenta-replica-1.jpg";
 import desamparoTapiz from "@/assets/taller/desamparo-tapiz.jpg";
 import cintas2022 from "@/assets/taller/cintas-2022-sandra-ceballos.jpg";
+import cintasNoticia from "@/assets/taller/cintas-2022-noticia.jpg";
 
 export type News = {
   kicker: string; // lo que tiene que verse de un vistazo (p. ej. "documenta fifteen")
@@ -66,7 +67,8 @@ export const stories: Story[] = [
       meta: "Miami · 2022",
       headline: "Sandra Ceballos, ganadora de la beca CINTAS en artes visuales",
       headlineEn: "Sandra Ceballos wins the CINTAS Fellowship in Visual Arts",
-      image: cintas2022
+      // Logo de la Fundación CINTAS sobre el fondo que usa en sus anuncios de ganadores.
+      image: cintasNoticia
     }
   },
   {

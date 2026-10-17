@@ -13,7 +13,7 @@ export const ROUTES = [
 ];
 
 // Secciones de la portada a las que lleva el menú.
-export const HOME_SECTIONS = ["obra", "trayectoria", "publicaciones", "contacto"];
+export const HOME_SECTIONS = ["obra", "trayectoria", "publicaciones", "charlas", "contacto"];
 
 // Mensajes del navegador que no son fallos de la web (avisos del WebGL por software).
 const NOISE = /GL Driver Message|GPU stall|WebGL|Automatic fallback to software/i;
@@ -22,12 +22,13 @@ type Fixtures = { issues: string[] };
 
 // Cada test:
 //  - nunca envía nada real a Formspree (las peticiones se bloquean salvo que el
-//    propio test las simule),
+//    propio test las simule) ni carga YouTube (los vídeos de Charlas),
 //  - recoge errores de consola, errores de JavaScript y respuestas 4xx/5xx.
 export const test = base.extend<Fixtures>({
   issues: async ({ page }, use) => {
     const issues: string[] = [];
     await page.route(/formspree\.io/, (route) => route.abort());
+    await page.route(/youtube(-nocookie)?\.com|ytimg\.com|googlevideo\.com/, (route) => route.abort());
     page.on("console", (message) => {
       if (message.type() === "error" && !NOISE.test(message.text())) issues.push(`consola: ${message.text()}`);
     });

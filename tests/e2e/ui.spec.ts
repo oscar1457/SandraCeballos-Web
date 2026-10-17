@@ -1,4 +1,4 @@
-import { test, expect, clickNav, isMobile, isReduced, waitScrollStill } from "./helpers";
+import { test, expect, clickNav, isMobile, isReduced, sectionTop, waitScrollStill } from "./helpers";
 
 test("menú del teléfono: se abre, se cierra y lleva a la sección", async ({ page, issues }, testInfo) => {
   test.skip(!isMobile(testInfo), "El menú desplegable solo existe en el teléfono");
@@ -59,15 +59,58 @@ test("galería: abre la ficha, la URL apunta a la obra y al cerrar queda limpia"
   expect(issues).toEqual([]);
 });
 
-test("galería: modo lista y vuelta a galería", async ({ page }, testInfo) => {
+test("galería: modo lista y vuelta a galería sin saltar a otra sección", async ({ page }, testInfo) => {
   test.skip(isReduced(testInfo), "Con movimiento reducido solo hay lista");
   await page.goto("/");
   await clickNav(page, testInfo, "#obra");
   await waitScrollStill(page);
-  await page.click('[data-mode-button="list"]');
-  await expect(page.locator("[data-list-row]").first()).toBeVisible();
-  await page.click('[data-mode-button="wheel"]');
-  await expect(page.locator("[data-list-row]").first()).toBeHidden();
+  // A media galería (la sección mide varias pantallas en este modo).
+  await page.evaluate(() => window.scrollBy(0, window.innerHeight * 2.5));
+  await waitScrollStill(page);
+  const marked = await page.locator('[data-now="count"]').textContent();
+  expect(await sectionTop(page, "obra"), "ya dentro de la galería").toBeLessThan(-300);
+
+  await page.locator('[data-mode-button="list"]').click();
+  await waitScrollStill(page);
+  // La lista se ve desde arriba: la sección empieza en lo alto de la pantalla
+  // y la primera fila está en la mitad de arriba (sin el hueco vacío de antes).
+  expect(Math.abs(await sectionTop(page, "obra")), "sigue en Obra").toBeLessThanOrEqual(2);
+  const firstRow = page.locator("[data-list-row]").first();
+  await expect(firstRow).toBeVisible();
+  const box = await firstRow.boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(box!.y, "la lista empieza arriba").toBeLessThan(viewport.height * 0.5);
+
+  // Al volver a la galería se queda en Obra, en la obra que estaba marcada.
+  await page.locator('[data-mode-button="wheel"]').click();
+  await waitScrollStill(page);
+  await expect(firstRow).toBeHidden();
+  const inWorks = await page.evaluate(() => {
+    const rect = document.getElementById("obra")!.getBoundingClientRect();
+    return rect.top <= 2 && rect.bottom >= window.innerHeight - 2;
+  });
+  expect(inWorks, "la pantalla sigue dentro de Obra").toBe(true);
+  await expect(page.locator('[data-now="count"]')).toHaveText(marked ?? "");
+});
+
+test("Charlas: el vídeo de YouTube solo se carga al pulsar", async ({ page, issues }) => {
+  const youtube: string[] = [];
+  page.on("request", (request) => {
+    if (/youtube|ytimg|googlevideo/.test(request.url())) youtube.push(request.url());
+  });
+  await page.goto("/?d#charlas");
+  await waitScrollStill(page);
+  const media = page.locator("[data-talk]").first();
+  await expect(media.locator("img")).toBeVisible();
+  // Créditos de cada vídeo a la vista.
+  await expect(page.locator("#charlas")).toContainText("Solveig Font");
+  await expect(page.locator("#charlas")).toContainText("Fernando Fraguela");
+  expect(youtube, "no se llama a YouTube antes de pulsar").toEqual([]);
+  await media.locator("[data-talk-play]").click();
+  const frame = media.locator("iframe");
+  await expect(frame).toHaveAttribute("src", /^https:\/\/www\.youtube-nocookie\.com\/embed\/4MWkFFcz6CY\?/);
+  await expect(frame).toHaveAttribute("title", /Sandra Ceballos en el PAMM/);
+  expect(issues).toEqual([]);
 });
 
 test("un enlace directo a una obra abre su ficha", async ({ page, issues }) => {
@@ -81,12 +124,17 @@ test("In the studio: las flechas pasan las historias", async ({ page, issues }) 
   await page.goto("/?d#taller");
   await waitScrollStill(page);
   const count = page.locator("[data-story-count]");
-  await expect(count).toHaveText("01 / 02");
-  await page.click("[data-story-next]");
-  await expect(count).toHaveText("02 / 02");
+  await expect(count).toHaveText(/^01 \/ \d\d$/);
+  const total = Number((await count.textContent())!.split("/")[1]);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  expect(total, "hay varias historias").toBeGreaterThan(1);
+  for (let story = 2; story <= total; story++) {
+    await page.click("[data-story-next]");
+    await expect(count).toHaveText(`${pad(story)} / ${pad(total)}`);
+  }
   await expect(page.locator("[data-story-next]")).toBeDisabled();
   await page.click("[data-story-prev]");
-  await expect(count).toHaveText("01 / 02");
+  await expect(count).toHaveText(`${pad(total - 1)} / ${pad(total)}`);
   expect(issues).toEqual([]);
 });
 

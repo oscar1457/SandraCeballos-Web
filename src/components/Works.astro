@@ -219,9 +219,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
     color: var(--black);
   }
 
+  /* En modo lista la sección mide lo que su contenido: la lista empieza
+     arriba, bajo el selector, sin el hueco vacío de antes. */
   .works[data-mode="list"] {
-    height: 100svh;
-    min-height: 40rem;
+    height: auto;
   }
 
   .works__stage {
@@ -233,7 +234,11 @@ const pad = (n: number) => String(n).padStart(2, "0");
   }
 
   .works[data-mode="list"] .works__stage {
-    min-height: 40rem;
+    position: relative;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 8.5rem var(--gutter) var(--space-4);
   }
 
   .works__switch {
@@ -434,12 +439,11 @@ const pad = (n: number) => String(n).padStart(2, "0");
   }
 
   .works[data-mode="list"] .list {
-    position: absolute;
-    inset: auto var(--gutter) var(--space-4);
+    position: relative;
     z-index: 2;
     display: grid;
     grid-template-columns: minmax(0, 1fr) clamp(10rem, 16vw, 15rem);
-    align-items: end;
+    align-items: start;
     gap: var(--space-3);
   }
 
@@ -485,8 +489,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
   }
 
   .list__preview {
+    position: sticky;
+    top: 6rem;
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: flex-end;
     height: clamp(12rem, 30svh, 20rem);
     margin: 0;
@@ -713,17 +719,16 @@ const pad = (n: number) => String(n).padStart(2, "0");
       display: none;
     }
 
-    /* En móvil la vista previa va encima de la lista, en el hueco libre. */
-    .works[data-mode="list"] .list {
-      grid-template-rows: minmax(0, 1fr) auto;
-      top: 10rem;
+    /* En móvil la vista previa va encima de la lista. */
+    .works[data-mode="list"] .works__stage {
+      padding-top: 7.5rem;
     }
 
     .list__preview {
+      position: static;
       order: -1;
       justify-content: flex-start;
-      height: 100%;
-      min-height: 8rem;
+      height: clamp(10rem, 30svh, 15rem);
     }
 
     .sheet__panel {

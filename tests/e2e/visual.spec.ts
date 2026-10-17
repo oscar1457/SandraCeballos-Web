@@ -123,7 +123,16 @@ for (const size of SIZES) {
       });
     }
 
-    for (const id of ["obra", "trayectoria", "publicaciones"]) {
+    test("obra en modo lista", async ({ page }) => {
+      await ready(page, "/");
+      await goToSection(page, "obra");
+      await page.locator('[data-mode-button="list"]').click();
+      await page.clock.runFor(1000);
+      await imagesOnScreen(page);
+      await shot(page, `${size.width}-obra-lista`);
+    });
+
+    for (const id of ["obra", "trayectoria", "publicaciones", "charlas"]) {
       test(`sección ${id}`, async ({ page }) => {
         await ready(page, "/");
         await goToSection(page, id);

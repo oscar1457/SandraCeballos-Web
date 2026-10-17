@@ -134,22 +134,38 @@ if (section && dataNode && sheet) {
   };
 
   // ---------- Cambio de modo ----------
-  const setMode = (mode: "wheel" | "list") => {
+  // La lista ocupa mucho menos que la galería (que se recorre con el scroll).
+  // Al cambiar de modo, la página se queda en la sección: la lista se ve desde
+  // arriba y la galería vuelve a la obra que estaba marcada. Antes el scroll se
+  // quedaba donde estaba y, al encoger la sección, te dejaba en otra.
+  const setMode = (mode: "wheel" | "list", keepPlace = false) => {
+    const changed = section.dataset.mode !== mode;
+    const marked = shown;
     section.dataset.mode = mode;
     modeButtons.forEach((button) =>
       button.setAttribute("aria-pressed", String(button.dataset.modeButton === mode))
     );
-    if (mode === "wheel") {
-      enableWheel();
-    } else {
+    if (mode === "list") {
       trigger?.kill();
       trigger = null;
+    }
+    // Primero se coloca el scroll (con la sección ya con su nueva altura) y
+    // después se activa la galería, que lee la posición para elegir la obra.
+    if (keepPlace && changed) {
+      let top = section.getBoundingClientRect().top + window.scrollY;
+      if (mode === "wheel" && total > 1) {
+        top += (marked / (total - 1)) * Math.max(0, section.offsetHeight - window.innerHeight);
+      }
+      document.dispatchEvent(new CustomEvent("sc:scroll-to", { detail: { top: Math.round(top) } }));
+    }
+    if (mode === "wheel") {
+      enableWheel();
     }
     ScrollTrigger.refresh();
   };
 
   modeButtons.forEach((button) =>
-    button.addEventListener("click", () => setMode(button.dataset.modeButton === "list" ? "list" : "wheel"))
+    button.addEventListener("click", () => setMode(button.dataset.modeButton === "list" ? "list" : "wheel", true))
   );
 
   rows.forEach((row) => {

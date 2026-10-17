@@ -39,7 +39,11 @@ test.describe("News en escritorio", () => {
     await page.goto("/");
     await expectShown(page, "News al abrir");
     await page.hover("[data-news]");
-    await expect.poll(async () => (await newsState(page)).item, { timeout: 8000 }).toBe(1);
+    // Pasa por todas y vuelve a la primera.
+    const total = await page.locator("[data-news-item]").count();
+    for (let item = 1; item < total; item++) {
+      await expect.poll(async () => (await newsState(page)).item, { timeout: 8000 }).toBe(item);
+    }
     await expect.poll(async () => (await newsState(page)).item, { timeout: 8000 }).toBe(0);
   });
 
@@ -111,7 +115,7 @@ test.describe("News en escritorio", () => {
     await page.locator("[data-news-item='0']").click();
     await waitScrollStill(page);
     await expect(page.locator("#taller")).toBeInViewport({ ratio: 0.5 });
-    await expect(page.locator("[data-story-count]")).toHaveText("01 / 02");
+    await expect(page.locator("[data-story-count]")).toHaveText(/^01 \/ \d\d$/);
     await expectGone(page, "News tras pulsarla");
     await expect.poll(() => new URL(page.url()).hash).toBe("");
   });

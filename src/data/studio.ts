@@ -4,6 +4,7 @@ import type { ImageMetadata } from "astro";
 import documentaVentana from "@/assets/taller/documenta-ventana.jpg";
 import documentaReplica from "@/assets/taller/documenta-replica-1.jpg";
 import desamparoTapiz from "@/assets/taller/desamparo-tapiz.jpg";
+import cintas2022 from "@/assets/taller/cintas-2022-sandra-ceballos.jpg";
 
 export type News = {
   kicker: string; // lo que tiene que verse de un vistazo (p. ej. "documenta fifteen")
@@ -45,6 +46,27 @@ export const stories: Story[] = [
       headline: "Espacio Aglutinador, a tamaño real en Kassel",
       headlineEn: "Espacio Aglutinador, full scale in Kassel",
       image: documentaReplica
+    }
+  },
+  {
+    // Fuente: Fundación CINTAS (cintasfoundation.org/fellows) y Diario de Cuba,
+    // 15/11/2022. La foto es la que publicó la fundación al anunciar las becas.
+    slug: "beca-cintas-2022",
+    year: "2022",
+    place: "Miami",
+    title: "Beca CINTAS en artes visuales",
+    titleEn: "CINTAS Fellowship in Visual Arts",
+    text: "En noviembre de 2022, la Fundación CINTAS anunció a Sandra Ceballos como ganadora de su beca en artes visuales, junto a Armando Lucas Correa (escritura creativa) y Rodrigo Castro (composición musical). Dotada con 20.000 dólares, es una de las distinciones más importantes para creadores cubanos y de ascendencia cubana.",
+    textEn: "In November 2022 the CINTAS Foundation announced Sandra Ceballos as the winner of its fellowship in visual arts, alongside Armando Lucas Correa (creative writing) and Rodrigo Castro (music composition). Worth 20,000 dollars, it is one of the most important distinctions for Cuban and Cuban-descendant creators.",
+    image: cintas2022,
+    alt: "Retrato de Sandra Ceballos publicado por la Fundación CINTAS al anunciar las becas de 2022.",
+    altEn: "Portrait of Sandra Ceballos published by the CINTAS Foundation when announcing the 2022 fellowships.",
+    news: {
+      kicker: "Beca CINTAS",
+      meta: "Miami · 2022",
+      headline: "Sandra Ceballos, ganadora de la beca CINTAS en artes visuales",
+      headlineEn: "Sandra Ceballos wins the CINTAS Fellowship in Visual Arts",
+      image: cintas2022
     }
   },
   {

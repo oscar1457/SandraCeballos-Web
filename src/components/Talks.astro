@@ -1,0 +1,263 @@
+---
+// Charlas: vídeos de YouTube con su fotograma y sus créditos. El vídeo no se
+// carga hasta que se pulsa: así la página no llama a YouTube (ni deja sus
+// cookies) a quien no lo ve. Al pulsar se usa youtube-nocookie.com.
+import { Image } from "astro:assets";
+import { talks } from "@/data/talks";
+
+const pad = (n: number) => String(n).padStart(2, "0");
+---
+
+<section class="talks" id="charlas" data-header="light" aria-labelledby="talks-title">
+  <div class="talks__head">
+    <h2 class="talks__title" id="talks-title">
+      <span data-lang="es">Charlas</span><span data-lang="en">Talks</span>
+    </h2>
+    <p class="talks__note">
+      <span data-lang="es">Los vídeos se cargan desde YouTube al pulsar ▶.</span>
+      <span data-lang="en">Videos load from YouTube when you press ▶.</span>
+    </p>
+  </div>
+
+  <ol class="talks__list">
+    {
+      talks.map((talk, index) => (
+        <li class="talk">
+          <div class="talk__media" data-talk={talk.id} data-talk-title={talk.title}>
+            <button
+              type="button"
+              class="talk__play"
+              data-talk-play
+              aria-label={`Reproducir el vídeo: ${talk.title}`}
+              data-aria-label-en={`Play the video: ${talk.title}`}
+            >
+              <Image
+                src={talk.image}
+                alt=""
+                widths={[480, 800, 1200]}
+                sizes="(max-width: 760px) 92vw, 31vw"
+                loading="lazy"
+                decoding="async"
+              />
+              <span class="talk__icon" aria-hidden="true" />
+            </button>
+          </div>
+          <p class="talk__meta num">
+            {pad(index + 1)} · {talk.year} · {talk.place}
+          </p>
+          <h3 class="talk__name">{talk.title}</h3>
+          <p class="talk__text">
+            <span data-lang="es">{talk.text}</span>
+            <span data-lang="en">{talk.textEn}</span>
+          </p>
+          <dl class="talk__credits">
+            {talk.credits.map((credit) => (
+              <div>
+                <dt>
+                  <span data-lang="es">{credit.role}</span>
+                  <span data-lang="en">{credit.roleEn}</span>
+                </dt>
+                <dd>{credit.names}</dd>
+              </div>
+            ))}
+          </dl>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<script>
+  // Al pulsar ▶ el fotograma se cambia por el reproductor de YouTube.
+  document.querySelectorAll<HTMLElement>("[data-talk]").forEach((media) => {
+    const button = media.querySelector<HTMLButtonElement>("[data-talk-play]");
+    button?.addEventListener("click", () => {
+      const id = media.dataset.talk ?? "";
+      const title = media.dataset.talkTitle ?? "";
+      const english = document.documentElement.lang === "en";
+      const iframe = document.createElement("iframe");
+      iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0&playsinline=1`;
+      iframe.title = `${english ? "Video" : "Vídeo"}: ${title}`;
+      iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      media.replaceChildren(iframe);
+      media.classList.add("is-playing");
+      iframe.focus();
+    });
+  });
+</script>
+
+<style>
+  .talks {
+    position: relative;
+    padding: 6.5rem var(--gutter) var(--space-5);
+    background: var(--black);
+    color: var(--white);
+  }
+
+  .talks__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .talks__title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2.4rem, 5.4vw, 5.6rem);
+    font-weight: 400;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .talks__note {
+    margin: 0;
+    font-size: var(--text-small);
+    color: rgb(255 255 255 / 0.62);
+  }
+
+  .talks__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4) var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .talk {
+    display: grid;
+    align-content: start;
+    gap: 0.55rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgb(255 255 255 / 0.85);
+  }
+
+  .talk__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    margin-bottom: 0.35rem;
+    overflow: hidden;
+    background: var(--grey-dark);
+  }
+
+  .talk__play {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .talk__play img,
+  .talk__media iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* El fotograma va en blanco y negro y recupera el color al pasar por encima. */
+  .talk__play img {
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.08);
+    transition: filter 400ms var(--ease-out), transform 700ms var(--ease-out);
+  }
+
+  .talk__play:hover img,
+  .talk__play:focus-visible img {
+    filter: none;
+    transform: scale(1.03);
+  }
+
+  .talk__play:focus-visible {
+    outline: 3px solid var(--red);
+    outline-offset: -3px;
+  }
+
+  .talk__icon {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 3.2rem;
+    height: 3.2rem;
+    background: var(--red);
+  }
+
+  .talk__icon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0.95rem;
+    height: 1.1rem;
+    background: var(--white);
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    transform: translateX(0.1rem);
+  }
+
+  .talk__meta {
+    margin: 0;
+    font-size: var(--text-small);
+    color: rgb(255 255 255 / 0.62);
+  }
+
+  .talk__name {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .talk__text {
+    margin: 0;
+    max-width: 36rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: rgb(255 255 255 / 0.86);
+  }
+
+  .talk__credits {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0.35rem 0 0;
+    font-size: var(--text-small);
+  }
+
+  .talk__credits div {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 38%) minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+
+  .talk__credits dt {
+    color: rgb(255 255 255 / 0.62);
+  }
+
+  .talk__credits dd {
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .talks__list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .talks {
+      padding-top: 5.5rem;
+    }
+
+    .talks__title {
+      font-size: clamp(2.2rem, 11vw, 3rem);
+    }
+  }
+</style>

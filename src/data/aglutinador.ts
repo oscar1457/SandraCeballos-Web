@@ -65,6 +65,10 @@ export const participants: Participant[] = [
   { name: "Chago Armada", role: "Exposiciones personales", roleEn: "Solo exhibitions", source: "cronologia" },
   { name: "Magaly Espinosa", role: "Curadores, come home!", roleEn: "Curadores, come home!", source: "cronologia" },
   { name: "Elvia Rosa Castro", role: "Curadores, come home!", roleEn: "Curadores, come home!", source: "cronologia" },
+  // Curadora invitada por Sandra para eventos puntuales a partir de 2005 (entrevista de
+  // María de Lourdes Mariño, Incubadora, 2025). En la cronología: curó «Domesticación»
+  // y co-curó «WHO I AM? Torneo audiovisual» (etapa del MAM, desde 2012).
+  { name: "Giselle Victoria Gómez", role: "Curadora invitada, desde 2005", roleEn: "Guest curator, from 2005", source: "cronologia" },
   { name: "Juan Sí González", role: "Malditos de la posguerra", roleEn: "Malditos de la posguerra", source: "catalogo" },
   { name: "Virginia Fleck", role: "Dreaming My Dreams", roleEn: "Dreaming My Dreams", source: "cronologia" },
   { name: "Magda Ileana González", role: "Curaduría, ARCO 2003", roleEn: "Curating, ARCO 2003", source: "cronologia" }
@@ -119,8 +123,8 @@ export const periods: Period[] = [
     years: "2004–2023",
     title: "Un espacio comprometido",
     titleEn: "A committed space",
-    text: "Con Sandra Ceballos como curadora, productora y diseñadora de montaje, el espacio asume proyectos más comprometidos con los conflictos existenciales, políticos y sociales del país. «Curadores, go home!» fue atacada por el Consejo Nacional de las Artes Plásticas; años después llegó «Curadores, come home!», con Rachel Weiss, Magaly Espinosa, Gerardo Mosquera y Elvia Rosa Castro.",
-    textEn: "With Sandra Ceballos as curator, producer and exhibition designer, the space takes on projects more engaged with the country’s existential, political and social conflicts. “Curadores, go home!” was attacked by the National Council of Visual Arts; years later came “Curadores, come home!”, with Rachel Weiss, Magaly Espinosa, Gerardo Mosquera and Elvia Rosa Castro.",
+    text: "Con Sandra Ceballos como curadora, productora y diseñadora de montaje, el espacio asume proyectos más comprometidos con los conflictos existenciales, políticos y sociales del país. «Curadores, go home!» fue atacada por el Consejo Nacional de las Artes Plásticas; años después llegó «Curadores, come home!», con Rachel Weiss, Magaly Espinosa, Gerardo Mosquera y Elvia Rosa Castro. Desde 2005 colaboran curadores invitados como Giselle Victoria Gómez, que curó «Domesticación».",
+    textEn: "With Sandra Ceballos as curator, producer and exhibition designer, the space takes on projects more engaged with the country’s existential, political and social conflicts. “Curadores, go home!” was attacked by the National Council of Visual Arts; years later came “Curadores, come home!”, with Rachel Weiss, Magaly Espinosa, Gerardo Mosquera and Elvia Rosa Castro. From 2005 guest curators such as Giselle Victoria Gómez, who curated “Domesticación”, take part.",
     image: curadoresGoHome,
     caption: "Cartel de «Curadores, go home!»",
     captionEn: "Poster for “Curadores, go home!”"
@@ -129,8 +133,8 @@ export const periods: Period[] = [
     years: "2007–2012",
     title: "Residencias PERRO y Museo de Arte Maníaco",
     titleEn: "PERRO residencies and the Museum of Maniac Art",
-    text: "Sandra Ceballos crea las Residencias PERRO (Propuesta Experimental de Respuesta Rápida Organizada), con apoyo de Prince Claus y la Fundación HIVOS, para artistas, estudiantes y curadores menos favorecidos por las instituciones oficiales. En 2012 funda el MAM, Museo de Arte Maníaco, abierto a artistas de cualquier edad y procedencia, con o sin título.",
-    textEn: "Sandra Ceballos creates the PERRO Residencies (Experimental Proposal for Organised Rapid Response), supported by Prince Claus and the HIVOS Foundation, for artists, students and curators overlooked by official institutions. In 2012 she founds the MAM, Museum of Maniac Art, open to artists of any age and background, trained or not."
+    text: "Sandra Ceballos crea las Residencias PERRO (Propuesta Experimental de Respuesta Rápida Organizada), con apoyo de Prince Claus y la Fundación HIVOS, para artistas, estudiantes y curadores menos favorecidos por las instituciones oficiales. En 2012 funda el MAM, Museo de Arte Maníaco, abierto a artistas de cualquier edad y procedencia, con o sin título; entre sus muestras, «WHO I AM? Torneo audiovisual», en co-curaduría con Giselle Victoria Gómez.",
+    textEn: "Sandra Ceballos creates the PERRO Residencies (Experimental Proposal for Organised Rapid Response), supported by Prince Claus and the HIVOS Foundation, for artists, students and curators overlooked by official institutions. In 2012 she founds the MAM, Museum of Maniac Art, open to artists of any age and background, trained or not; its shows include “WHO I AM? Torneo audiovisual”, co-curated with Giselle Victoria Gómez."
   },
   {
     years: "2016–2018",
@@ -159,7 +163,7 @@ export const curators = [
   "Gerardo Mosquera (Cuba)",
   "Coco Fusco (Estados Unidos)",
   "Eugenio Valdés (Cuba)",
-  "Giselle Victoria (Cuba)",
+  "Giselle Victoria Gómez (Cuba)",
   "Orlando Hernández (Cuba)",
   "Elvia Rosa Castro (Cuba)",
   "Magaly Espinosa (Cuba)",
@@ -169,7 +173,7 @@ export const curators = [
 ];
 
 export const catalogueAuthors = [
-  "Gerardo Mosquera", "Coco Fusco", "Eugenio Valdés", "Giselle Victoria", "Orlando Hernández",
+  "Gerardo Mosquera", "Coco Fusco", "Eugenio Valdés", "Giselle Victoria Gómez", "Orlando Hernández",
   "Elvia Rosa Castro", "Magaly Espinosa", "Tamy Katz Freiman", "Frency González", "Yanelys Núñez",
   "Iván de la Nuez", "Maite Díaz González", "Manuel Vidal", "Sandra Ceballos", "Chago Armada",
   "Luis Manuel Molina", "Joel Jover", "Cristina Vives", "Ezequiel Suárez", "Lázara Castellano",

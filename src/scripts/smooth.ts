@@ -97,6 +97,20 @@ document.addEventListener("click", (event) => {
   }
 });
 
+// Otras secciones piden ir a un punto concreto sin animación (p. ej. la galería
+// al cambiar a lista, que encoge la sección: sin esto el scroll se quedaba en
+// la misma posición y te dejaba en otra sección).
+export type ScrollToDetail = { top: number };
+document.addEventListener("sc:scroll-to", (event) => {
+  const { top } = (event as CustomEvent<ScrollToDetail>).detail;
+  if (lenis) {
+    lenis.resize();
+    lenis.scrollTo(top, { immediate: true, force: true });
+  } else {
+    window.scrollTo({ top, behavior: "instant" });
+  }
+});
+
 // Entrar con un enlace directo (o cambiar el "#…" a mano en la barra de direcciones).
 const navigateFromUrl = (immediate: boolean) => {
   const hash = window.location.hash;

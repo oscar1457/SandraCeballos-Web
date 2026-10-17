@@ -5,6 +5,7 @@ import Footer from "@/components/Footer.astro";
 import Intro from "@/components/Intro.astro";
 import Publications from "@/components/Publications.astro";
 import Studio from "@/components/Studio.astro";
+import Talks from "@/components/Talks.astro";
 import SiteHeader from "@/components/SiteHeader.astro";
 import Works from "@/components/Works.astro";
 import NewsCard from "@/components/NewsCard.astro";
@@ -23,6 +24,7 @@ const formEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? "";
     <Studio />
     <Career />
     <Publications />
+    <Talks />
     <Contact site={site} endpoint={formEndpoint} />
   </main>
   <Footer site={site} />
